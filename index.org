@@ -15,11 +15,12 @@
 
 * About Me
   I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting.
+[[yannik_li.JPG]]
 
+* Bootloader  
 * Linux Device Driver
-
 * Operating System
-
 * ARM & x86
-
 * Android 
+* Project Management
+* Other
