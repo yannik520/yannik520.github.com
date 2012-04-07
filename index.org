@@ -1,0 +1,25 @@
+#+TITLE:     Yannik's Home Page
+#+AUTHOR:    Yanqing.Li
+#+EMAIL:     yqli520_2006@163.com
+#+DATE:      2012-04-07 六
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* About Me
+  I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting.
+
+* Linux Device Driver
+
+* Operating System
+
+* ARM & x86
+
+* Android 
