@@ -14,8 +14,10 @@
 #+LINK_HOME: 
 
 * About Me
-  I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting.
-[[yannik_li.JPG]]
+  I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting.\\
+#+ATTR_HTML: width="120"
+[[yannik_li.JPG]]\\
+  + My Resume :[[./liyanqing.doc]]
 
 * Bootloader  
 * Linux Device Driver
