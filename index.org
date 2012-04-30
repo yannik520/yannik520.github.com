@@ -19,9 +19,18 @@
 [[yannik_li.JPG]]\\
   + My Resume :[[./liyanqing.doc]]
 
-* Bootloader  
-* Linux Device Driver
 * Operating System
+** My "Big Eye"
+*** What is "Big Eye"
+    Big-Eye is a small OS for arm platform I wroted, it just has a task schedule and memory allocation, just for learning how to switch task, if want to make it for acture use, need to optimize and rewrite some code, some code in "Big Eye" come frome Other OS, it just for learning!
+*** How to get the code
+    you can get code frome:\\
+    [[git@github.com:yannik520/Big-Eye-OS.git]]\\
+    or read code directly from:\\
+    https://github.com/yannik520/Big-Eye-OS
+* Bootloader
+** UBoot
+* Linux Device Driver
 * ARM & x86
 * Android 
 * Project Management
