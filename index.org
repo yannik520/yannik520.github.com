@@ -33,5 +33,9 @@
 * Linux Device Driver
 * ARM & x86
 * Android 
+** Suspend&Resume
+[[pm_framework_in_android.png]]
 * Project Management
+** [[git_and_repo.html][Git and Repo]]
+
 * Other

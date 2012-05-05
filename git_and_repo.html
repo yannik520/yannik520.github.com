@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>GIT ANG REPO USAGE</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-05-05 六"/>
+<meta name="author" content="Yanqing Li"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">GIT ANG REPO USAGE</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 git command </a>
+<ul>
+<li><a href="#sec-1.1">1.1 git add </a></li>
+<li><a href="#sec-1.2">1.2 git rm #删除文件 </a></li>
+<li><a href="#sec-1.3">1.3 git mv #修改文件名，或搬移目录 </a></li>
+<li><a href="#sec-1.4">1.4 git status #查看状态 </a></li>
+<li><a href="#sec-1.5">1.5 git commit </a></li>
+<li><a href="#sec-1.6">1.6 git branch </a></li>
+<li><a href="#sec-1.7">1.7 git checkout </a></li>
+<li><a href="#sec-1.8">1.8 git diff </a></li>
+<li><a href="#sec-1.9">1.9 git tag </a></li>
+<li><a href="#sec-1.10">1.10 git log </a></li>
+<li><a href="#sec-1.11">1.11 git show </a></li>
+<li><a href="#sec-1.12">1.12 git reset </a></li>
+<li><a href="#sec-1.13">1.13 git grep </a></li>
+<li><a href="#sec-1.14">1.14 git stash </a></li>
+<li><a href="#sec-1.15">1.15 git merge </a></li>
+<li><a href="#sec-1.16">1.16 git blame </a></li>
+<li><a href="#sec-1.17">1.17 git ls-files </a></li>
+<li><a href="#sec-1.18">1.18 git revert </a></li>
+<li><a href="#sec-1.19">1.19 git remote </a></li>
+<li><a href="#sec-1.20">1.20 git fetch </a></li>
+<li><a href="#sec-1.21">1.21 git push </a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 repo command </a>
+<ul>
+<li><a href="#sec-2.1">2.1 repo init </a></li>
+<li><a href="#sec-2.2">2.2 repo sync </a></li>
+<li><a href="#sec-2.3">2.3 repo upload </a></li>
+<li><a href="#sec-2.4">2.4 repo diff </a></li>
+<li><a href="#sec-2.5">2.5 repo download </a></li>
+<li><a href="#sec-2.6">2.6 repo forall </a></li>
+<li><a href="#sec-2.7">2.7 repo foreach </a></li>
+<li><a href="#sec-2.8">2.8 repo start </a></li>
+<li><a href="#sec-2.9">2.9 repo prune </a></li>
+<li><a href="#sec-2.10">2.10 repo status </a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 创建本地repo服务器 </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> git command </h2>
+<div class="outline-text-2" id="text-1">
+
+
+</div>
+
+<div id="outline-container-1.1" class="outline-3">
+<h3 id="sec-1.1"><span class="section-number-3">1.1</span> git add </h3>
+<div class="outline-text-3" id="text-1.1">
+
+<ul>
+<li>
+git add . #将文件先暂存到staging area, stages new and modified, without deleted
+</li>
+<li>
+git add -A #states all
+</li>
+<li>
+git add -u #states modified and deleted, without new
+</li>
+<li>
+git add -i #进入互动模式
+</li>
+<li>
+git add filename #新增一个文件
+</li>
+<li>
+git add modify-file #修改过得文档也要加add,不然在commit时要加-a
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.2" class="outline-3">
+<h3 id="sec-1.2"><span class="section-number-3">1.2</span> git rm #删除文件 </h3>
+<div class="outline-text-3" id="text-1.2">
+
+<ul>
+<li>
+git rm filename
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.3" class="outline-3">
+<h3 id="sec-1.3"><span class="section-number-3">1.3</span> git mv #修改文件名，或搬移目录 </h3>
+<div class="outline-text-3" id="text-1.3">
+
+<ul>
+<li>
+git mv filename newfilename 
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.4" class="outline-3">
+<h3 id="sec-1.4"><span class="section-number-3">1.4</span> git status #查看状态 </h3>
+<div class="outline-text-3" id="text-1.4">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1.5" class="outline-3">
+<h3 id="sec-1.5"><span class="section-number-3">1.5</span> git commit </h3>
+<div class="outline-text-3" id="text-1.5">
+
+<ul>
+<li>
+git commit
+</li>
+<li>
+git commit -m 'commit message'
+</li>
+<li>
+git commit -a -m "message"
+</li>
+<li>
+git commit -a -v #-v查看修改的内容
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.6" class="outline-3">
+<h3 id="sec-1.6"><span class="section-number-3">1.6</span> git branch </h3>
+<div class="outline-text-3" id="text-1.6">
+
+<ul>
+<li>
+git branch #列出所有的分支
+</li>
+<li>
+git branch new-branch #产生新的分支
+</li>
+<li>
+git branch new-branch master #由master产生新的分支
+</li>
+<li>
+git branch -d branch #删除分支
+</li>
+<li>
+git branch -D branch #强制删除分支
+</li>
+<li>
+git checkout -b new-branch #产生新分支并切换过去
+</li>
+<li>
+git branch -r #列出所有repository branch
+</li>
+<li>
+git branch -a #列出所有分支
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.7" class="outline-3">
+<h3 id="sec-1.7"><span class="section-number-3">1.7</span> git checkout </h3>
+<div class="outline-text-3" id="text-1.7">
+
+<ul>
+<li>
+git checkout branch-name #切换到branch-name
+</li>
+<li>
+git checkout master #切换到master
+</li>
+<li>
+git checkout -b new-branch master #从master建立新的分支，并切换过去
+</li>
+<li>
+git checkout -b new-branch #由当前分支建立新分支
+</li>
+<li>
+git checkout -b new-branch origin #由origin建立分支
+</li>
+<li>
+git checkout filename #还原状态到repository状态
+</li>
+<li>
+git checkout HEAD . #将所有文件都checkout出来
+</li>
+<li>
+git checkout xxxx . #xxxx是commit的编号的前四位，将xxxx编号的版本checkout出来
+</li>
+<li>
+git checkout &ndash; * #恢复上一次commit的状态
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.8" class="outline-3">
+<h3 id="sec-1.8"><span class="section-number-3">1.8</span> git diff </h3>
+<div class="outline-text-3" id="text-1.8">
+
+<ul>
+<li>
+git diff master #与master对比看哪些文件不同
+</li>
+<li>
+git diff &ndash;cached #比较staging area与repository
+</li>
+<li>
+git diff tag1 tag2 #tag1与tag2比较
+</li>
+<li>
+git diff tag1:file1 tag2:file2 #tag1的file1与tag2的file2比较
+</li>
+<li>
+git diff #当前与staging area比较
+</li>
+<li>
+git diff HEAD #当前与repository比较
+</li>
+<li>
+git diff new-brach #当前与new<sub>branch的比较</sub>
+</li>
+<li>
+git diff &ndash;stat
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.9" class="outline-3">
+<h3 id="sec-1.9"><span class="section-number-3">1.9</span> git tag </h3>
+<div class="outline-text-3" id="text-1.9">
+
+<ul>
+<li>
+git tag v1 ebff #为commit ebff810c462234433434323334343设置标记v1
+</li>
+<li>
+git tag 版本1 ebff #tag可以为中文
+</li>
+<li>
+git tag -d 版本1 #删除标记版本1
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.10" class="outline-3">
+<h3 id="sec-1.10"><span class="section-number-3">1.10</span> git log </h3>
+<div class="outline-text-3" id="text-1.10">
+
+<ul>
+<li>
+git log #列出所有log
+</li>
+<li>
+git log &ndash;all 
+</li>
+<li>
+git log -p #列出log及修改的内容
+</li>
+<li>
+git log -p filename #将filename的log及修改内容列出来
+</li>
+<li>
+git log &ndash;name-only #列出哪些文件被修改
+</li>
+<li>
+git log &ndash;stat &ndash;summary #列出各个版本间的改动及行数
+</li>
+<li>
+git log filename #这个文件的所有log
+</li>
+<li>
+git log directory #这个目录的所有log
+</li>
+<li>
+git log -S'FUNC（）‘ #列出由FUNC()这个字符串的log
+</li>
+<li>
+git log &ndash;no-merges #不要列出merge的log
+</li>
+<li>
+git log &ndash;since="2 weeks ago" #列出最后两周的log
+</li>
+<li>
+git log &ndash;pretty=oneline 
+</li>
+<li>
+git log &ndash;pretty=short
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.11" class="outline-3">
+<h3 id="sec-1.11"><span class="section-number-3">1.11</span> git show </h3>
+<div class="outline-text-3" id="text-1.11">
+
+<ul>
+<li>
+git show ebff #显示commit ebff810xxxxxxxxxxx的内容
+</li>
+<li>
+git show v1 #显示tag v1的修改内容
+</li>
+<li>
+git show v1:hello.txt #显示tag:v1的hello.txt文件修改内容
+</li>
+<li>
+git show HEAD #当前版本的修改文件
+</li>
+<li>
+git show HEAD^ #前一版本所有修改的文件
+</li>
+<li>
+git show HEAD~4 #前4版本的修改文件
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.12" class="outline-3">
+<h3 id="sec-1.12"><span class="section-number-3">1.12</span> git reset </h3>
+<div class="outline-text-3" id="text-1.12">
+
+<ul>
+<li>
+git reset &ndash;hard HEAD^ #还原到前一版本
+</li>
+<li>
+git reset &ndash;soft HEAD~3
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.13" class="outline-3">
+<h3 id="sec-1.13"><span class="section-number-3">1.13</span> git grep </h3>
+<div class="outline-text-3" id="text-1.13">
+
+<ul>
+<li>
+git grep "hello" v1 #查找tag:v1中是否由“hello"字符串
+</li>
+<li>
+git grep "hello"
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.14" class="outline-3">
+<h3 id="sec-1.14"><span class="section-number-3">1.14</span> git stash </h3>
+<div class="outline-text-3" id="text-1.14">
+
+<ul>
+<li>
+git stash #放进暂存区
+</li>
+<li>
+git stash list #列出暂存区的文件
+</li>
+<li>
+git stash pop #取出最新的一笔，并移除
+</li>
+<li>
+git stash apply #取出但不移除
+</li>
+<li>
+git stash clear #清除暂存区
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.15" class="outline-3">
+<h3 id="sec-1.15"><span class="section-number-3">1.15</span> git merge </h3>
+<div class="outline-text-3" id="text-1.15">
+
+<ul>
+<li>
+git merge #合并
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.16" class="outline-3">
+<h3 id="sec-1.16"><span class="section-number-3">1.16</span> git blame </h3>
+<div class="outline-text-3" id="text-1.16">
+
+<ul>
+<li>
+git blame filename #列出此文件所有commit的记录
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.17" class="outline-3">
+<h3 id="sec-1.17"><span class="section-number-3">1.17</span> git ls-files </h3>
+<div class="outline-text-3" id="text-1.17">
+
+<ul>
+<li>
+git ls-files -d #查看已删除的文件
+</li>
+<li>
+git ls-files -d | xargs git checkout &ndash; #将已删除的文件还原
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.18" class="outline-3">
+<h3 id="sec-1.18"><span class="section-number-3">1.18</span> git revert </h3>
+<div class="outline-text-3" id="text-1.18">
+
+<ul>
+<li>
+git revert HEAD #回到前一此commit的状态
+</li>
+<li>
+git revert HEAD^ #回到上上一次的状态
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.19" class="outline-3">
+<h3 id="sec-1.19"><span class="section-number-3">1.19</span> git remote </h3>
+<div class="outline-text-3" id="text-1.19">
+
+<ul>
+<li>
+git remote
+</li>
+<li>
+git remote add new-branch <a href="http://git.xxx.xx.com/project.git">http://git.xxx.xx.com/project.git</a> #增加远程repository的branch
+</li>
+<li>
+git remote show #列出现在由多少repository
+</li>
+<li>
+git remote rm new-branch #删除服务器上的新分支
+</li>
+<li>
+git remote update #更新所有repository branch
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.20" class="outline-3">
+<h3 id="sec-1.20"><span class="section-number-3">1.20</span> git fetch </h3>
+<div class="outline-text-3" id="text-1.20">
+
+<ul>
+<li>
+git fetch origin
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.21" class="outline-3">
+<h3 id="sec-1.21"><span class="section-number-3">1.21</span> git push </h3>
+<div class="outline-text-3" id="text-1.21">
+
+<ul>
+<li>
+git push origin：heads/xxx-branch
+
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> repo command </h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1"><span class="section-number-3">2.1</span> repo init </h3>
+<div class="outline-text-3" id="text-2.1">
+
+<ul>
+<li>
+repo init -u URL #在当前目录安装repo，该命令创建一个.repo文件夹，文件夹中包含一些git仓库，这些仓库包含着repo源代码何manifest文件。
+</li>
+</ul>
+
+<p>++ -u:制定一个获取manifest仓库的URL。
+++ -m:选择一个仓库中的manifest,默认是default.xml
+++ -b:制定一个版本，也就是一个特别的manifet-branch
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2.2" class="outline-3">
+<h3 id="sec-2.2"><span class="section-number-3">2.2</span> repo sync </h3>
+<div class="outline-text-3" id="text-2.2">
+
+<ul>
+<li>
+repo sync [PROJECT<sub>LIST]</sub> #下载新的改变和更新当前目录下的工作文件，该命令相当与git remote update;git rebase origin/BRANCH (BRANCH本地分支）
+</li>
+</ul>
+
+<p>++ -d:将制定工程切换到特定的manifest版本
+++ -s:同步当前工程到一个由manifet-server元素指定的可编译的版本
+++ -f:继续同步其他工程，即使有错误发生
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2.3" class="outline-3">
+<h3 id="sec-2.3"><span class="section-number-3">2.3</span> repo upload </h3>
+<div class="outline-text-3" id="text-2.3">
+
+<ul>
+<li>
+repo upload [PROJECT<sub>LIST]</sub> #上传修改的代码
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2.4" class="outline-3">
+<h3 id="sec-2.4"><span class="section-number-3">2.4</span> repo diff </h3>
+<div class="outline-text-3" id="text-2.4">
+
+<ul>
+<li>
+repo diff [PROJECT<sub>LIST]</sub>
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2.5" class="outline-3">
+<h3 id="sec-2.5"><span class="section-number-3">2.5</span> repo download </h3>
+<div class="outline-text-3" id="text-2.5">
+
+<ul>
+<li>
+repo download target revision #下载特定的版本到本地
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2.6" class="outline-3">
+<h3 id="sec-2.6"><span class="section-number-3">2.6</span> repo forall </h3>
+<div class="outline-text-3" id="text-2.6">
+
+<ul>
+<li>
+repo forall -c command #对每一个项目执行command
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2.7" class="outline-3">
+<h3 id="sec-2.7"><span class="section-number-3">2.7</span> repo foreach </h3>
+<div class="outline-text-3" id="text-2.7">
+
+<ul>
+<li>
+repo foreach [project list】 -c command #对project执行command
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2.8" class="outline-3">
+<h3 id="sec-2.8"><span class="section-number-3">2.8</span> repo start </h3>
+<div class="outline-text-3" id="text-2.8">
+
+<ul>
+<li>
+repo start newbranchname . #创建一个新分支
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2.9" class="outline-3">
+<h3 id="sec-2.9"><span class="section-number-3">2.9</span> repo prune </h3>
+<div class="outline-text-3" id="text-2.9">
+
+<ul>
+<li>
+repo prune [project list] #删除已经merge的project
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2.10" class="outline-3">
+<h3 id="sec-2.10"><span class="section-number-3">2.10</span> repo status </h3>
+<div class="outline-text-3" id="text-2.10">
+
+<ul>
+<li>
+repo status #显示每个仓库的状态
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 创建本地repo服务器 </h2>
+<div class="outline-text-2" id="text-3">
+
+<ul>
+<li>
+mkdir repositories
+</li>
+<li>
+cd repositories
+</li>
+<li>
+git init &ndash;bare manifest.git
+</li>
+<li>
+git init &ndash;bare project1.git
+</li>
+<li>
+git init &ndash;bare project2.git
+</li>
+<li>
+cd -
+</li>
+<li>
+mkdir myrepo
+</li>
+<li>
+cd myrepo
+</li>
+<li>
+git clone /path/to/manifest.git
+</li>
+<li>
+cd manifest
+</li>
+<li>
+create a default.xml file with following content:
+
+
+</li>
+</ul>
+
+
+<pre class="example">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;manifest&gt;
+
+  &lt;remote name="korg"  fetch="/path/to/repositories/" review="review.source.android.com" /&gt;
+
+  &lt;default revision="master" remote="korg" /&gt;
+
+  &lt;project path="project1" name="project1" /&gt;
+
+  &lt;project path="project2" name="project2" /&gt;
+
+&lt;/manifest&gt;
+</pre>
+
+
+
+
+<ul>
+<li>
+git add &ndash;all
+</li>
+<li>
+git commit -a -m "add defalut.xml"
+</li>
+<li>
+git push &ndash;all
+</li>
+<li>
+cd ..
+</li>
+<li>
+git clone /path/to/project1.git
+</li>
+<li>
+cd project1
+</li>
+<li>
+echo "hello project1" &gt; hello.txt
+</li>
+<li>
+git add -all
+</li>
+<li>
+git commit -a -m “add hello.txt in project1"
+</li>
+<li>
+git push -all
+</li>
+<li>
+cd ..
+</li>
+<li>
+git clone /path/to/project2.git
+</li>
+<li>
+cd project2
+</li>
+<li>
+echo "hello project2" &gt; hello.txt
+</li>
+<li>
+git add -all
+</li>
+<li>
+git commit -a -m "add hello.txt in project2"
+</li>
+<li>
+git push -all
+</li>
+<li>
+cd ../..
+</li>
+<li>
+mkdir myproject
+</li>
+<li>
+cd myproject
+</li>
+<li>
+repo init -u /path/to/manifet.git
+</li>
+<li>
+repo sync
+</li>
+<li>
+repo log
+
+
+
+</li>
+</ul>
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: Yanqing Li
+<a href="mailto:yqli_520@hotmail.com">&lt;yqli_520@hotmail.com&gt;</a>
+</p>
+<p class="date"> Date: 2012-05-05 六</p>
+<p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
+</div>
+</div>
+</body>
+</html>
