@@ -31,6 +31,7 @@
 * Bootloader
 ** UBoot
 * Linux Device Driver
+** [[input_dev_framework.html][The Framework of Input Device]]
 * ARM & x86
 * Android 
 ** Suspend&Resume
