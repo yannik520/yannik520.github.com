@@ -12,5 +12,5 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+LINK_UP:   
 #+LINK_HOME: 
-[[input.png]]
-[[input_function.png]]
+[[input.png]]\\
+[[input_function.png]]\\
