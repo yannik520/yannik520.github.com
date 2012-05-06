@@ -12,5 +12,9 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+LINK_UP:   
 #+LINK_HOME: 
-[[input.png]]\\
-[[input_function.png]]\\
+
+* Input Device
+#+CAPTION: Data Structure Diagram
+[[input.png]]
+#+CAPTION: Function Call Graph
+[[input_function.png]]
