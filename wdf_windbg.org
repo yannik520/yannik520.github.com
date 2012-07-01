@@ -1,0 +1,42 @@
+#+TITLE:     Windows WDF Driver Debug With WinDbg
+#+AUTHOR:    Yannik Li
+#+EMAIL:     yqli_520@hotmail.com
+#+DATE:      2012-07-01 日
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* Add a Serial Port For VMWare
++ "Add" -> "Serial Port" -> "Output to namedpipe", the pipe named "\\.\pipe\com_1"
++ select "This end is server"
++ and "The other end is an application"
+
+* Config host
++ add "-b -k com:pipe,port=\\.\pipe\com_1,resets=0" in the setting of windbg shortkey  
+
+* Config target system(windows 7) in VMWare
++ after start windows 7 in VMWare, modify port name "COM1" to "COM2", because the port name in VMWare is COM2
++ run cmd.exe as administrator
++ run "bcdedit /copy {current} /d "Vista  Debug" to get a GUID
++ run “bcdedit /debug {The GUID Value} ON” to start debug function
++ and run "bcdedit /dbgsettings SERIAL DEBUGPORT:1 BAUDRATE:115200" to config baudrate 
+
+* Start Debug
++ run windbg in host computer
++ "File" -> "Symbol Search Path" to add the path to *.pdb of your driver
++ "File" -> "Source Search Path" to select driver source file path
++ run "Ctrl+Break" or "Debug"->"Break" to connect to target system, and make the system in stop state
++ input .reload to load module and symbol file
++ use "lm l" list the symble file has been loaded
++ “File" -> "Open Source File" to open source file, and bp or "F9" to set break point
++ input G to make target continue to run
++ run driver test application in target system
++ the color of break line will changed from red to pink
++ and run P to debug driver step by step.
