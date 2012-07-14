@@ -1,0 +1,24 @@
+#+TITLE:     SD Host Driver
+#+AUTHOR:    Yannik Li
+#+EMAIL:     yqli_520@hotmail.com
+#+DATE:      2012-07-14 六
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* What need to do in SD host driver
++ first, need to alloc a mmc_host with mmc_alloc_host();
++ Realizing the function need in struct mmc_host_ops base on the specified host controller;
++ Init the member in mmc_host
++ At last, call mmc_add_host() to add mmc_host
++ request irq for the status of SD card and IO of controller.
+
+* The call releation occured in the process of inserting a card
+
