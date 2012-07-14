@@ -22,7 +22,7 @@
 * Operating System
 ** My "Big Eye"
 *** What is "Big Eye"
-    Big-Eye is a small OS for arm platform, it just has a task schedule and memory allocation, I wrote it just for learning how to switch task, if want to make it for acture use, need to optimize and rewrite some code, though some code in "Big Eye" come frome Other OS, now it is a tool for learning!
+    Big-Eye is a small OS for arm platform, I wrote it just for learning how to schedule task.
 *** How to get the code
     you can get code frome:\\
     [[git@github.com:yannik520/Big-Eye-OS.git]]\\

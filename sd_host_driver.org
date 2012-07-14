@@ -14,11 +14,11 @@
 #+LINK_HOME: 
 
 * What need to do in SD host driver
-+ first, need to alloc a mmc_host with mmc_alloc_host();
-+ Realizing the function need in struct mmc_host_ops base on the specified host controller;
-+ Init the member in mmc_host
-+ At last, call mmc_add_host() to add mmc_host
++ first, need to alloc a mmc\_host with mmc\_alloc\_host();
++ Realizing the function need in struct mmc\_host\_ops base on the specified host controller;
++ Init the member in mmc\_host
++ At last, call mmc\_add\_host() to add mmc\_host
 + request irq for the status of SD card and IO of controller.
 
 * The call releation occured in the process of inserting a card
-
+[[sd_detect.png]]

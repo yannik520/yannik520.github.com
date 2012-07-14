@@ -89,16 +89,16 @@ lang="en" xml:lang="en">
 
 <ul>
 <li>
-first, need to alloc a mmc<sub>host</sub> with mmc<sub>alloc</sub><sub>host</sub>();
+first, need to alloc a mmc_host with mmc_alloc_host();
 </li>
 <li>
-Realizing the function need in struct mmc<sub>host</sub><sub>ops</sub> base on the specified host controller;
+Realizing the function need in struct mmc_host_ops base on the specified host controller;
 </li>
 <li>
-Init the member in mmc<sub>host</sub>
+Init the member in mmc_host
 </li>
 <li>
-At last, call mmc<sub>add</sub><sub>host</sub>() to add mmc<sub>host</sub>
+At last, call mmc_add_host() to add mmc_host
 </li>
 <li>
 request irq for the status of SD card and IO of controller.
