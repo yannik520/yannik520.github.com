@@ -1,0 +1,868 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=GB2312">
+    <title>Linux Block Device Architecture</title>
+  </head>
+  <body style="direction: ltr;" lang="en-US">
+
+<h1><span style="font-weight: bold;">Linux Block Device Architecture</span></h1>
+
+<div class="author">
+<span style="font-weight: bold;">Author:</span> 
+<a href="mailto:uvsravikiran@gmail.com">Ravi Kiran UVS</a>
+</div>
+
+<br>
+
+<small style="font-style: italic;">Last Modified: 19th May 2006<br>
+
+
+Note: I'm still working on this... and will be adding more information
+(and diagrams also). Please send me your comments, suggestions or
+improvements.</small>
+<h2>Introduction</h2>
+
+
+
+<p>Block devices offer storage for large amounts of data (like the hard
+disks). They normally have moving parts and very slow to perform I/O
+operations. Since the I/O operations are costly, the kernel tries to
+extract the maximum performance by caching the data in memory. Since
+the actual I/O is performed by the device drivers, the kernel provides
+various hooks for device drivers to register their handlers.</p>
+<p>Another requirement of the block device layer is to hide the
+hardware specific characteristics and provide a unified API to access
+the devices. For example, a file system like ext2 need not bother about
+the low level details of the block device.</p>
+<p>One more characteristic of the block devices is that when multiple
+requests are submitted to the device, the performance depends
+significantly on the sequence of the requests. Since hard disks have
+moving parts, the performance is the maximum if all the requests are in
+the same direction of the head. The kernel collects the I/O requests
+and sorts them before calling the device driver routines to process
+them. It also boosts the performance by clubbing multiple requests for
+contiguous sectors. The algorithm that sorts the I/O requests is called
+as the elevator algorithm.</p>
+<h3>Access from the user space</h3>
+
+
+<p>Block devices are accessed as special type of files, such as /dev/sda1, 
+(with the file type as block device type). They are identified by their 
+major and minor numbers. The device file stores these two values. The 
+major number is used to identify the device driver and
+the minor number is used to identify the partition within the device.
+For example, the device driver for the hard disk will manage all the
+partitions on the disk. It can be seen that the device files for
+different partitions will have the same major number but will have
+different minor numbers.</p>
+
+<pre>$ file /dev/sda1
+/dev/sda1: block special (8/1)
+</pre>
+
+<p>The kernel identifies the device only by the major and minor number
+combination. The actual file is irrelevant for the kernel. The device
+file can be located anywhere in the file system and there can be any
+number of device files. All of them refer to the same device (and
+partition).  For example, the partitions of the hard disk are normally 
+named as hda1, hda2 etc under /dev folder. This is just a convention. 
+We can create a device file /tmp/hda1 with the same major and minor 
+number as /dev/hda1.&nbsp;Both point to the same device and the file 
+system on it can be mounted using any file.</p>
+
+
+<h3>Kernel layer</h3>
+
+
+<p>The data from the block devices is accessed as blocks (defined by
+the <a href="#SBH">structure buffer_head</a>).&nbsp;For example, when 
+a file is read from the device, the file system handler for the read 
+operation converts the file offset into a block number and issues a 
+request to load that particular block.</p>
+
+<p>Since the actual I/O has to be performed by the device drivers, the
+block device layer defines various handlers to perform the actual
+operations. It provides registration mechanisms for the device drivers
+to register their handlers. Once this is done, the kernel calls the
+registered handler to perform the actual operation.</p>
+
+<p>The kernel also makes use of the elevator algorithm to sort the I/O
+requests in the request queue. The kernel offers different types of
+elevator algorithms. There are four algorithms available now - noop,
+deadline, cfq and anticipatory.</p>
+
+<h2>Kernel Infrastructure</h2>
+<h3>
+Important data structures</h3>
+
+These are the important data structures used by the block device layer.<br>
+<span style="font-weight: bold;"></span>
+<p style="font-weight: bold;">gendisk</p>
+
+<p>This stores the information about a disk. The important fields are
+queue, part and fops used to store the request queue, partition
+information and the block device operations table respectively. The
+part field points to an array of pointers to hd_structs each
+representing a partition.</p>
+<p>This device driver has to allocate the gendisk structure, load the
+partition table, allocate the request queue and fill the other fields
+in the gendisk structure.</p>
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/genhd.h?a=x86_64#L100" target="codewindow">struct gendisk</a> {<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; struct hd_struct &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;**part;<br>
+&nbsp;&nbsp;&nbsp; struct block_device_operations &nbsp; *fops;<br>
+&nbsp;&nbsp;&nbsp; request_queue_t &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; *queue;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+
+</div>
+<p style="font-weight: bold;">hd_struct</p>
+
+<p>This stores the information about a partition on a disk.</p>
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/genhd.h?a=x86_64#L77" target="codewindow">struct hd_struct</a> {<br>
+&nbsp;&nbsp;&nbsp; sector_t &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; start_sector;<br>
+&nbsp;&nbsp;&nbsp; sector_t &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; nr_sects;<br>
+&nbsp;&nbsp;&nbsp; int &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;partno;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+
+</div>
+<p style="font-weight: bold;">block_device</p>
+
+<p>This is used to represent a block device in the kernel. This can
+represent the entire disk or a particular partition. When the structure
+represents a partition, the bd_contains field points to the device
+object which contains the partition. The bd_part field points to the
+partition structure of the&nbsp;device. In the structure representing
+the device, the field bd_disk points to the gendisk structure of the
+device.</p>
+<p>This structure is created only when the device is opened. Note that
+the device driver still creates the gendisk structure, allocates the
+request queue and registers the structures with the kernel. But till
+the device is actually opened (either by reading through a device file
+or by mounting it), this structure will not be created.</p>
+<p>The field bd_inode points to the inode in the bdev file system. The
+device will be accessed as a block device type file. That inode that
+represents that device file is stored in the bd_inodes list.</p>
+<p>When the device file is opened for the first time, the kernel
+allocates the block_device structure and fills the structures. This is
+actually allocated by the function 
+<a href="http://lxr.linux.no/source/fs/block_dev.c?a=x86_64#L243" target="codewindow">bdev_alloc_inode</a>. This is called
+when the inode in the bdev file system has to be allocated. This
+allocates the space required for both the structures in a single buffer.</p>
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/fs.h?a=x86_64#L367" target="codewindow">struct block_device</a> {<br>
+&nbsp;&nbsp;&nbsp; dev_t&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; bd_bdev;<br>
+&nbsp;&nbsp;&nbsp; struct inode&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; *bd_inode;<br>
+&nbsp;&nbsp;&nbsp; struct list_head &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;bd_inodes;<br>
+&nbsp;&nbsp;&nbsp; struct block_device &nbsp;&nbsp;&nbsp; *bd_contains;<br>
+&nbsp;&nbsp;&nbsp; struct hd_struct&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; *bd_part;<br>
+&nbsp;&nbsp;&nbsp; struct gendisk&nbsp;&nbsp;&nbsp; &nbsp; 
+&nbsp;&nbsp;&nbsp; *bd_disk;<br>
+&nbsp;&nbsp;&nbsp; struct list_head&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; 
+bd_list;<br>
+&nbsp;&nbsp;&nbsp; struct backing_dev_info *bd_inode_backing_dev_info;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+
+</div>
+<p style="font-weight: bold;"><a name="SBH">buffer_head</a></p>
+
+<p>This structure describes a block of data in memory. b_data points to
+the actual memory location where the data is present. The field
+b_this_page is used to list all the buffers sharing the same page i.e.,
+the b_data points to the same page.</p>
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/buffer_head.h?a=x86_64#L44" target="codewindow">struct buffer_head</a> {<br>
+&nbsp;&nbsp;&nbsp; struct buffer_head &nbsp; *b_this_page;<br>
+&nbsp;&nbsp;&nbsp; char &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; *b_data;<br>
+&nbsp;&nbsp;&nbsp; sector_t &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;blocknr;<br>
+&nbsp;&nbsp;&nbsp; struct block_device &nbsp;*b_bdev;<br>
+&nbsp;&nbsp;&nbsp; bh_end_io_t &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;*b_end_io;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+
+</div>
+<p style="font-weight: bold;">bio</p>
+<p>This structure is used to represent an ongoing block I/O operation.
+This is the basic unit of I/O for the block layer. When a block has to
+be read from a device, the buffer_head structure (the represents the
+data in memory) allocates a bio structure, fills the structure and
+submits to the block layer.</p>
+
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/bio.h?a=x86_64#L64" target="codewindow">struct bio</a> {<br>
+&nbsp;&nbsp;&nbsp; sector_t&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; bi_sector;<br>
+&nbsp;&nbsp;&nbsp; struct bio &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; *bi_next;<br>
+&nbsp;&nbsp;&nbsp; struct block_device *bi_bdev;<br>
+&nbsp;&nbsp;&nbsp; unsigned short &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;bi_vcnt;<br>
+&nbsp;&nbsp;&nbsp; unsigned short &nbsp;&nbsp;&nbsp; &nbsp; bi_idx;<br>
+&nbsp;&nbsp;&nbsp; struct bio_vec &nbsp;&nbsp;&nbsp; &nbsp;*bi_io_vec;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+
+</div>
+<br>
+<p style="font-weight: bold;">bio_vec</p>
+<p>This represents a segment of data in memory as (page, offset,
+length). The location in memory to which the I/O needs to be performed
+is represented as segments. The bio structure points to an array of
+such segments.</p>
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/bio.h?a=x86_64#L54" target="codewindow">struct bio_vec</a> {<br>
+&nbsp;&nbsp;&nbsp; struct page&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; *bv_page;<br>
+&nbsp;&nbsp;&nbsp; unsigned int&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; bv_len;<br>
+&nbsp;&nbsp;&nbsp; unsigned int&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; bv_offset;<br>
+};<br>
+
+</div>
+<p style="font-weight: bold;">request</p>
+This is used to represent a pending I/O request. These are stored as a
+list to the request queue (these are sorted by the elevator algorithm).
+When a bio is submitted to the block layer, it tries to see if it can
+be added to an existing request in the request queue. Such bio
+structures are stored as a list and stored in bio field. The bi_next
+field of the bio structure is used to store the next bio in the list.<br>
+<br>
+The elevator_private field is used to store the elevator specific data.
+This is filled by the elevator algorithm (which is stored in the
+request queue) at the time of allocating the request.<br>
+<br>
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/blkdev.h?a=x86_64#L107" target="codewindow">struct request_list</a> {<br>
+&nbsp;&nbsp;&nbsp; mempool_t&nbsp;&nbsp;&nbsp; *rq_pool;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+<br>
+<a href="http://lxr.linux.no/source/include/linux/blkdev.h?a=x86_64#L117" target="codewindow">struct request</a> {<br>
+&nbsp;&nbsp;&nbsp; struct list_head&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; queuelist;<br>
+&nbsp;&nbsp;&nbsp; struct list_head&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; donelist;<br>
+&nbsp;&nbsp;&nbsp; struct bio&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;*bio;<br>
+&nbsp;&nbsp;&nbsp; struct bio&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;*biotail;<br>
+&nbsp;&nbsp;&nbsp; void&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+*elevator_private;<br>
+&nbsp;&nbsp;&nbsp; struct gendisk&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;*rq_gendisk;<br>
+&nbsp;&nbsp;&nbsp; request_queue_t&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; *q;<br>
+&nbsp;&nbsp;&nbsp; request_list&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; *rl;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+
+</div>
+<p style="font-weight: bold;">request_queue</p>
+This stores information about the pending requests and other
+information required to manage the request queue like the elevator
+algorithm.<br>
+<br>
+The request_fn field is the most important handler from the device
+driver point of view. This is the handler that is called when the
+actual I/O has to be performed i.e., when a request object has to be
+processed.<br>
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/include/linux/blkdev.h?a=x86_64#L312" target="codewindow">struct request_queue</a> {<br>
+&nbsp;&nbsp;&nbsp; struct list_head&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; queue_head;<br>
+&nbsp;&nbsp;&nbsp; struct request&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;*lastmerge;<br>
+&nbsp;&nbsp;&nbsp; elevator_t&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;*elevator;<br>
+&nbsp;&nbsp;&nbsp; struct request_list&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;rq;<br>
+&nbsp;&nbsp;&nbsp; request_fn_proc&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; *request_fn;<br>
+&nbsp;&nbsp;&nbsp; merge_request_fn&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp; &nbsp;*back_merge_fn;<br>
+&nbsp;&nbsp;&nbsp; merge_request_fn&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp;*front_merge_fn;<br>
+&nbsp;&nbsp;&nbsp; merge_requests_fn&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp; *merge_requests_fn;<br>
+&nbsp;&nbsp;&nbsp; make_request_fn&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; 
+&nbsp; *make_request_fn;<br>
+&nbsp;&nbsp;&nbsp; prep_rq_fn&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; *prep_rq_fn;<br>
+&nbsp;&nbsp;&nbsp; unplug_fn&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; *unplug_fn;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+};<br>
+
+</div>
+
+<h2>Kernel Operations</h2><br><h3>Device driver registration</h3>
+
+
+
+<p>To support a disk, the device driver has to first register with the
+kernel. The driver needs to allocate a gendisk for each disk and assign
+a request queue for each gendisk. The gendisk structure is allocated using
+alloc_disk by passing the number of minors (this is the number of
+partitions - 1, so 1 would mean no partitions). The gendisk structures are 
+registered using add_disk function.  The partition information is represented 
+by the hd_struct and the partitions of a disk are stored as an array of 
+hd_struct structures. alloc_disk allocates the array required for the 
+partitions. The driver needs to fill the partition information if there 
+are partitions.</p>
+
+<p>The floppy driver
+
+</p><ol>
+  <li>Driver Initialization: 
+      <a href="http://lxr.linux.no/source/drivers/block/floppy.c?%20%20%20%20%20%20a=x86_64#L4227" target="codewindow">floppy_init</a>
+      <ul>
+        <li>alloc_disk: Line 4235
+        </li><li>register_blkdev: Line 4253
+        </li><li>blk_init_queue: Line 4257
+        </li><li>config_types: Line 4274 Floppy drive(s): fd0 is 1.44M (dmesg)
+        </li><li>get_fdc_version: Line 4351 FDC 0 is a post-1991 82077 (dmesg)
+        </li><li>add_disk: Line 4400
+      </li></ul>
+</li></ol>
+
+<p>The function 
+<a href="http://lxr.linux.no/source/block/ll_rw_blk.c?a=x86_64#L1680" target="codewindow">blk_init_queue</a> generally is used 
+to allocate the request queue and it calls function 
+<a href="http://lxr.linux.no/source/block/ll_rw_blk.c?a=x86_64#L1718" target="codewindow">blk_init_queue_node</a> to complete 
+its job. This blk_init_queue_node function fills most of the handlers in 
+the request queue with the default handlers provided by the kernel. it sets
+generic_unplug_device as&nbsp;the unplug handler of the queue (this
+handler will be called to perform the actual I/O on the device).</p>
+
+<p>This blk_init_queue_node function then calls the function 
+<a href="http://lxr.linux.no/source/block/ll_rw_blk.c?a=x86_64#L208" target="codewindow">blk_queue_make_request</a>. It initializes the
+unplug_work structure with (blk_unplug_work, q) and the unplug_timer
+with (blk_unplug_timeout, q). The timeout handler will be called when
+the timer expires. The timer handler adds the unplug work structure to
+the block work queue. This work queue is allocated by the block device
+layer initialization function 
+<a href="http://lxr.linux.no/source/block/ll_rw_blk.c?a=x86_64#L3225" target="codewindow">blk_dev_init</a>. Function blk_dev_init is 
+called by <a href="http://lxr.linux.no/source/block/genhd.c?a=x86_64#L315" target="codewindow">genhd_device_init</a> once.</p>
+
+<p>blk_init_queue also assigns
+the chosen elevator algorithm (it can be chosen at the boot time) by
+calling elevator_init. 
+<a href="http://lxr.linux.no/source/block/elevator.c?a=x86_64#L170" target="codewindow">elevator_init</a> gets the elevator type 
+identified by the name and calls elevator_attach to attach the elevator 
+to the queue. This calls the elevator_init_fn which allows the elevator
+algorithm to initialize its data structures for the request queue.</p>
+
+
+<p>The following diagram shows the call graph for blk_init_queue.</p>
+
+<p><img style="width: 536px; height: 246px;" src="blkdevarch_files/cg_init26.png"></p>
+
+<a href="http://lxr.linux.no/source/include/linux/fs.h?a=x86_64#L367" target="codewindow&quot;">struct block_device</a>
+<p>The following diagram shows the relationship between various data 
+structures related to block devices.</p><p><img style="width: 696px; height: 577px;" src="blkdevarch_files/gendisk26.png"></p>
+
+
+
+<br><h3>Opening a device file</h3>
+
+
+
+<p>A device can be read/written as a normal file. For example, file
+system utilities access device files as regular files and write file
+system meta data. The kernel accesses these devices when a file system
+on the device is mounted.</p>
+
+
+
+<p>File systems call <a href="http://lxr.linux.no/source/fs/inode.c?a=x86_64#L1385" target="codewindow">init_special_inode</a> function 
+for special type files like device files. This function sets the file operations 
+of the inode to def_blk_fops.  When the inode is opened, the kernel calls the 
+open handler in this file operations table. &nbsp;The handler registered in
+the def_blk_fops is blkdev_open.</p>
+
+
+
+<p><img style="width: 778px; height: 604px;" alt="" src="blkdevarch_files/cg_bdev26.png"></p>
+
+
+
+<p>When the kernel opens the device during mount, the function
+get_sb_bdev, which reads the file system superblock from the device.
+The details of both the code paths can be seen in the call graph. Both
+the paths finally call bd_acquire. The inode is allocated from the
+special block device file system. The inode allocation function
+registered with this file system, bdev_alloc_inode, actually allocates
+the structure bdev_inode which has space for the block_device and an
+inode. Though the pointer to the inode field is returned by the inode
+allocation function, iget5_locked, we know that there is a block_device
+structure before the inode structure (this can be accessed by
+manipulating the inode pointer). The function bdget initializes this
+block device structure and the new inode structure.</p>
+
+
+
+<p>Note that the gendisk and the partition information is not yet
+assigned to the block device structure. This is done by the function
+do_open. This function handles the case of opening the device file of a
+partition. The funciton get_gendisk fills the number of partitions in
+the disk. If the device is opened for the first time and there are
+partitions, it calls bdget_disk to get the block device structure for
+the whole disk and calls blkdev_get to open the disk. The open handler
+of the block device operations table is called when the block device
+structure of the whole disk is opened.</p>
+
+
+<p>The following code snippet shows the important lines of code in the
+bd_open function that setup the device structures for partitions. The
+bd_contains field is set for the partition device to point to the
+structure of the whole disk. Also, the bd_part is set to the
+corresponding entry in the hd_struct array for the partition.</p>
+
+
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/fs/block_dev.c?a=x86_64#L560" target="codewindow">static int do_open(struct block_device *bdev, 
+struct file *file)</a> {<br>
+
+
+&nbsp;&nbsp;&nbsp; int part;<br>
+
+
+&nbsp;&nbsp;&nbsp; struct gendisk *disk;<br>
+
+
+<br>
+
+
+&nbsp;&nbsp;&nbsp; disk = get_gendisk(bdev-&gt;bd_dev, &amp;part);<br>
+
+
+&nbsp;&nbsp;&nbsp; if(!bdev-&gt;bd_openers) { <span style="font-style: italic;">// 
+not opened before</span><br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; if(!part) { <span style="font-style: italic;">// 
+device for the whole disk</span><br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; if(disk-&gt;fops-&gt;open)<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp; ret = disk-&gt;fops-&gt;open(bdev-&gt;bd_inode,
+file);<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; else { <span style="font-style: italic;">// 
+device represents a partition</span><br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; struct block_device *whole;<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; struct hd_struct *p;<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; whole = bdget_disk(bdev, 0);<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+blkdev_get(whole, file-&gt;f_mode, file-&gt;f_flags);<br>
+
+
+<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+bdev-&gt;bd_contains = whole;<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+p = disk-&gt;part[part - 1];<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; bdev-&gt;bd_part = p;<br>
+
+
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br>
+
+
+}<br>
+
+
+<br>
+
+
+<span style="font-style: italic;">Note: this shows only the important lines 
+of code</span><br>
+
+</div>
+<p>  The block device is initialized now. Data can be read/written by
+allocating bio structures and populating it (the bi_bdev field pointing
+to the block device structure) and then calling submit_bio.</p>
+
+
+
+
+<h3>Request submission</h3>
+
+
+
+<p>Requests for I/O are submitted using the submit_bio function. The
+bio structure is allocated using bio_alloc by passing the number of
+segments so that the bio_vec array is allocated for the requested
+segments. For example, the function submit_bh which is used to submit a
+request for a block allocates and fills a bio structure and submits
+using submit_bio.</p>
+
+<div class="codesnippet">
+<a href="http://lxr.linux.no/source/fs/buffer.c?a=x86_64#L2757" target="codewindow">int submit_bh</a>(int rw, 
+struct buffer_head *bh) {<br>
+
+&nbsp;&nbsp;&nbsp; struct bio *bio;<br>
+
+&nbsp;&nbsp;&nbsp; ...<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">bio = 
+bio_alloc(GFP_NOIO, 1);</span><br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_sector = bh-&gt;b_blocknr * (bh-&gt;b_size &gt;&gt; 9);<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_bdev = bh-&gt;b_bdev;<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_io_vec[0].bv_page = bh-&gt;b_page;<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_io_vec[0].bv_len = bh-&gt;b_size;<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_io_vec[0].bv_offset = bh_offset(bh);<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_vcnt = 1;<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_idx = 0;<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_size = bh-&gt;b_size;<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_end_io = end_bio_bh_io_sync;<br>
+
+&nbsp;&nbsp;&nbsp; bio-&gt;bi_private = bh;<br>
+
+<br>
+
+&nbsp;&nbsp;&nbsp; bio_get(bio);<br>
+
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">submit_bio(rw, bio);</span><br>
+
+};<br>
+
+</div><p>The function __make_request does the job of adding the bio to the
+request queue. It makes use of the elevator algorithm to see if an
+existing request is enlarged or if a new request has to be created. If
+the bio can be added to an existing request, it tries to see if the
+adjacent requests can be merged again with the help of the elevator
+algorithm.</p>
+
+<p>The following diagram shows the call graph for request submission:</p>
+
+<p><img style="width: 948px; height: 461px;" alt="" src="blkdevarch_files/cg_bio26.png"></p>
+
+<p>The following diagram shows the relationship between the request 
+and bio data structures.</p>
+
+
+
+<p><img style="width: 576px; height: 444px;" alt="" src="blkdevarch_files/request26.png"></p>
+
+
+
+
+<p></p>
+
+
+
+<h4>New request</h4>
+
+
+
+<p>The function __make_request first calls elv_merge to see if the bio
+structure can be merged into an existing request structure. The return
+value contains the merge information. If it cannot be merged, the bio
+has to be added to the request queue by creating a new request.</p>
+
+<p>It tries to allocate a new request structure. If it is not able to
+allocate a structure, it will wait till it can allocate a structure.
+elv_set_request is called so that the elevator algorithm can add its
+information to the request (stored in the elevator_private field of the
+request structure).</p>
+
+<h4>Elevator algorithm</h4>
+
+
+
+<p>If the elevator algorithm determines that the bio structure can be
+merged into an existing request, it indicates by the return value of
+ELEVATOR_BACK_MERGE or ELEVATOR_FRONT_MERGE. It returns a pointer to a
+request to which the bio structure has to be added. The return value
+indicates where to add the bio in the request (back merge indicates
+that the bio should be added at the end of bio structures in the
+request).</p>
+
+<p>Before merging, it calls the back_merge_fn or the front_merge_fn
+field of the request queue (which in general are ll_back_merge_fn and
+ll_front_merge_fn). These functions can check whether the back/front
+merge can be performed on the request. The default functions verify if
+the constraints like the maximum sectors in the request will be
+violated after the request. The elevator algorithm only tells if the
+request can be enlarged. It doesnt know about the device driver
+constraints on requests. So, these callbacks allow the drivers to
+control the merge operation.</p>
+
+<p>The following diagram shows the relationship between the request
+queue and the requests with one of the requests enlarged with a bio
+structure.</p>
+
+<p><img style="width: 786px; height: 550px;" src="blkdevarch_files/rq26.png"></p>Note 
+that till now we have only talked about adding the requests to the
+request queue. These actual I/O is performed by a concept of 'device
+plugging' and 'unplugging'. When there are requests in the request
+queue, the device is 'plugged' using the function blk_plug_device. This
+starts an unplug timer with a delay as specified in the unplug_delay
+field of the request queue.&nbsp;
+
+<h3>Request handling</h3>
+
+
+
+<p>The requests are handled when the device is unplugged. The function
+called to unplug the device is&nbsp;generic_unplug_device or
+__generic_unplug_device. The device can be unplugged if the unplug
+timer expires or if there is a scarcity of request structures on the
+queue, of it I/O has to be forced on the device (like sending special
+commands to the device).</p>
+
+<p>The function __generic_unplug_device deletes any timers, marks the
+device as unplugged and calls the request_fn handler of the request
+queue. The handler is supposed to process all the requests in the
+request queue.</p>
+
+<h2>Accessing the device</h2>
+
+As mentioned above, the data on the device can be accessed inside the
+kernel as blocks, or read from the user space as a normal file.
+Read/write from the user space can be done in two ways - by issuing
+read/write system call on the device file or mapping the device file
+and reading/writing to the memory. The kernel ensures that the blocks
+are cached and all the code paths make use of the cache.
+<h3 class="western">Mapped I/O</h3>
+
+
+
+<p>Each opened inode has an associated address space object which
+stores the mapping information like the loaded pages etc. It has an
+associated address space operation table with handlers to perform
+operations on the address space like readpage, writepage etc.</p>
+
+
+
+<p>When the file is mapped into memory the internal data
+structures
+(vm_area_struct) are updated to specify that the mapped memory area
+is a valid one. With demand paging, the read is triggered only when
+there is a page fault. The write
+handlers of the address space will trigger a write operation to the
+device.</p>
+
+<p>When the device file is opened for the first time, the function
+bdget sets the a_ops field of the inode-&gt;i_data to def_blk_aops. The
+i_mapping field of the special inode points to this i_data field in the
+inode itself. This value from the special device inode is copied into
+the i_mapping field of the inode for the device file (with which the
+device is opened). So, if the device file is opened with n inodes (for
+example, if we create /dev/hda1, /tmp/hda1, /tmp/hdA1 all having the
+same major and minor numbers and open all the files) the i_mapping
+fields of all the inodes will share the same mapping with the special
+device inode i.e., all point to the i_data field of the special device
+inode.</p>
+
+<p>The handler for readpage is blkdev_readpage. This calls
+block_read_full_page to which checks whether the page has associated
+buffers required and if they are uptodate. If not, it calls submit_bh
+for all the buffers that are not uptodate.</p>
+
+<div class="codesnippet">
+struct address_space_operations 
+<a href="http://lxr.linux.no/source/fs/block_dev.c?a=x86_64#L785" target="codewindow">def_blk_aops =</a> {<br>
+
+&nbsp;&nbsp;&nbsp; .readpage &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; 
+&nbsp; = blkdev_readpage,<br>
+
+&nbsp;&nbsp;&nbsp; .writepage&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp; = blkdev_writepage,<br>
+
+&nbsp;&nbsp;&nbsp; .sync_page&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp; = block_sync_page,<br>
+
+&nbsp;&nbsp;&nbsp; .prepare_write&nbsp;&nbsp; &nbsp;&nbsp; 
+&nbsp; = blkdev_prepare_write,<br>
+
+&nbsp;&nbsp;&nbsp; .commit_write&nbsp;&nbsp; &nbsp;&nbsp; 
+&nbsp;&nbsp; = blkdev_commit_write,<br>
+
+&nbsp;&nbsp;&nbsp; .writepages&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 
+&nbsp;= generic_writepages,<br>
+
+&nbsp;&nbsp;&nbsp; .direct_IO&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp; = blkdev_direct_IO,<br>
+
+};<br>
+
+<br>
+
+<br>
+
+struct file_operations 
+<a href="http://lxr.linux.no/source/fs/block_dev.c?a=x86_64#L795" target="codewindow">def_blk_fops =</a> {<br>
+
+&nbsp;&nbsp;&nbsp; .open&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; 
+&nbsp; &nbsp; = blkdev_open,<br>
+
+&nbsp;&nbsp;&nbsp; .release&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; 
+&nbsp; = blkdev_close,<br>
+
+&nbsp;&nbsp;&nbsp; .llseek&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; 
+&nbsp;&nbsp; &nbsp; = block_llseek,<br>
+
+&nbsp;&nbsp;&nbsp; .read&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; = generic_file_read,<br>
+
+&nbsp;&nbsp;&nbsp; .write&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp; &nbsp; = blkdev_file_write,<br>
+
+&nbsp; &nbsp;&nbsp;.aio_read &nbsp; &nbsp; &nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp;&nbsp; = generic_file_aio_read,<br>
+
+&nbsp; &nbsp;&nbsp;.aio_write&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp; = blkdev_file_aio_write, <br>
+
+&nbsp;&nbsp;&nbsp; .mmap&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; = generic_file_mmap,<br>
+
+&nbsp;&nbsp;&nbsp; .fsync&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; = block_fsync,<br>
+
+&nbsp;&nbsp;&nbsp; .unlocked_ioctl&nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp;= block_ioctl,<br>
+
+#ifdef CONFIG_COMPAT<br>
+
+&nbsp;&nbsp;&nbsp; .compat_ioctl&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp; = compat_blkdev_ioctl,<br>
+
+#endif<br>
+
+&nbsp;&nbsp;&nbsp; .readv &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp; 
+&nbsp;&nbsp;&nbsp; = generic_file_readv,<br>
+
+&nbsp;&nbsp;&nbsp; .writev&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;= generic_file_write_nolock,<br>
+
+&nbsp;&nbsp;&nbsp; .sendfile&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; 
+&nbsp;&nbsp;&nbsp; &nbsp;= generic_file_sendfile,<br>
+
+};<br>
+
+<br>
+
+
+</div>
+
+
+
+<h3 class="western">System calls</h3>
+
+
+
+<p>Read and write system calls delegate the task to the handlers
+in
+the file operation table. The file operation table for the block
+devices is generally set to def_blk_fops (set by the function
+init_special_inode which is called by all file systems). The read and
+write handlers in this table are generic_file_read and
+generic_file_write.</p>
+
+
+
+<p>The function generic_file_read looks up for the pages in the
+page
+cache and if it is not present, calls the readpage handler of the
+address space object. So, this actually calls the blkdev_readpage handler.</p>
+
+
+
+<p>The function generic_file_write uses the prepare_write and
+commit_write handler of the address space operations table to write
+the data to the buffer. The corresponding handlers in the def_blk_fops
+table are generic_prepare_write and generic_commit_write. The
+function generic_commit_write marks the buffers as dirty as well as
+adding the
+inode to the dirty inodes of the superblock (so that the files can be
+flushed before unmounting).</p>
+
+
+
+<h3 class="western">Getting a buffer</h3>
+
+
+
+<p>__bread is used to read a block from a device. This first
+checks
+if the buffer is available in the cache. Instead of maintaining a
+separate buffer cache, the kernel makes use of the page cache. The
+pages of data loaded from a file (inode) are cached and are accessed
+using its address space object. The offset of the page is used to
+locate the page in the cache.</p>
+
+<p>To check if the block is available in the page cache, the block
+number is converted into the page number with in the inode i.e., the
+index of the page which will contain the required block is computed.
+For example, if the block size is 1k and page size is 4k and the
+request is to read block number 11, the corresponding page is 3 (with 4
+blocks per page, 11th block falls in the 3rd page). If there is a page
+for the page index and there is a buffer_head for the required block
+number, it is returned.</p>
+
+<p>If it is not able to find the buffer head (even if it finds a valid
+page), it tries to find or create a page and allocate buffer structures
+to it. Finally it would have found or created a page with buffer
+structures. if the buffer is not valid, it submits the buffer for I/O
+using submit_bh.</p>
+
+<p>The following diagram shows the call graph for __bread.</p>
+
+<img alt="" src="blkdevarch_files/cg_bh26.png">
+<p>The following diagram shows the flow chart of the logic of reading a buffer 
+through the cache.</p>
+
+<p><img style="width: 856px; height: 621px;" alt="" src="blkdevarch_files/fc_bh26.png"></p>
+</body></html>
