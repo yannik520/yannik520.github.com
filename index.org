@@ -34,6 +34,7 @@
 ** [[input_dev_framework.html][The Framework of Input Device]]
 ** [[sd_host_driver.html][SD Host Controller Driver]]
 ** [[blkdevarch.html][Linux Block Device Architecture]]
+** [[chrdevarch.html][Linux Char Device Architecture]]
 * Windows WDF Device Driver
 ** [[wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
 * ARM & x86

@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>Linux Char Device Architecture</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-07-18 三"/>
+<meta name="author" content="Yannik Li"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">Linux Char Device Architecture</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Introduction </a>
+<ul>
+<li><a href="#sec-1.1">1.1 Accress from user space </a></li>
+<li><a href="#sec-1.2">1.2 How to write a char device driver </a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 Char Device File System Init </a>
+<ul>
+<li><a href="#sec-2.1">2.1 kobj_map init </a></li>
+<li><a href="#sec-2.2">2.2 The analices of register_chrdev() </a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Opening A Device File </a>
+<ul>
+<li><a href="#sec-3.1">3.1 The interface with file system </a></li>
+<li><a href="#sec-3.2">3.2 What have been done in chrdev_open() </a></li>
+<li><a href="#sec-3.3">3.3 The call graph of open() </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction </h2>
+<div class="outline-text-2" id="text-1">
+
+<p>The data of char device just can be accessed as a stream, read/write it one by one, in other word, you can't random access the data from char device, which is the diffrence with block device.<br/>
+heree, we will show how to write a char device driver, and to study linux char device driver in deeper level &mdash; to analize the relationship between file system and char device driver. we'll to show how to access char device in user space in next section.
+</p>
+</div>
+
+<div id="outline-container-1.1" class="outline-3">
+<h3 id="sec-1.1"><span class="section-number-3">1.1</span> Accress from user space </h3>
+<div class="outline-text-3" id="text-1.1">
+
+<p>In Linux, everything is a file, that means device can be accessed as a special type of file. you can call open() to get the file handle, and call read() to get data frome the device. in linux system, device node always be created in /dev directory, but it not means you must create it in the directory, you can create it in any directory, e.g., /tmp.<br/>
+A device can access as the way mentioned above, and it has some differance with a nomal file, for a char device, we can use ioctl() to send cmd to device driver, and use mmap() to map memory from kernel space to user space, then the memory can access in user sapce directly.
+</p></div>
+
+</div>
+
+<div id="outline-container-1.2" class="outline-3">
+<h3 id="sec-1.2"><span class="section-number-3">1.2</span> How to write a char device driver </h3>
+<div class="outline-text-3" id="text-1.2">
+
+<p>To write a char device driver, need to define a variable in the type of struct file_operations, and initialize it with functions defied in driver, in the callback of __init, you can call register_chrdev() with MAJOR and file_operations variable parameter to register a char device. after the step, you can mknode with MAJOR and access it with open/read/write fuctions in userspace.
+It look likes very simple to complete a char device driver, Yes, it is so simple!
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Char Device File System Init </h2>
+<div class="outline-text-2" id="text-2">
+
+<p>There is a chrdev_init() function in the file char_dev.c, char device file system is initialized here, the first thing in this function to do is initializing the kobj_map with kobj_map_init() function, the struct kboj_map is defined as following:
+</p>
+
+
+<pre class="example">struct kobj_map {
+        struct probe {
+                struct probe *next;
+                dev_t dev;
+                unsigned long range;
+                struct module *owner;
+                kobj_probe_t *get;
+                int (*lock)(dev_t, void *);
+                void *data;
+        } *probes[255];
+        struct mutex *lock;
+};
+</pre>
+
+
+
+<p>
+The number of array probes is defined as MAX major number for char device, so the max major number for char device is 255.
+</p>
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1"><span class="section-number-3">2.1</span> kobj_map init </h3>
+<div class="outline-text-3" id="text-2.1">
+
+<p>the result of calling kobj_map_init() is as the following graph showd.<br/>
+<a href="#sec-2.1"><img src="kobj_map_init.png"/></a>
+</p></div>
+
+</div>
+
+<div id="outline-container-2.2" class="outline-3">
+<h3 id="sec-2.2"><span class="section-number-3">2.2</span> The analices of register_chrdev() </h3>
+<div class="outline-text-3" id="text-2.2">
+
+<ul>
+<li>
+to call __register_chrdev_region() to alloc a major not used and make chardevs[major] point to a new aclloced variable in type of struct char_device_struct.
+
+</li>
+</ul>
+
+
+<pre class="example">static struct char_device_struct {
+        struct char_device_struct *next;
+        unsigned int major;
+        unsigned int baseminor;
+        int minorct;
+        char name[64];
+        struct cdev *cdev;              /* will die */
+} *chrdevs[CHRDEV_MAJOR_HASH_SIZE];
+</pre>
+
+
+
+<ul>
+<li>
+to call cdev_alloc to alloc a struct cdev variable and fill the fileds with fops and name passed in 
+</li>
+<li>
+then call cdev_add() to add the char device.
+</li>
+</ul>
+
+<p>in cdev_add() function, called kobj_map() to add a probe to cdev_map, which the probe with the field be filled with MKDEV(major, 0), the major is the major number of the char device. what happend as showed in following graph.<br/>
+<a href="#sec-2.2"><img src="kobj_map.png"/></a>
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Opening A Device File </h2>
+<div class="outline-text-2" id="text-3">
+
+
+</div>
+
+<div id="outline-container-3.1" class="outline-3">
+<h3 id="sec-3.1"><span class="section-number-3">3.1</span> The interface with file system </h3>
+<div class="outline-text-3" id="text-3.1">
+
+<p>def_chr_fops is defined in char_dev.c as following:
+</p>
+
+
+<pre class="example">const struct file_operations def_chr_fops = {
+        .open = chrdev_open,
+        .llseek = noop_llseek,
+};
+</pre>
+
+
+
+<p>
+and the def_chr_fops assigned to inode-&gt;i_fops in init_special_inode()
+</p>
+
+
+<pre class="example">void init_special_inode(struct inode *inode, umode_t mode, dev_t rdev)
+{
+        inode-&gt;i_mode = mode;
+        if (S_ISCHR(mode)) {
+                inode-&gt;i_fop = &amp;def_chr_fops;
+                inode-&gt;i_rdev = rdev;
+        } else if (S_ISBLK(mode)) {
+                inode-&gt;i_fop = &amp;def_blk_fops;
+                inode-&gt;i_rdev = rdev;
+        } else if (S_ISFIFO(mode))
+                inode-&gt;i_fop = &amp;def_fifo_fops;
+        else if (S_ISSOCK(mode))
+                inode-&gt;i_fop = &amp;bad_sock_fops;
+        else
+                printk(KERN_DEBUG "init_special_inode: bogus i_mode (%o) for"
+                                  " inode %s:%lu\n", mode, inode-&gt;i_sb-&gt;s_id,
+                                  inode-&gt;i_ino);
+}
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3.2" class="outline-3">
+<h3 id="sec-3.2"><span class="section-number-3">3.2</span> What have been done in chrdev_open() </h3>
+<div class="outline-text-3" id="text-3.2">
+
+<p>The detail please see the comment in following code.
+</p>
+
+
+<pre class="example">static int chrdev_open(struct inode *inode, struct file *filp)
+{
+        struct cdev *p;
+        struct cdev *new = NULL;
+        int ret = 0;
+
+        spin_lock(&amp;cdev_lock);
+        p = inode-&gt;i_cdev;
+        if (!p) {
+                struct kobject *kobj;
+                int idx;
+                spin_unlock(&amp;cdev_lock);
+                kobj = kobj_lookup(cdev_map, inode-&gt;i_rdev, &amp;idx); // to lookup kobj in cdev_map with major and minor number
+                if (!kobj)
+                        return -ENXIO;
+                new = container_of(kobj, struct cdev, kobj);
+                spin_lock(&amp;cdev_lock);
+                /* Check i_cdev again in case somebody beat us to it while
+                   we dropped the lock. */
+                p = inode-&gt;i_cdev;
+                if (!p) {
+                        inode-&gt;i_cdev = p = new;
+                        list_add(&amp;inode-&gt;i_devices, &amp;p-&gt;list);
+                        new = NULL;
+                } else if (!cdev_get(p))
+                        ret = -ENXIO;
+        } else if (!cdev_get(p))
+                ret = -ENXIO;
+        spin_unlock(&amp;cdev_lock);
+        cdev_put(new);
+        if (ret)
+                return ret;
+
+        ret = -ENXIO;
+        /* get file_operations defined in driver and assigned to filp-&gt;f_op,
+        when user call read/write in user space, it will call read/write define in driver directly.*/
+        filp-&gt;f_op = fops_get(p-&gt;ops);
+        if (!filp-&gt;f_op)
+                goto out_cdev_put;
+
+        if (filp-&gt;f_op-&gt;open) {
+                ret = filp-&gt;f_op-&gt;open(inode, filp); // call open defined in driver
+                if (ret)
+                        goto out_cdev_put;
+        }
+
+        return 0;
+
+ out_cdev_put:
+        cdev_put(p);
+        return ret;
+}
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3.3" class="outline-3">
+<h3 id="sec-3.3"><span class="section-number-3">3.3</span> The call graph of open() </h3>
+<div class="outline-text-3" id="text-3.3">
+
+<p><a href="#sec-3.3"><img src="open.png"/></a>
+</p></div>
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: Yannik Li
+<a href="mailto:yqli_520@hotmail.com">&lt;yqli_520@hotmail.com&gt;</a>
+</p>
+<p class="date"> Date: 2012-07-18 三</p>
+<p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
+</div>
+</div>
+</body>
+</html>
