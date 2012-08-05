@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>Create RPM Package On Ubuntu</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-08-05 日"/>
+<meta name="author" content="yannik.li"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">Create RPM Package On Ubuntu</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 What is RPM </a></li>
+<li><a href="#sec-2">2 How to create RPM package on ubuntu </a>
+<ul>
+<li><a href="#sec-2.1">2.1 Prepare </a></li>
+<li><a href="#sec-2.2">2.2 Write hello-2.8.spec file for the rpm package, and saved into SPECS </a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Tue Sep 06 2011 The Coon of Ty &amp;lt;Ty@coon.org&amp;gt; 2.8-1</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> What is RPM </h2>
+<div class="outline-text-2" id="text-1">
+
+<p>RPM is a package management system, The name RPM variously refers to the .rpm file fromat. RPM was intended primarily for GNU/Linux distributions, ex: Fedora, Meego and openSUSE.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> How to create RPM package on ubuntu </h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1"><span class="section-number-3">2.1</span> Prepare </h3>
+<div class="outline-text-3" id="text-2.1">
+
+<ul>
+<li>
+install apm on ubuntu: 
+
+</li>
+</ul>
+
+
+<pre class="example">#aptitude install rpm
+</pre>
+
+
+
+<ul>
+<li>
+make rpmbuild directory: 
+
+</li>
+</ul>
+
+
+<pre class="example">#mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
+</pre>
+
+
+
+<ul>
+<li>
+enter into SOURCES directory:  
+
+</li>
+</ul>
+
+
+<pre class="example">#cd ~/rpmbuild/SOURCES
+</pre>
+
+
+
+<ul>
+<li>
+get hello word souce code: 
+
+</li>
+</ul>
+
+
+<pre class="example">#wget http://ftp.gnu.org/gnu/hello/hello-2.8.tar.gz
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2.2" class="outline-3">
+<h3 id="sec-2.2"><span class="section-number-3">2.2</span> Write hello-2.8.spec file for the rpm package, and saved into SPECS </h3>
+<div class="outline-text-3" id="text-2.2">
+
+
+
+
+<pre class="example">Summary: The "Hello World" program from GNU
+Name: hello
+Version: 2.8
+Release: 1%{?dist}
+Source0: %{name}-%{version}.tar.gz
+License: GPLv3+
+Group: Development/Tools
+
+Requires(post): info
+Requires(preun): info
+
+%description 
+The "Hello World" program, done with all bells and whistles of a proper FOSS 
+project, including configuration, build, internationalization, help files, etc.
+
+%prep
+%setup -q
+
+%build
+%configure
+make %{?_smp_mflags}
+
+%install
+%make_install
+%find_lang %{name}
+rm -f %{buildroot}/%{_infodir}/dir
+
+%post
+/sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
+
+%preun
+if [ $1 = 0] ; then
+/sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
+fi
+
+%files -f %{name}.lang
+%doc AUTHORS ChangeLog COPYING NEWS README THANKS TODO
+%{_mandir}/man1/hello.1.gz
+%{_infodir}/%{name}.info.gz
+%{_bindir}/hello
+
+%changelog
+* Tue Sep 06 2011 The Coon of Ty &lt;Ty@coon.org&gt; 2.8-1
+- Initial version of the package
+</pre>
+
+
+
+</div>
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: yannik.li
+<a href="mailto:yqli_520@hotmail.com">&lt;yqli_520@hotmail.com&gt;</a>
+</p>
+<p class="date"> Date: 2012-08-05 日</p>
+<p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
+</div>
+</div>
+</body>
+</html>

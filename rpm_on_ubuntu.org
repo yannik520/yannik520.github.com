@@ -1,0 +1,83 @@
+#+TITLE:     Create RPM Package On Ubuntu
+#+AUTHOR:    yannik.li
+#+EMAIL:     yqli_520@hotmail.com
+#+DATE:      2012-08-05 日
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* What is RPM
+RPM is a package management system, The name RPM variously refers to the .rpm file fromat. RPM was intended primarily for GNU/Linux distributions, ex: Fedora, Meego and openSUSE.
+
+* How to create RPM package on ubuntu
+** Prepare
++ install apm on ubuntu: 
+#+BEGIN_SRC bash
+#aptitude install rpm
+#+END_SRC
++ make rpmbuild directory: 
+#+BEGIN_SRC bash
+#mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
+#+END_SRC
++ enter into SOURCES directory:  
+#+BEGIN_SRC bash
+#cd ~/rpmbuild/SOURCES
+#+END_SRC
++ get hello word souce code: 
+#+BEGIN_SRC bash
+#wget http://ftp.gnu.org/gnu/hello/hello-2.8.tar.gz
+#+END_SRC
+** Write hello-2.8.spec file for the rpm package, and saved into SPECS
+#+BEGIN_EXAMPLE
+Summary: The "Hello World" program from GNU
+Name: hello
+Version: 2.8
+Release: 1%{?dist}
+Source0: %{name}-%{version}.tar.gz
+License: GPLv3+
+Group: Development/Tools
+
+Requires(post): info
+Requires(preun): info
+
+%description 
+The "Hello World" program, done with all bells and whistles of a proper FOSS 
+project, including configuration, build, internationalization, help files, etc.
+
+%prep
+%setup -q
+
+%build
+%configure
+make %{?_smp_mflags}
+
+%install
+%make_install
+%find_lang %{name}
+rm -f %{buildroot}/%{_infodir}/dir
+
+%post
+/sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
+
+%preun
+if [ $1 = 0] ; then
+/sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
+fi
+
+%files -f %{name}.lang
+%doc AUTHORS ChangeLog COPYING NEWS README THANKS TODO
+%{_mandir}/man1/hello.1.gz
+%{_infodir}/%{name}.info.gz
+%{_bindir}/hello
+
+%changelog
+* Tue Sep 06 2011 The Coon of Ty <Ty@coon.org> 2.8-1
+- Initial version of the package
+#+END_EXAMPLE
