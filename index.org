@@ -43,6 +43,7 @@
 * Project Management
 ** [[git_and_repo.html][Git and Repo]]
 
+** [[Config Git Server]]
 * Other
 ** [[rpm_on_ubuntu.html][Create RPM Package On Ubuntu]]
 

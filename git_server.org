@@ -1,0 +1,57 @@
+#+TITLE:     Config Git Server
+#+AUTHOR:    yannik
+#+EMAIL:     yqli_520@hotmail.com
+#+DATE:      2012-08-08 三
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* Prepare
++ Modify hostname
+modify hostname in /etc/hostname to GitServer
++ add a user and make a directory .ssh
+#+BEGIN_SRC bash  
+$ sudo adduser git
+$ su git
+$ mkdir ~/.ssh
+#+END_SRC
++ add member's ssh public key into ~/.ssh/authorized_keys
+#+BEGIN_SRC bash
+$ cat id_rsa.bob.pub >> ~/.ssh/authorized_keys
+$ cat id_rsa.jone.pub >> ~/.ssh/authorized_keys
+#+END_SRC
+
+* Create Git Repo
++ create a bare repo
+#+BEGIN_SRC bash 
+$ cd ~/
+$ mkdir project.git
+$ cd project.git
+$ git --bare init
+#+END_SRC
+
++ create a git repo in work pc and push the code to remote git server
+#+BEGIN_SRC bash 
+$ cd myproject
+$ git init
+$ git add .
+$ git commit -m "initial commit"
+$ git remote add origin git@GitServer:/home/git/project.git
+$ git push origin master
+#+END_SRC
+
++ Using it
+#+BEGIN_SRC bash
+$ git clone git@GitSerer:/home/git/project.git
+$ git pull
+$ git add .
+$ git commit -m "add code"
+$ git push origin master
+#+END_SRC
