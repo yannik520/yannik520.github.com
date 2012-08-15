@@ -1,0 +1,137 @@
+#+TITLE:     A Python Plugin Framework
+#+AUTHOR:    yannik
+#+EMAIL:     yqli_520@hotmail.com
+#+DATE:      2012-08-15 三
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+
+* A Framework with metaclass
++ Example code
+
+*# main.py*
+
+#+begin_example
+import os, sys
+from plugin import *
+
+if __name__ == "__main__":
+
+    # test PluginMgr
+    print pluginmgr.get_plugins()
+#+end_example
+
+*# plugin.py*
+
+#+begin_example
+import os,sys
+
+class _Plugin(object):
+    class __metaclass__(type):
+        def __init__(cls, name, bases, attrs):
+            if not hasattr(cls, 'plugins'):
+                cls.plugins = {}
+                print "in if:"
+                print cls
+            else:
+                print "%s %s" % (attrs['name'],name)
+                print cls
+                cls.plugins[attrs['name']] = cls
+                print cls.plugins
+        def show_plugins(cls):
+            for kls in cls.plugins.values():
+                    print kls
+        def get_plugins(cls):
+            return cls.plugins
+
+
+class PluginMgr(object):
+    plugin_dirs = {}
+    # make the manager class as singleton
+    _instance = None
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(PluginMgr, cls).__new__(cls, *args, **kwargs)
+
+        return cls._instance
+    def __init__(self):
+        self.plugin_dir="/home/yannik/work/plugin_python/plugins/"
+        self.plugin_dirs[self.plugin_dir] = False
+
+    def _load_all(self):
+        for (pdir, loaded) in self.plugin_dirs.iteritems():
+            if loaded: continue
+
+            sys.path.insert(0, pdir)
+            for mod in [x[:-3] for x in os.listdir(pdir) if x.endswith(".py")]:
+                if mod and mod != '__init__':
+                    if mod in sys.modules:
+                        print "Module %s already exists, skip" % mod
+                    else:
+                        try:
+                            pymod = __import__(mod)
+                            self.plugin_dirs[pdir] = True
+                            print "Plugin module %s:%s imported"\
+                                        % (mod, pymod.__file__)
+                        except ImportError, e:
+                            print 'Loading failed, skip plugin %s/%s'\
+                                          % (os.path.basename(pdir), mod)
+
+            del(sys.path[0])
+
+
+    def get_plugins(self):
+        """ the return value is dict of name:class pairs """
+        self._load_all()
+        return _Plugin.get_plugins()
+
+pluginmgr = PluginMgr()
+
+#+end_example
+
+*# plugin1.py*
+
+#+begin_example
+
+import os, sys
+from plugin import _Plugin
+
+class Plugin_1(_Plugin):
+    name = 'Plugin1'
+
+    def get_name(self):
+        return name
+#+end_example
+
+*# plugin2.py*
+
+#+begin_example
+import os, sys
+from plugin import _Plugin
+
+class Plugin_2(_Plugin):
+    name = 'Plugin2'
+
+    def get_name(self):
+        return name
+#+end_example
+
++ The directory tree
+#+begin_example
+.
+├── main.py
+├── plugin.py
+├── plugin.pyc
+└── plugins
+    ├── plugin1.py
+    ├── plugin1.pyc
+    ├── plugin2.py
+    └── plugin2.pyc
+#+end_example

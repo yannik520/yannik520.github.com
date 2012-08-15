@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>A Python Plugin Framework</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-08-15 三"/>
+<meta name="author" content="yannik"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">A Python Plugin Framework</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 A Framework with metaclass </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> A Framework with metaclass </h2>
+<div class="outline-text-2" id="text-1">
+
+<ul>
+<li>
+Example code
+
+</li>
+</ul>
+
+<p><b># main.py</b>
+</p>
+
+
+
+<pre class="example">import os, sys
+from plugin import *
+
+if __name__ == "__main__":
+
+    # test PluginMgr
+    print pluginmgr.get_plugins()
+</pre>
+
+
+
+
+<p>
+<b># plugin.py</b>
+</p>
+
+
+
+<pre class="example">import os,sys
+
+class _Plugin(object):
+    class __metaclass__(type):
+        def __init__(cls, name, bases, attrs):
+            if not hasattr(cls, 'plugins'):
+                cls.plugins = {}
+                print "in if:"
+                print cls
+            else:
+                print "%s %s" % (attrs['name'],name)
+                print cls
+                cls.plugins[attrs['name']] = cls
+                print cls.plugins
+        def show_plugins(cls):
+            for kls in cls.plugins.values():
+                    print kls
+        def get_plugins(cls):
+            return cls.plugins
+
+
+class PluginMgr(object):
+    plugin_dirs = {}
+    # make the manager class as singleton
+    _instance = None
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(PluginMgr, cls).__new__(cls, *args, **kwargs)
+
+        return cls._instance
+    def __init__(self):
+        self.plugin_dir="/home/yannik/work/plugin_python/plugins/"
+        self.plugin_dirs[self.plugin_dir] = False
+
+    def _load_all(self):
+        for (pdir, loaded) in self.plugin_dirs.iteritems():
+            if loaded: continue
+
+            sys.path.insert(0, pdir)
+            for mod in [x[:-3] for x in os.listdir(pdir) if x.endswith(".py")]:
+                if mod and mod != '__init__':
+                    if mod in sys.modules:
+                        print "Module %s already exists, skip" % mod
+                    else:
+                        try:
+                            pymod = __import__(mod)
+                            self.plugin_dirs[pdir] = True
+                            print "Plugin module %s:%s imported"\
+                                        % (mod, pymod.__file__)
+                        except ImportError, e:
+                            print 'Loading failed, skip plugin %s/%s'\
+                                          % (os.path.basename(pdir), mod)
+
+            del(sys.path[0])
+
+
+    def get_plugins(self):
+        """ the return value is dict of name:class pairs """
+        self._load_all()
+        return _Plugin.get_plugins()
+
+pluginmgr = PluginMgr()
+
+</pre>
+
+
+
+
+<p>
+<b># plugin1.py</b>
+</p>
+
+
+
+<pre class="example">
+import os, sys
+from plugin import _Plugin
+
+class Plugin_1(_Plugin):
+    name = 'Plugin1'
+
+    def get_name(self):
+        return name
+</pre>
+
+
+
+
+<p>
+<b># plugin2.py</b>
+</p>
+
+
+
+<pre class="example">import os, sys
+from plugin import _Plugin
+
+class Plugin_2(_Plugin):
+    name = 'Plugin2'
+
+    def get_name(self):
+        return name
+</pre>
+
+
+
+
+<ul>
+<li>
+The directory tree
+
+</li>
+</ul>
+
+
+<pre class="example">.
+├── main.py
+├── plugin.py
+├── plugin.pyc
+└── plugins
+    ├── plugin1.py
+    ├── plugin1.pyc
+    ├── plugin2.py
+    └── plugin2.pyc
+</pre>
+
+
+
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: yannik
+<a href="mailto:yqli_520@hotmail.com">&lt;yqli_520@hotmail.com&gt;</a>
+</p>
+<p class="date"> Date: 2012-08-15 三</p>
+<p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
+</div>
+</div>
+</body>
+</html>
