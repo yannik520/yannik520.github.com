@@ -124,6 +124,7 @@ class Plugin_2(_Plugin):
 #+end_example
 
 + The directory tree
+
 #+begin_example
 .
 ├── main.py
