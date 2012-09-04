@@ -3,12 +3,12 @@
                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>Create RPM Package On Ubuntu</title>
+<title>Ashmem Analysis</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-<meta name="title" content="Create RPM Package On Ubuntu"/>
+<meta name="title" content="Ashmem Analysis"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-08-05 日"/>
-<meta name="author" content="yannik.li"/>
+<meta name="generated" content="2012-08-29 三"/>
+<meta name="author" content="yannik"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
 <style type="text/css">
@@ -92,155 +92,81 @@
 </div>
 
 <div id="content">
-<h1 class="title">Create RPM Package On Ubuntu</h1>
+<h1 class="title">Ashmem Analysis</h1>
 
 
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1 What is RPM</a></li>
-<li><a href="#sec-2">2 How to create RPM package on ubuntu</a>
-<ul>
-<li><a href="#sec-2-1">2.1 Prepare</a></li>
-<li><a href="#sec-2-2">2.2 Write hello-2.8.spec file for the rpm package, and saved into SPECS</a></li>
-</ul>
-</li>
+<li><a href="#sec-1">1 Code Analysis</a></li>
+<li><a href="#sec-2">2 How to use in user space</a></li>
 </ul>
 </div>
 </div>
 
 <div id="outline-container-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> What is RPM</h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> Code Analysis</h2>
 <div class="outline-text-2" id="text-1">
 
-<p>RPM is a package management system, The name RPM variously refers to the .rpm file fromat. RPM was intended primarily for GNU/Linux distributions, ex: Fedora, Meego and openSUSE.
+<p>A "area" cache and a "range" cache are created first in ashmem<sub>init</sub>(), and then register a misc device named ashmem, at last, using register<sub>shrinker</sub>() register a callback, there are two important struct in the code as following:
+</p>
+
+
+<pre class="example">/*
+ * ashmem_area - anonymous shared memory area
+ * Lifecycle: From our parent file's open() until its release()
+ * Locking: Protected by `ashmem_mutex'
+ * Big Note: Mappings do NOT pin this structure; it dies on close()
+ */
+struct ashmem_area {
+        char name[ASHMEM_FULL_NAME_LEN]; /* optional name in /proc/pid/maps */
+        struct list_head unpinned_list;  /* list of all ashmem areas */
+        struct file *file;               /* the shmem-based backing file */
+        size_t size;                     /* size of the mapping, in bytes */
+        unsigned long prot_mask;         /* allowed prot bits, as vm_flags */
+};
+
+/*
+ * ashmem_range - represents an interval of unpinned (evictable) pages
+ * Lifecycle: From unpin to pin
+ * Locking: Protected by `ashmem_mutex'
+ */
+struct ashmem_range {
+        struct list_head lru;           /* entry in LRU list */
+        struct list_head unpinned;      /* entry in its area's unpinned list */
+        struct ashmem_area *asma;       /* associated area */
+        size_t pgstart;                 /* starting page, inclusive */
+        size_t pgend;                   /* ending page, inclusive */
+        unsigned int purged;            /* ASHMEM_NOT or ASHMEM_WAS_PURGED */
+};
+</pre>
+
+<p>
+if the range is unpined, the area can be purged by system, and purged is assigned from ASHMEM_NOT_PURGED to ASHMEM_WAS_PURGED, and the code architecture as following:<br/>
+<img src="./ashmem_basic_struct.gif"  alt="./ashmem_basic_struct.gif" /><br/>
+Above graph come from: <a href="http://www.linuxidc.com/Linux/2011-09/42212.htm">http://www.linuxidc.com/Linux/2011-09/42212.htm</a>
 </p>
 </div>
 
 </div>
 
 <div id="outline-container-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> How to create RPM package on ubuntu</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> How to use in user space</h2>
 <div class="outline-text-2" id="text-2">
 
-
-</div>
-
-<div id="outline-container-2-1" class="outline-3">
-<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Prepare</h3>
-<div class="outline-text-3" id="text-2-1">
-
 <ul>
-<li>install apm on ubuntu: 
+<li>Open the shmem first
 </li>
 </ul>
 
-
-
-
-<pre class="example">#aptitude install rpm
-</pre>
-
-<ul>
-<li>make rpmbuild directory: 
-</li>
-</ul>
-
-
-
-
-<pre class="example">#mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
-</pre>
-
-<ul>
-<li>enter into SOURCES directory:  
-</li>
-</ul>
-
-
-
-
-<pre class="example">#cd ~/rpmbuild/SOURCES
-</pre>
-
-<ul>
-<li>get hello word souce code: 
-</li>
-</ul>
-
-
-
-
-<pre class="example">#wget http://ftp.gnu.org/gnu/hello/hello-2.8.tar.gz
-</pre>
-
-</div>
-
-</div>
-
-<div id="outline-container-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Write hello-2.8.spec file for the rpm package, and saved into SPECS</h3>
-<div class="outline-text-3" id="text-2-2">
-
-
-
-
-<pre class="example">Summary: The "Hello World" program from GNU
-Name: hello
-Version: 2.8
-Release: 1%{?dist}
-Source0: %{name}-%{version}.tar.gz
-License: GPLv3+
-Group: Development/Tools
-
-Requires(post): info
-Requires(preun): info
-
-%description 
-The "Hello World" program, done with all bells and whistles of a proper FOSS 
-project, including configuration, build, internationalization, help files, etc.
-
-%prep
-%setup -q
-
-%build
-%configure
-make %{?_smp_mflags}
-
-%install
-%make_install
-%find_lang %{name}
-rm -f %{buildroot}/%{_infodir}/dir
-
-%post
-/sbin/install-info %{_infodir}/%{name}.info %{_infodir}/dir || :
-
-%preun
-if [ $1 = 0] ; then
-/sbin/install-info --delete %{_infodir}/%{name}.info %{_infodir}/dir || :
-fi
-
-%files -f %{name}.lang
-%doc AUTHORS ChangeLog COPYING NEWS README THANKS TODO
-%{_mandir}/man1/hello.1.gz
-%{_infodir}/%{name}.info.gz
-%{_bindir}/hello
-
-%changelog
-* Tue Sep 06 2011 The Coon of Ty &lt;Ty@coon.org&gt; 2.8-1
-- Initial version of the package
-ORG-LIST-END-MARKER
-</pre>
-
-</div>
 </div>
 </div>
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-08-05 日</p>
-<p class="author">Author: yannik.li</p>
+<p class="date">Date: 2012-08-29 三</p>
+<p class="author">Author: yannik</p>
 <p class="creator">Org version 7.8.11 with Emacs version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
 

@@ -11,13 +11,15 @@
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+LINK_UP:   
-#+LINK_HOME: 
+#+LINK_HOME:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
 
 * About Me
   I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting.\\
 #+ATTR_HTML: width="120"
-[[yannik_li.JPG]]\\
-  + My Resume :[[./liyanqing.doc]]
+[[./yannik_li.JPG]]
+
++ My Resume :[[./liyanqing.doc]]
 
 * Operating System
 ** My "Big Eye"
@@ -30,6 +32,7 @@
     https://github.com/yannik520/Big-Eye-OS
 * Bootloader
 ** UBoot
+*** [[uboot_code_relocate.html][Uboot Code Relocation]]
 * Linux Device Driver
 ** [[input_dev_framework.html][The Framework of Input Device]]
 ** [[sd_host_driver.html][SD Host Controller Driver]]
@@ -40,6 +43,7 @@
 * ARM & x86
 * Android 
 ** [[suspend_and_resume.html][Suspend&Resume]]
+** [[ashmem.html][Ashmem Analysis]]
 * Project Management
 ** [[git_and_repo.html][Git and Repo]]
 

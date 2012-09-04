@@ -1,0 +1,54 @@
+#+TITLE:     Ashmem Analysis
+#+AUTHOR:    yannik
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      2012-08-29 三
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* Code Analysis
+A "area" cache and a "range" cache are created first in ashmem_init(), and then register a misc device named ashmem, at last, using register_shrinker() register a callback, there are two important struct in the code as following:
+#+BEGIN_SRC c
+/*
+ * ashmem_area - anonymous shared memory area
+ * Lifecycle: From our parent file's open() until its release()
+ * Locking: Protected by `ashmem_mutex'
+ * Big Note: Mappings do NOT pin this structure; it dies on close()
+ */
+struct ashmem_area {
+	char name[ASHMEM_FULL_NAME_LEN]; /* optional name in /proc/pid/maps */
+	struct list_head unpinned_list;	 /* list of all ashmem areas */
+	struct file *file;		 /* the shmem-based backing file */
+	size_t size;			 /* size of the mapping, in bytes */
+	unsigned long prot_mask;	 /* allowed prot bits, as vm_flags */
+};
+
+/*
+ * ashmem_range - represents an interval of unpinned (evictable) pages
+ * Lifecycle: From unpin to pin
+ * Locking: Protected by `ashmem_mutex'
+ */
+struct ashmem_range {
+	struct list_head lru;		/* entry in LRU list */
+	struct list_head unpinned;	/* entry in its area's unpinned list */
+	struct ashmem_area *asma;	/* associated area */
+	size_t pgstart;			/* starting page, inclusive */
+	size_t pgend;			/* ending page, inclusive */
+	unsigned int purged;		/* ASHMEM_NOT or ASHMEM_WAS_PURGED */
+};
+#+END_SRC 
+if the range is unpined, the area can be purged by system, and purged is assigned from ASHMEM\_NOT\_PURGED to ASHMEM\_WAS\_PURGED, and the code architecture as following:\\
+[[./ashmem_basic_struct.gif]]\\
+Above graph come from: http://www.linuxidc.com/Linux/2011-09/42212.htm
+
+* How to use in user space
++ Open the shmem first

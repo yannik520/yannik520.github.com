@@ -12,6 +12,8 @@
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+LINK_UP:   
 #+LINK_HOME: 
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
 * Introduction
   The data of char device just can be accessed as a stream, read/write it one by one, in other word, you can't random access the data from char device, which is the diffrence with block device.\\
   heree, we will show how to write a char device driver, and to study linux char device driver in deeper level --- to analize the relationship between file system and char device driver. we'll to show how to access char device in user space in next section.
@@ -40,7 +42,7 @@ struct kobj_map {
 The number of array probes is defined as MAX major number for char device, so the max major number for char device is 255.
 ** kobj\_map init
 the result of calling kobj\_map\_init() is as the following graph showd.\\
-[[kobj_map_init.png]]
+[[./kobj_map_init.png]]
 ** The analices of register\_chrdev()
 + to call \_\_register\_chrdev\_region() to alloc a major not used and make chardevs[major] point to a new aclloced variable in type of struct char\_device\_struct.
 #+BEGIN_SRC C
@@ -56,7 +58,7 @@ static struct char_device_struct {
 + to call cdev\_alloc to alloc a struct cdev variable and fill the fileds with fops and name passed in 
 + then call cdev\_add() to add the char device.
 in cdev\_add() function, called kobj\_map() to add a probe to cdev\_map, which the probe with the field be filled with MKDEV(major, 0), the major is the major number of the char device. what happend as showed in following graph.\\
-[[kobj_map.png]]
+[[./kobj_map.png]]
 * Opening A Device File
 ** The interface with file system
 def\_chr\_fops is defined in char\_dev.c as following:
@@ -146,4 +148,4 @@ static int chrdev_open(struct inode *inode, struct file *filp)
 #+END_SRC
 
 ** The call graph of open()
-[[open.png]]
+[[./open.png]]
