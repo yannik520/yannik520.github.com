@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>An Example of PyCurses</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="An Example of PyCurses"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-09-08 六"/>
+<meta name="author" content="yanqing.li"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">An Example of PyCurses</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Example Code</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Example Code</h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+
+<pre class="example">import sys,os
+import curses
+
+class menu:
+    current_menu = []
+    menu_stack = []
+    deep = []
+    select_ks = ["Select KS file:"]
+    menu0_0=["create", "chroot", "covert"]
+    menu1_0=["loop", "raw", "fs", "livecd", "liveusb"]
+    menu1_1=[" "]
+    menu1_2=[" "]
+    menu2_1=["select image file"]
+    menu2_2=["select image file"]
+    menu2_0=select_ks
+    menu3_1=["-h", "--help", "-s", "--saveto"]
+    menu3_2=["loop", "raw", "fs", "livecd", "liveusb"]
+    menu3_0=["-h", "-c", "-o", "-A"]
+    menu4_0=[]
+    menu4_1=[]
+    menu4_2=["-h", "-S", "--shell"]
+    spec=["Command", "Image Type", "SK file or image file", "Options", "Options"]
+
+    def __init__(self):
+        self.menu_stack.append(self.menu0_0)
+        self.current_menu=self.menu0_0
+
+    def get_current_menu(self):
+        return self.current_menu
+
+    def menu_push(self, item):
+        print "menu_push"
+        self.menu_stack.append(item)
+        self.current_menu = item
+
+    def menu_pop(self):
+        self.menu_stack.pop()
+        if len(self.menu_stack) != 0 and isinstance(self.menu_stack[len(self.menu_stack) - 1],list):
+            self.current_menu = self.menu_stack[len(self.menu_stack) - 1]
+        else:
+            self.current_menu = self.menu_stack
+
+
+def mymenu(stdscr):
+    k=0
+    c_item = 0
+    l_item = 0
+    cmdline=["mic"]
+    menu_item=[]
+    c_menu = menu()
+    c_menu_len = 0
+    stdscr.clear()
+    stdscr.refresh()
+    cmd_num = 0
+    height,width = stdscr.getmaxyx()
+
+    while k != ord('q'):
+
+        c_menu_len = len(c_menu.get_current_menu())
+        if k == curses.KEY_DOWN:
+            if c_item &lt; c_menu_len - 1:
+                c_item += 1
+        elif k == curses.KEY_UP:
+            if c_item &gt;= 1:
+                c_item -= 1
+        elif k == curses.KEY_RIGHT:
+            l_item += 1
+            if hasattr(c_menu, "menu%d_%x" % (l_item, cmd_num)):
+                menu_item=getattr(c_menu, "menu%d_%d" % (l_item, cmd_num))
+
+            cmdline.append(c_menu.get_current_menu()[c_item])
+
+            c_menu.menu_push(menu_item)
+            c_item = 0
+
+        elif k == curses.KEY_LEFT:
+            c_menu.menu_pop()
+            if l_item &gt;= 1:
+                l_item -= 1
+            cmdline.pop()
+            c_item = 0
+
+        stdscr.clear()
+
+        subwin = stdscr.subwin(0, width, 0, 0)
+        subwin.box()
+        subwin.move(0, 0)
+        subwin.addstr(getattr(c_menu, "spec")[l_item])
+        cliwin = stdscr.subwin(0, width, height-5, 0)
+        cliwin.box()
+        cliwin.move(0, 0)
+        cliwin.addstr("Mic cmd:")
+
+        print c_menu.get_current_menu()
+        for i in range(len(c_menu.get_current_menu())):
+            stdscr.move(i+2,5)
+            stdscr.addstr("%s" % c_menu.get_current_menu()[i])
+
+        stdscr.move(height-3, 5)
+        for i in range(len(cmdline)):
+            stdscr.addstr("%s " % cmdline[i])
+        stdscr.addstr("%s " % c_menu.get_current_menu()[c_item])
+
+        stdscr.move(c_item + 2, 5)
+        stdscr.refresh()
+        if l_item == 0:
+            cmd_num = c_item
+        k = stdscr.getch()
+
+
+
+def main():
+    curses.wrapper(mymenu)
+
+
+
+
+if __name__ == "__main__":
+    main()
+</pre>
+
+
+<p>
+<a href="./pcurses.py">Example Source Code</a>
+</p></div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2012-09-08 六</p>
+<p class="author">Author: yanqing.li</p>
+<p class="creator">Org version 7.8.11 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
