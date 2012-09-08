@@ -51,6 +51,7 @@
 * Other
 ** [[rpm_on_ubuntu.html][Create RPM Package On Ubuntu]]
 ** [[python_plugin_framework.html][A Ptython Plugin Framework]]
+** [[./pycurses_example.html][An Example of PyCurses]]
 
 #+BEGIN_HTML
 <!-- BEGIN CBOX - www.cbox.ws - v001 -->
