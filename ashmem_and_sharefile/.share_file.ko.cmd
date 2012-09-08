@@ -1,0 +1,1 @@
+cmd_/home/yannik/work/ashmem_practice/share_file.ko := ld -r -m elf_i386 -T /home/yannik/work/linux-3.5.3/scripts/module-common.lds --build-id  -o /home/yannik/work/ashmem_practice/share_file.ko /home/yannik/work/ashmem_practice/share_file.o /home/yannik/work/ashmem_practice/share_file.mod.o
