@@ -17,5 +17,7 @@
 * Input Device
 #+CAPTION: Data Structure Diagram
 [[./input.png]]
+#+CAPTION: Data Structure Releation&Register Process
+[[./input_subsystem.jpg]]
 #+CAPTION: Function Call Graph
 [[./input_function.png]]
