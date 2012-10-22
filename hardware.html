@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Hardware</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="Hardware"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-10-21 日"/>
+<meta name="author" content="Yanqing Li"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="./style.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Hardware</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 I2C</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Characteristic</a></li>
+<li><a href="#sec-1-2">1.2 Transfering data</a>
+<ul>
+<li><a href="#sec-1-2-1">1.2.1 Byte format</a></li>
+<li><a href="#sec-1-2-2">1.2.2 Acknowledge</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> I2C</h2>
+<div class="outline-text-2" id="text-1">
+
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Characteristic</h3>
+<div class="outline-text-3" id="text-1-1">
+
+<ul>
+<li>multi-master serial single-ended computer bus
+</li>
+<li>used to attach low-speed peripherials to a motherboad,embedded system
+</li>
+<li>two bidirectional open-drain lines: Serial Data Line(SDA) and Serial Clock (SCL)
+</li>
+<li>support 100 kbit/s standard mode, 10 kbit/s low-speed mode, 400 kbit/s Fast mode and 3.4 Mbit/s High Speed mode.
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Transfering data</h3>
+<div class="outline-text-3" id="text-1-2">
+
+
+</div>
+
+<div id="outline-container-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> Byte format</h4>
+<div class="outline-text-4" id="text-1-2-1">
+
+<p>Every byte put on the SDA line must be 8-bits long. The number of bytes that can be transmitted per transfer is unrestricfed. Each byte has to be followed by an acknowledge bit. Data is transferred with the most significant bit(MSB) first. if a slave can't receive or transmit annther complete byte of data until it has performed some other function, for example servicing an internal interrupt, it can hold the clock line SCL LOW to force the master into a wait state. Data transfer then continues when the slave is ready for another byte of data and releases clock line SCL.
+In some cases, it's permitted to use a different format from the I2C-bus format. Amessage which starts with such an address can be terminated by generation of a STOP condition, even during the transmission of a byte. In this case, no acknowledge is generated.
+</p></div>
+
+</div>
+
+<div id="outline-container-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> Acknowledge</h4>
+<div class="outline-text-4" id="text-1-2-2">
+
+<p>Data transfer with acknowledge is obligatory. The acknowledge-related clock pulse is generated by the master. The transmitter releases the SDA line(HIGH) during the acknowledge clock pulse. The receiver must pull down the SDA line during the acknowledge clock pulse so that it remains stable LOW during the HIGH period of this clock pulse. Of course, set-up and hold times must alse be taken into account.
+</p>
+<p>
+<img src="./i2c/i2c-bus-graph1.png"  alt="./i2c/i2c-bus-graph1.png" /> <br/>
+<img src="./i2c/I2C_data_transfer.png"  alt="./i2c/I2C_data_transfer.png" /> <br/>
+<img src="./i2c/data_transfer.png"  alt="./i2c/data_transfer.png" /> <br/>
+<img src="./i2c/a_complete_data_transfer.png"  alt="./i2c/a_complete_data_transfer.png" /> <br/>
+<img src="./i2c/acknowledge.png"  alt="./i2c/acknowledge.png" /> <br/>
+<img src="./i2c/master_reads_a_slave.png"  alt="./i2c/master_reads_a_slave.png" /> <br/>
+<img src="./i2c/mater-transmitter.png"  alt="./i2c/mater-transmitter.png" /> <br/>
+<img src="./i2c/combined_format.png"  alt="./i2c/combined_format.png" /> <br/>
+</p></div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2012-10-21 日</p>
+<p class="author">Author: Yanqing Li</p>
+<p class="creator">Org version 7.8.11 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>

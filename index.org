@@ -38,6 +38,7 @@
 ** [[sd_host_driver.html][SD Host Controller Driver]]
 ** [[blkdevarch.html][Linux Block Device Architecture]]
 ** [[chrdevarch.html][Linux Char Device Architecture]]
+** [[./i2c_driver_framework.html][I2C Driver Framework]]
 * Windows WDF Device Driver
 ** [[wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
 * ARM & x86
