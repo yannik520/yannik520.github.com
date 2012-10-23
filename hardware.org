@@ -37,7 +37,7 @@ Data transfer with acknowledge is obligatory. The acknowledge-related clock puls
 [[./i2c/mater-transmitter.png]] \\
 [[./i2c/combined_format.png]] \\
 
-*SPI(Serial Peripheral Interface Bus)
+* SPI(Serial Peripheral Interface Bus)
 ** Characteristic
 + synchronous serial data link standard
 + operates in full deplex mode

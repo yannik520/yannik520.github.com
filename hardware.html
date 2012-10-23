@@ -106,8 +106,12 @@
 <ul>
 <li><a href="#sec-1-2-1">1.2.1 Byte format</a></li>
 <li><a href="#sec-1-2-2">1.2.2 Acknowledge</a></li>
+</ul></li>
 </ul>
 </li>
+<li><a href="#sec-2">2 SPI(Serial Peripheral Interface Bus)</a>
+<ul>
+<li><a href="#sec-2-1">2.1 Characteristic</a></li>
 </ul>
 </li>
 </ul>
@@ -172,8 +176,87 @@ In some cases, it's permitted to use a different format from the I2C-bus format.
 <img src="./i2c/master_reads_a_slave.png"  alt="./i2c/master_reads_a_slave.png" /> <br/>
 <img src="./i2c/mater-transmitter.png"  alt="./i2c/mater-transmitter.png" /> <br/>
 <img src="./i2c/combined_format.png"  alt="./i2c/combined_format.png" /> <br/>
-</p></div>
+</p>
 </div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> SPI(Serial Peripheral Interface Bus)</h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Characteristic</h3>
+<div class="outline-text-3" id="text-2-1">
+
+<ul>
+<li>synchronous serial data link standard
+</li>
+<li>operates in full deplex mode
+</li>
+<li>communicate in master/slave mode
+</li>
+<li>multiple slave devices are allowed with individual slave select lines.
+</li>
+<li>sometimes spi is called a four-wire serial bus
+</li>
+</ul>
+
+<p>++ SCK: serial clock(output from master)
+++ SDI: serial data in
+++ SDO: serial data out
+++ CS: chip select
+</p>
+<p>
+++ Data Transmission
+To begin a communication, the bus master first configures the clock, using a frequency less than or equal to the maximum frequency the slave device supports. Such frequencies are commonly in the range of 1–100 MHz.
+The master then transmits the appropriate chip select bit for the desired chip to a logic 0. A logic 0 is transmitted because the chip select line is active low, meaning its off state is a logic 1; on is asserted with a logic 0. If a waiting period is required (such as for analog-to-digital conversion), then the master must wait for at least that period of time before starting to issue clock cycles.
+During each SPI clock cycle, a full duplex data transmission occurs:
+the master sends a bit on the MOSI line; the slave reads it from that same line
+the slave sends a bit on the MISO line; the master reads it from that same line
+Not all transmissions require all four of these operations to be meaningful but they do happen.
+Transmissions normally involve two shift registers of some given word size, such as eight bits, one in the master and one in the slave; they are connected in a ring. Data is usually shifted out with the most significant bit first, while shifting a new least significant bit into the same register. After that register has been shifted out, the master and slave have exchanged register values. Then each device takes that value and does something with it, such as writing it to memory. If there is more data to exchange, the shift registers are loaded with new data<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup> and the process repeats.
+Transmissions may involve any number of clock cycles. When there is no more data to be transmitted, the master stops toggling its clock. Normally, it then deselects the slave.
+Transmissions often consist of 8-bit words, and a master can initiate multiple such transmissions if it wishes/needs. However, other word sizes are also common, such as 16-bit words for touchscreen controllers or audio codecs, like the TSC2101 from Texas Instruments; or 12-bit words for many digital-to-analog or analog-to-digital converters.
+Every slave on the bus that hasn't been activated using its chip select line must disregard the input clock and MOSI signals, and must not drive MISO. The master must select only one slave at a time.
+<img src="./spi/spi_8-bit_circular_transfer.png"  alt="./spi/spi_8-bit_circular_transfer.png" />
+++ Clock polarity and phase
+In addition to setting the clock frequency, the master must also configure the clock polarity and phase with respect to the data. Freescale's SPI Block Guide<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup> names these two options as CPOL and CPHA respectively, and most vendors have adopted that convention.
+The timing diagram is shown to the right. The timing is further described below and applies to both the master and the slave device.
+At CPOL=0 the base value of the clock is zero
+For CPHA=0, data is captured on the clock's rising edge (low→high transition) and data is propagated on a falling edge (high→low clock transition).
+For CPHA=1, data is captured on the clock's falling edge and data is propagated on a rising edge.
+At CPOL=1 the base value of the clock is one (inversion of CPOL=0)
+For CPHA=0, data is captured on clock's falling edge and data is propagated on a rising edge.
+For CPHA=1, data is captured on clock's rising edge and data is propagated on a falling edge.
+That is, CPHA=0 means sample on the leading (first) clock edge, while CPHA=1 means sample on the trailing (second) clock edge, regardless of whether that clock edge is rising or falling. Note that with CPHA=0, the data must be stable for a half cycle before the first clock cycle. For all CPOL and CPHA modes, the initial clock value must be stable before the chip select line goes active.
+The MOSI and MISO signals are usually stable (at their reception points) for the half cycle until the next clock transition. SPI master and slave devices may well sample data at different points in that half cycle.
+<img src="./spi/spi_timing_diagram.png"  alt="./spi/spi_timing_diagram.png" />
+Mode    CPOL    CPHA
+0       0       0
+1       0       1
+2       1       0
+3       1       1
+<img src="./spi/spi_three_slaves.png"  alt="./spi/spi_three_slaves.png" />
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> DEFINITION NOT FOUND: 1
+</p>
+
+<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> DEFINITION NOT FOUND: 2
+</p>
+
+</div>
+</div>
+</div>
+
 </div>
 </div>
 </div>
