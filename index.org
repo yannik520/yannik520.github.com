@@ -32,29 +32,28 @@
     https://github.com/yannik520/Big-Eye-OS
 * Bootloader
 ** UBoot
-*** [[uboot_code_relocate.html][Uboot Code Relocation]]
+*** [[./uboot_code_relocate.html][Uboot Code Relocation]]
 * Linux Device Driver
-** [[input_dev_framework.html][The Framework of Input Device]]
-** [[sd_host_driver.html][SD Host Controller Driver]]
-** [[blkdevarch.html][Linux Block Device Architecture]]
-** [[chrdevarch.html][Linux Char Device Architecture]]
+** [[./input_dev_framework.html][The Framework of Input Device]]
+** [[./sd_host_driver.html][SD Host Controller Driver]]
+** [[./blkdevarch.html][Linux Block Device Architecture]]
+** [[./chrdevarch.html][Linux Char Device Architecture]]
 ** [[./i2c_driver_framework.html][I2C Driver Framework]]
 ** [[./spi_driver_framework.html][SPI Driver Framework]]
 ** [[./v4l2_framework.html][V4L2 Driver Architecture]]
 * Windows WDF Device Driver
-** [[wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
+** [[./wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
 * ARM & x86 & Hardware
 ** [[./hardware.html][Hardware and Protocol]]
 * Android 
-** [[suspend_and_resume.html][Suspend&Resume]]
-** [[ashmem.html][Ashmem Analysis]]
+** [[./suspend_and_resume.html][Suspend&Resume]]
+** [[./ashmem.html][Ashmem Analysis]]
 * Project Management
-** [[git_and_repo.html][Git and Repo]]
-   
-** [[Config Git Server]]
+** [[./git_and_repo.html][Git and Repo]]
+** [[./git_server.html][Config Git Server]]
 * Other
-** [[rpm_on_ubuntu.html][Create RPM Package On Ubuntu]]
-** [[python_plugin_framework.html][A Ptython Plugin Framework]]
+** [[./rpm_on_ubuntu.html][Create RPM Package On Ubuntu]]
+** [[./python_plugin_framework.html][A Ptython Plugin Framework]]
 ** [[./pycurses_example.html][An Example of PyCurses]]
 
 #+BEGIN_HTML
