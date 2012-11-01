@@ -1,0 +1,35 @@
+#+TITLE:     Linux Driver Code
+#+AUTHOR:    Yanqing Li
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      2012-11-01 四
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* Virtual Mouse Driver
+I wrote a virtual mouse driver to use keyboard to control mouse cursor.\\
+Usage:\\
++ Ctr+Alt+p: move cursor upward
++ Ctr+Alt+n: move cursor down
++ Ctr+Alt+b: move cursor left
++ Ctr+Alt+f: move cursor right
++ Ctr+Alt+Space: left mouse button clicked
++ Ctr+Alt+m: right mouse button clicked
++ Capslock: lock speed
+
+[[./linux_driver_code/vmouse_driver.tar.bz2][virtual mouse driver code]]
+
+* A simple file system: qfs
+qfs is a simple file system just has one file.
+
+[[./linux_driver_code/qfs.tar.bz2][qfs code]]
+
