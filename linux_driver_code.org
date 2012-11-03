@@ -33,3 +33,7 @@ qfs is a simple file system just has one file.
 
 [[./linux_driver_code/qfs.tar.bz2][qfs code]]
 
+* A stackable file system: maskfs
+maskfs is modified from ecryptfs, I used it to mask all files in a directory, and want to say: what you saw is not necessarily true.
+
+[[./linux_driver_code/maskfs.tar.bz2][maskfs code]]
