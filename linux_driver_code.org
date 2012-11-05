@@ -24,6 +24,8 @@ Usage:\\
 + Ctr+Alt+f: move cursor right
 + Ctr+Alt+Space: left mouse button clicked
 + Ctr+Alt+m: right mouse button clicked
++ Alt+u: wheel scroll up
++ Alt+v: Wheel scroll down
 + Capslock: lock speed
 
 [[./linux_driver_code/vmouse_driver.tar.bz2][virtual mouse driver code]]
