@@ -1,0 +1,38 @@
+#+TITLE:     Basc Knowledge of Kernel-Mode Driver Framework(KMDF)
+#+AUTHOR:    Yannik.Li
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      2012-12-09 日
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* About KMDF
+Kernel-Mode Driver Framework(KMDF) is a library that you can use to develop kernel-mode drivers that support the WDM. KMDF provides common driver functionality, which enables you to write a driver with significantly less code than in WDM. KMDF support Object module, the basic object of KMDF include WDFDEVICE, WDFDRIVER, WDFREQUEST, WDFQUEUE and so on. the device stack same to WDM, the device object devide into PDO, FDO and FiDO.
+
+* mini-port driver, port driver and class driver
+For every class of device, provide a class driver to support the class of device, the class driver provide a common functional collection independly from specific device class. class driver always provided by Microsoft, and the part is device independly.
+the lowest layer driver is called miniport driver, it is complete the parts directly relate to hardware device, and port driver provide service for miniport driver, it include some common function used for miniport driver.
+so, the type of driver from high layer to low is: class driver, port driver, miniport driver. The class driver provide interface for user, the miniport driver directly communicat with hardware.
+
+* How to register a class filter driver manually
+Just use kbdclass filter driver as example, the class filter driver called kbfiltr.
++ Went into the registry and modified the HKEY\_LOCAL\_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{4D36E96B-E325-11CE-BFC1-08002BE10318}\UpperFilters key, and set the UpperFilters to "kbfiltr kdbclass".
+
++ Created a new reg key at HKLM/SYSTEM/CurrentControlSet/Services and called it kbfiltr. created the values as below:\\
+	Type (dword) : 00000001\\
+	Start (dword) : 00000003\\
+	ErrorControl (dword) : 00000000\\
+	Tag (dword) : 00000006\\
+	ImagePath (reg\_expand\_sz) : system32\DRIVERS\kbfiltr.sys\\
+	DisplayName (reg\_sz) : Keyboard Filter Example\\
+	Group (reg\_sz) : Keyboard Port\\
+

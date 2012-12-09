@@ -44,6 +44,7 @@
 ** [[./linux_driver_code.html][Linux Driver Code]]
 * Windows WDF Device Driver
 ** [[./wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
+** [[./kmdf.html][Basic Knowledge of KMDF]]
 * ARM & x86 & Hardware
 ** [[./hardware.html][Hardware and Protocol]]
 * Android 
