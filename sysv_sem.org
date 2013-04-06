@@ -1,0 +1,74 @@
+#+TITLE:     SYSTEM V SEMAPHORE
+#+AUTHOR:    Yannik Li
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      2013-04-05 五
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+* The Relase Between Structs
+** Basic Structs
+#+BEGIN_SRC c
+struct sem_array {
+	struct kern_ipc_perm	____cacheline_aligned_in_smp
+				sem_perm;	/* permissions .. see ipc.h */
+	time_t			sem_otime;	/* last semop time */
+	time_t			sem_ctime;	/* last change time */
+	struct sem		*sem_base;	/* ptr to first semaphore in array */
+	struct list_head	sem_pending;	/* pending operations to be processed */
+	struct list_head	list_id;	/* undo requests on this array */
+	int			sem_nsems;	/* no. of semaphores in array */
+	int			complex_count;	/* pending complex operations */
+};
+
+struct sem {
+	int	semval;		/* current value */
+	int	sempid;		/* pid of last operation */
+	struct list_head sem_pending; /* pending single-sop operations */
+};
+#+END_SRC
+
+#+begin_src ditaa :file sem_structs.png :cmdline -r -s 0.8
+		      	       	       	
+	    +----------------+ 		sem_pending list                             
+    sem_base|                | 	      +----------------+         +----------------+  
+    +-------+   sem_array    +-------->   sem_queue    <--------->   sem_queue    |
+    |  	    |                | 	      +----------------+         +----------------+
+    |	    +----------------+
+    +------->      sem       |
+   	    +----------------+	   	    		      
+   	    |      sem       |	   	    		      
+   	    +----------------+	   	    
+	    |      sem       |	   	    
+	    +----------------+	   	    
+	    |      sem       |	   	    
+	    +----------------+	   	    
+	    |      sem       |	       	    
+            +----------------+
+#+end_src
+
+#+results:
+[[file:sem_structs.png]]
+
+* Code Analysis
+#+begin_src dot :file sem_code_analysis.png :cmdline -Kdot -Tpng
+digraph G {
+  size="8,6"
+  ratio=expand
+  node[shape=box]
+  rankdir=LR
+
+  semop -> sys_semtimedop
+  sys_semtimedop -> try_atomic_semop [label="P or V operation"]
+  try_atomic_semop -> do_smart_update [label="wakeup or suspend process"]
+}
+#+end_src
+#+results:
+[[file:sem_code_analysis.png]]
