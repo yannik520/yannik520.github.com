@@ -117,17 +117,25 @@
 </ul></li>
 </ul>
 </li>
-<li><a href="#sec-4">4 Linux Device Driver</a>
+<li><a href="#sec-4">4 Linux</a>
 <ul>
-<li><a href="#sec-4-1">4.1 The Framework of Input Device</a></li>
-<li><a href="#sec-4-2">4.2 SD Host Controller Driver</a></li>
-<li><a href="#sec-4-3">4.3 Linux Block Device Architecture</a></li>
-<li><a href="#sec-4-4">4.4 Linux Char Device Architecture</a></li>
-<li><a href="#sec-4-5">4.5 I2C Driver Framework</a></li>
-<li><a href="#sec-4-6">4.6 SPI Driver Framework</a></li>
-<li><a href="#sec-4-7">4.7 V4L2 Driver Architecture</a></li>
-<li><a href="#sec-4-8">4.8 Linux Driver Code</a></li>
-<li><a href="#sec-4-9">4.9 System V Semaphore</a></li>
+<li><a href="#sec-4-1">4.1 Linux Device Driver</a>
+<ul>
+<li><a href="#sec-4-1-1">4.1.1 The Framework of Input Device</a></li>
+<li><a href="#sec-4-1-2">4.1.2 SD Host Controller Driver</a></li>
+<li><a href="#sec-4-1-3">4.1.3 Linux Block Device Architecture</a></li>
+<li><a href="#sec-4-1-4">4.1.4 Linux Char Device Architecture</a></li>
+<li><a href="#sec-4-1-5">4.1.5 I2C Driver Framework</a></li>
+<li><a href="#sec-4-1-6">4.1.6 SPI Driver Framework</a></li>
+<li><a href="#sec-4-1-7">4.1.7 V4L2 Driver Architecture</a></li>
+<li><a href="#sec-4-1-8">4.1.8 Linux Driver Code</a></li>
+<li><a href="#sec-4-1-9">4.1.9 System V Semaphore</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-2">4.2 Linux Kernel</a>
+<ul>
+<li><a href="#sec-4-2-1">4.2.1 Linux System Call in User Space</a></li>
+</ul></li>
 </ul>
 </li>
 <li><a href="#sec-5">5 Windows WDF Device Driver</a>
@@ -243,80 +251,104 @@
 </div>
 
 <div id="outline-container-4" class="outline-2">
-<h2 id="sec-4"><span class="section-number-2">4</span> Linux Device Driver</h2>
+<h2 id="sec-4"><span class="section-number-2">4</span> Linux</h2>
 <div class="outline-text-2" id="text-4">
 
 
 </div>
 
 <div id="outline-container-4-1" class="outline-3">
-<h3 id="sec-4-1"><span class="section-number-3">4.1</span> <a href="./input_dev_framework.html">The Framework of Input Device</a></h3>
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Linux Device Driver</h3>
 <div class="outline-text-3" id="text-4-1">
 
+
+</div>
+
+<div id="outline-container-4-1-1" class="outline-4">
+<h4 id="sec-4-1-1"><span class="section-number-4">4.1.1</span> <a href="./input_dev_framework.html">The Framework of Input Device</a></h4>
+<div class="outline-text-4" id="text-4-1-1">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-2" class="outline-4">
+<h4 id="sec-4-1-2"><span class="section-number-4">4.1.2</span> <a href="./sd_host_driver.html">SD Host Controller Driver</a></h4>
+<div class="outline-text-4" id="text-4-1-2">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-3" class="outline-4">
+<h4 id="sec-4-1-3"><span class="section-number-4">4.1.3</span> <a href="./blkdevarch.html">Linux Block Device Architecture</a></h4>
+<div class="outline-text-4" id="text-4-1-3">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-4" class="outline-4">
+<h4 id="sec-4-1-4"><span class="section-number-4">4.1.4</span> <a href="./chrdevarch.html">Linux Char Device Architecture</a></h4>
+<div class="outline-text-4" id="text-4-1-4">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-5" class="outline-4">
+<h4 id="sec-4-1-5"><span class="section-number-4">4.1.5</span> <a href="./i2c_driver_framework.html">I2C Driver Framework</a></h4>
+<div class="outline-text-4" id="text-4-1-5">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-6" class="outline-4">
+<h4 id="sec-4-1-6"><span class="section-number-4">4.1.6</span> <a href="./spi_driver_framework.html">SPI Driver Framework</a></h4>
+<div class="outline-text-4" id="text-4-1-6">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-7" class="outline-4">
+<h4 id="sec-4-1-7"><span class="section-number-4">4.1.7</span> <a href="./v4l2_framework.html">V4L2 Driver Architecture</a></h4>
+<div class="outline-text-4" id="text-4-1-7">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-8" class="outline-4">
+<h4 id="sec-4-1-8"><span class="section-number-4">4.1.8</span> <a href="./linux_driver_code.html">Linux Driver Code</a></h4>
+<div class="outline-text-4" id="text-4-1-8">
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-9" class="outline-4">
+<h4 id="sec-4-1-9"><span class="section-number-4">4.1.9</span> <a href="./sysv_sem.html">System V Semaphore</a></h4>
+<div class="outline-text-4" id="text-4-1-9">
+
+</div>
 </div>
 
 </div>
 
 <div id="outline-container-4-2" class="outline-3">
-<h3 id="sec-4-2"><span class="section-number-3">4.2</span> <a href="./sd_host_driver.html">SD Host Controller Driver</a></h3>
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Linux Kernel</h3>
 <div class="outline-text-3" id="text-4-2">
 
-</div>
 
 </div>
 
-<div id="outline-container-4-3" class="outline-3">
-<h3 id="sec-4-3"><span class="section-number-3">4.3</span> <a href="./blkdevarch.html">Linux Block Device Architecture</a></h3>
-<div class="outline-text-3" id="text-4-3">
+<div id="outline-container-4-2-1" class="outline-4">
+<h4 id="sec-4-2-1"><span class="section-number-4">4.2.1</span> <a href="./system_call.html">Linux System Call in User Space</a></h4>
+<div class="outline-text-4" id="text-4-2-1">
 
 </div>
-
-</div>
-
-<div id="outline-container-4-4" class="outline-3">
-<h3 id="sec-4-4"><span class="section-number-3">4.4</span> <a href="./chrdevarch.html">Linux Char Device Architecture</a></h3>
-<div class="outline-text-3" id="text-4-4">
-
-</div>
-
-</div>
-
-<div id="outline-container-4-5" class="outline-3">
-<h3 id="sec-4-5"><span class="section-number-3">4.5</span> <a href="./i2c_driver_framework.html">I2C Driver Framework</a></h3>
-<div class="outline-text-3" id="text-4-5">
-
-</div>
-
-</div>
-
-<div id="outline-container-4-6" class="outline-3">
-<h3 id="sec-4-6"><span class="section-number-3">4.6</span> <a href="./spi_driver_framework.html">SPI Driver Framework</a></h3>
-<div class="outline-text-3" id="text-4-6">
-
-</div>
-
-</div>
-
-<div id="outline-container-4-7" class="outline-3">
-<h3 id="sec-4-7"><span class="section-number-3">4.7</span> <a href="./v4l2_framework.html">V4L2 Driver Architecture</a></h3>
-<div class="outline-text-3" id="text-4-7">
-
-</div>
-
-</div>
-
-<div id="outline-container-4-8" class="outline-3">
-<h3 id="sec-4-8"><span class="section-number-3">4.8</span> <a href="./linux_driver_code.html">Linux Driver Code</a></h3>
-<div class="outline-text-3" id="text-4-8">
-
-</div>
-
-</div>
-
-<div id="outline-container-4-9" class="outline-3">
-<h3 id="sec-4-9"><span class="section-number-3">4.9</span> <a href="./sysv_sem.html">System V Semaphore</a></h3>
-<div class="outline-text-3" id="text-4-9">
-
 </div>
 </div>
 

@@ -3,11 +3,11 @@
                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>SYSTEM V SEMAPHORE</title>
+<title>Linux System Call in User Space</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-<meta name="title" content="SYSTEM V SEMAPHORE"/>
+<meta name="title" content="Linux System Call in User Space"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2013-04-05 五"/>
+<meta name="generated" content="2013-05-30 四"/>
 <meta name="author" content="Yannik Li"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -92,80 +92,135 @@
 </div>
 
 <div id="content">
-<h1 class="title">SYSTEM V SEMAPHORE</h1>
+<h1 class="title">Linux System Call in User Space</h1>
 
 
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1 The Relase Between Structs</a>
-<ul>
-<li><a href="#sec-1-1">1.1 Basic Structs</a></li>
-</ul>
-</li>
-<li><a href="#sec-2">2 Code Analysis</a></li>
+<li><a href="#sec-1">1 Linux System Call</a></li>
+<li><a href="#sec-2">2 System Calls in 32-bit X86 Linux</a></li>
+<li><a href="#sec-3">3 System Calls in 32-bit ARM Linux</a></li>
 </ul>
 </div>
 </div>
 
 <div id="outline-container-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> The Relase Between Structs</h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> Linux System Call</h2>
 <div class="outline-text-2" id="text-1">
 
+<p>The operating system is responsible for
+</p><ul>
+<li>Process Management (starting, running, stopping processes)
+</li>
+<li>File Management(creating, opening, closing, reading, writing, renaming files)
+</li>
+<li>Memory Management (allocating, deallocating memory)
+</li>
+<li>Other stuff (timing, scheduling, network management)
+</li>
+</ul>
 
-</div>
-
-<div id="outline-container-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Basic Structs</h3>
-<div class="outline-text-3" id="text-1-1">
-
-
-
-
-<pre class="example">struct sem_array {
-        struct kern_ipc_perm    ____cacheline_aligned_in_smp
-                                sem_perm;       /* permissions .. see ipc.h */
-        time_t                  sem_otime;      /* last semop time */
-        time_t                  sem_ctime;      /* last change time */
-        struct sem              *sem_base;      /* ptr to first semaphore in array */
-        struct list_head        sem_pending;    /* pending operations to be processed */
-        struct list_head        list_id;        /* undo requests on this array */
-        int                     sem_nsems;      /* no. of semaphores in array */
-        int                     complex_count;  /* pending complex operations */
-};
-
-struct sem {
-        int     semval;         /* current value */
-        int     sempid;         /* pid of last operation */
-        struct list_head sem_pending; /* pending single-sop operations */
-};
-</pre>
-
-
-
-
-<p>
-<img src="sem_structs.png"  alt="sem_structs.png" />
+<p>An application program makes a system call to get the operating system to perform a service for it, like reading from a file.
 </p>
-</div>
+<p>
+One nice thing about syscalls is that you don't have to link with a C library, so your executables can be much smaller.
+</p>
 </div>
 
 </div>
 
 <div id="outline-container-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> Code Analysis</h2>
+<h2 id="sec-2"><span class="section-number-2">2</span> System Calls in 32-bit X86 Linux</h2>
 <div class="outline-text-2" id="text-2">
 
 
-<p>
-<img src="sem_code_analysis.png"  alt="sem_code_analysis.png" />
-</p></div>
+
+
+<pre class="example">
+# -----------------------------------------------------------------------------
+# A 32-bit Linux standalone program that writes "Hello, World" to the console
+# using system calls only.  The program does not need to link with any external
+# libraries at all.
+#
+# System calls used:
+#   4: write(fileid, bufferAddress, numberOfBytes)
+#   1: exit(returnCode)
+#
+# Assemble:
+#     gcc -c hello.s
+# Link:
+#     ld hello.o (to produce a.out)
+#     (or) ld -o hello hello.o (to produce hello)
+#
+# Or, you can assemble and link in one step:
+#     gcc -nostdlib hello.s
+#
+# The symbol _start is the default entry point for ld.
+# -----------------------------------------------------------------------------
+
+        .global _start
+
+        .text
+_start:
+        # write(1, message, 13)
+        mov     $4, %eax                # system call 4 is write
+        mov     $1, %ebx                # file handle 1 is stdout
+        mov     $message, %ecx          # address of string to output
+        mov     $13, %edx               # number of bytes to write
+        int     $0x80                   # invoke operating system code
+
+        # exit(0)
+        mov     $1, %eax                # system call 1 is exit
+        xor     %ebx, %ebx              # we want return code 0
+        int     $0x80                   # invoke operating system code
+message:
+        .ascii  "Hello, World\n"
+
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> System Calls in 32-bit ARM Linux</h2>
+<div class="outline-text-2" id="text-3">
+
+
+
+
+<pre class="example">
+.section .data
+msg:
+        .ascii "Hello world!\n"
+len = . - msg
+
+.section .text
+.global _start
+
+_start:
+        /* syscall write(int fd, const void *buf, size_t count) */
+        mov r0, #1
+        ldr r1, =msg
+        mov r2, #len
+        mov r7, #4
+        swi #0
+
+        /* syscall exit(int status) */
+        mov r0, #0
+        mov r7, #1
+        swi #0
+</pre>
+
+</div>
 </div>
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2013-04-05 五</p>
+<p class="date">Date: 2013-05-30 四</p>
 <p class="author">Author: Yannik Li</p>
 <p class="creator">Org version 7.8.11 with Emacs version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>

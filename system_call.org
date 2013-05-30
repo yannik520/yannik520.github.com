@@ -1,0 +1,95 @@
+#+TITLE:     Linux System Call in User Space
+#+AUTHOR:    Yannik Li
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      2013-05-30 四
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* Linux System Call
+The operating system is responsible for
++ Process Management (starting, running, stopping processes)
++ File Management(creating, opening, closing, reading, writing, renaming files)
++ Memory Management (allocating, deallocating memory)
++ Other stuff (timing, scheduling, network management)
+An application program makes a system call to get the operating system to perform a service for it, like reading from a file.
+
+One nice thing about syscalls is that you don't have to link with a C library, so your executables can be much smaller.
+
+* System Calls in 32-bit X86 Linux
+#+begin_src asm
+
+# -----------------------------------------------------------------------------
+# A 32-bit Linux standalone program that writes "Hello, World" to the console
+# using system calls only.  The program does not need to link with any external
+# libraries at all.
+#
+# System calls used:
+#   4: write(fileid, bufferAddress, numberOfBytes)
+#   1: exit(returnCode)
+#
+# Assemble:
+#     gcc -c hello.s
+# Link:
+#     ld hello.o (to produce a.out)
+#     (or) ld -o hello hello.o (to produce hello)
+#
+# Or, you can assemble and link in one step:
+#     gcc -nostdlib hello.s
+#
+# The symbol _start is the default entry point for ld.
+# -----------------------------------------------------------------------------
+
+        .global _start
+
+        .text
+_start:
+        # write(1, message, 13)
+        mov     $4, %eax                # system call 4 is write
+        mov     $1, %ebx                # file handle 1 is stdout
+        mov     $message, %ecx          # address of string to output
+        mov     $13, %edx               # number of bytes to write
+        int     $0x80                   # invoke operating system code
+        
+        # exit(0)
+        mov     $1, %eax                # system call 1 is exit
+        xor     %ebx, %ebx              # we want return code 0
+        int     $0x80                   # invoke operating system code
+message:
+        .ascii  "Hello, World\n"
+
+#+end_src
+
+* System Calls in 32-bit ARM Linux
+#+begin_src asm
+
+.section .data
+msg:
+	.ascii "Hello world!\n"
+len = . - msg
+
+.section .text
+.global _start
+
+_start:
+	/* syscall write(int fd, const void *buf, size_t count) */
+	mov r0, #1
+	ldr r1, =msg
+	mov r2, #len
+	mov r7, #4
+	swi #0
+
+	/* syscall exit(int status) */
+	mov r0, #0
+	mov r7, #1
+	swi #0
+#+end_src
