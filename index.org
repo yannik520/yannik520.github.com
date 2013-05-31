@@ -45,7 +45,7 @@
 *** [[./linux_driver_code.html][Linux Driver Code]]
 *** [[./sysv_sem.html][System V Semaphore]]
 ** Linux Kernel
-*** [[./system_call.html][Linux System Call in User Space]]
+*** [[./system_call.html][Access Linux System Call in User Space]]
 * Windows WDF Device Driver
 ** [[./wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
 ** [[./kmdf.html][Basic Knowledge of KMDF]]

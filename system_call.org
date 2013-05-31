@@ -1,4 +1,4 @@
-#+TITLE:     Linux System Call in User Space
+#+TITLE:     Access Linux System Call in User Space
 #+AUTHOR:    Yannik Li
 #+EMAIL:     yannik520@gmail.com
 #+DATE:      2013-05-30 四
