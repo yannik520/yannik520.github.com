@@ -1,0 +1,54 @@
+#+TITLE:     Developing Android APP With Emacs
+#+AUTHOR:    yannik
+#+EMAIL:     yqli_520@hotmail.com
+#+DATE:      2013-11-30 六
+#+DESCRIPTION: 
+#+KEYWORDS: 
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+** Install android SDK and NDK
++ Download Android SDK and NDK \\
+   http://developer.android.com/sdk/index.html
++ Run *android update sdk* to start up GUI
++ Select and install the package from available packages
++ Export path to sdk tools \\
+  export PATH=${PATH}:/home/yannik/work/android\_sdk\_ndk/android-sdk-linux/tools
++ Create a avd virtual device \\
+  *android creat avd -n AVD -t 1 -b armeabi* \\
+  -n: virtual device name \\
+  -t: target ID, can get with *android list targets*
+
+** Config Emacs
++ Download *android mode* \\
+  https://github.com/remvee/android-mode
++ Config Elisp: \\
+#+BEGIN_SRC emacs-lisp:
+(require 'android-mode)
+(custom-set-variables
+ '(android-mode-avd "AVD")
+ '(android-mode-sdk-dir "/opt/android-sdk/"))
+#+END_SRC
+
+** Start developing android APP
++ Start emulator \\
+  *M-x android-start-emulator*
++ Create a project \\
+  *M-x android-create-project* \\
+  1. input project path: /home/yannik/work/android\_example \\
+  2. package name: org.example.helloworld \\
+  3. activity name: helloworld \\
+  or \\
+  android create project -n helloworld -t 1 -p ./ -k org.example.helloworld -a helloworld
++ Build and install package \\
+  C-x C-f PATH-TO-PROJECT and *M-x android-build-debug* \\
+  and *M-x android-ant-installd* to install package
+
+
