@@ -22,14 +22,14 @@
 + My Resume :[[./liyanqing.doc]]
 
 * Operating System
-** My "Big Eye"
-*** What is "Big Eye"
-    Big-Eye is a small OS for arm platform, I wrote it just for learning how to schedule task.
+** My "Lynx"
+*** The instruction to Lynx
+    Lynx is an embedded operating system kernel just support for arm architecture cpu at present, it is in developing.
 *** How to get the code
     you can get code frome:\\
-    [[git@github.com:yannik520/Big-Eye-OS.git]]\\
+    [[git@github.com:yannik520/Lynx.git]]\\
     or read code directly from:\\
-    https://github.com/yannik520/Big-Eye-OS
+    https://github.com/yannik520/Lynx
 * Bootloader
 ** UBoot
 *** [[./uboot_code_relocate.html][Uboot Code Relocation]]
