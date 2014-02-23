@@ -1,0 +1,50 @@
+#+TITLE:     The Implementation of Loadable Kernel Module
+#+AUTHOR:    Yannik Li(Yanqing Li)
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      2014-02-22 Sat.
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* The Introduction of Loadable Kernel Module(LKM)
+  *LKM* is an object file that contains code to extend the running kernel, or so-called base kernel,
+  there are many system using the mechanithm, the representative one is Linux,
+  Many device driver and filesystem in Linux are builded in module, and be loaded into the kernel dynamically when after the kernel have been booted up. \\
+  A LKM module is just an object file and provides some interfaces that will be called by base kernel,
+  in fact, loading a module into kernel is just the process to link the module with the target kernel.
+  the file type of the object file maybe in ELF, AXF or other loadable file format. \\
+  The following chapter will show you how to load a ELF format module into a given kernel.
+
+* The Introduction of Executable and Linking Format
+  *ELF* was originally developed and published by UNIX System Laboratories
+  (USL) as part of the Application Binary Interface (ABI). The Tool Interface Standards committee
+  (TIS) has selected the evolving ELF standard as a portable object file format that works on 32-bit Intel
+  Architecture environments for a variety of operating systems.\\
+  ELF has three main types of object files:^[1]
+  + A relocatable file holds code and data suitable for linking with other object files to create an executable
+or a shared object file.
+  + An executable file holds a program suitable for execution; the file specifies howe x e c(BA\_OS) creates
+a program's process image.
+  + A shared object file holds code and data suitable for linking in two contexts.
+  The detail about ELF file format can reference ELF Specification Version 1.1.
+
+* The Process of Loading Module
++ first, get ELF header(ehdr) from file offset 0
++ then get secton header from the offset ehdr.e_shoff
++ get the size and number fo section header from ehdr.e\_shentsizeºÍehdr.e_shnum
++ get the address of string table header(strable) with the value of ehdr.e\_shoff + ehdr.e\_shentsize * ehdr.e\_shstrndx
++ then get the real position of string table with strtable.sh\_offset
++ traversing all sections, get the name for each section and compare with the section name string ".text", ".data", ".bss", ".rodata", and so on, to get the position and size for each expected section.
++ at last, also is the most important, to relocate the symbol in each section with the information in the corresponding rel and rela section.
+
+* References
+[1]. Executable and Linkable Format Specification, Version 1.1

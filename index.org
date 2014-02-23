@@ -30,6 +30,7 @@
     [[git@github.com:yannik520/Lynx.git]]\\
     or read code directly from:\\
     https://github.com/yannik520/Lynx
+** [[./lkm.html][The Implementation of Loadable Kernel Module]]
 * Bootloader
 ** UBoot
 *** [[./uboot_code_relocate.html][Uboot Code Relocation]]
