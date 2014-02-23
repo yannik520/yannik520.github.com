@@ -22,14 +22,14 @@
 + My Resume :[[./liyanqing.doc]]
 
 * Operating System
-** My "Lynx"
-*** The instruction to Lynx
-    Lynx is an embedded operating system kernel just support for arm architecture cpu at present, it is in developing.
+** My "YakOS"
+*** The instruction to YakOS
+    YakOS is an embedded operating system kernel just support for arm architecture cpu at present, it is in developing.
 *** How to get the code
     you can get code frome:\\
-    [[git@github.com:yannik520/Lynx.git]]\\
+    [[git@github.com:yannik520/YakOS.git]]\\
     or read code directly from:\\
-    https://github.com/yannik520/Lynx
+    https://github.com/yannik520/YakOS
 ** [[./lkm.html][The Implementation of Loadable Kernel Module]]
 * Bootloader
 ** UBoot
