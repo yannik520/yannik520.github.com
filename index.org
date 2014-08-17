@@ -45,6 +45,7 @@
 *** [[./v4l2_framework.html][V4L2 Driver Architecture]]
 *** [[./linux_driver_code.html][Linux Driver Code]]
 *** [[./sysv_sem.html][System V Semaphore]]
+*** [[./tty/tty_driver.html][Linux TTY Driver]]
 ** Linux Kernel
 *** [[./system_call.html][Access Linux System Call in User Space]]
 * Windows WDF Device Driver
