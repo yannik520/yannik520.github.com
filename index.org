@@ -26,10 +26,13 @@
 *** The instruction to YakOS
     YakOS is an embedded operating system kernel just support for arm architecture cpu at present, it is in developing.
 *** How to get the code
-    you can get code frome:\\
+    You can get code frome:\\
     [[git@github.com:yannik520/YakOS.git]]\\
     or read code directly from:\\
-    https://github.com/yannik520/YakOS
+    https://github.com/yannik520/YakOS\\
+    Documents about YakOS:\\
+    [[https://github.com/yannik520/YakOS/tree/master/documents/yakOS.pdf][yakOS.pdf]]
+
 ** [[./lkm.html][The Implementation of Loadable Kernel Module]]
 * Bootloader
 ** UBoot
