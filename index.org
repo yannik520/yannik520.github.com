@@ -31,7 +31,7 @@
     or read code directly from:\\
     https://github.com/yannik520/YakOS\\
     Documents about YakOS:\\
-    [[https://github.com/yannik520/YakOS/tree/master/documents/yakOS.pdf][yakOS.pdf]]
+    [[https://github.com/yannik520/YakOS/tree/master/The_Design_and_Realization_of_yakOS/yakOS.html][The Design and Realization of yakOS]]
 
 ** [[./lkm.html][The Implementation of Loadable Kernel Module]]
 * Bootloader
