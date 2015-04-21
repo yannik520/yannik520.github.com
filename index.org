@@ -2,22 +2,21 @@
 #+AUTHOR:    Yanqing.Li
 #+EMAIL:     yqli520_2006@163.com
 #+DATE:      2012-04-07 六
-#+DESCRIPTION: 
-#+KEYWORDS: 
-#+LANGUAGE:  en
-#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
-#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
-#+EXPORT_SELECT_TAGS: export
-#+EXPORT_EXCLUDE_TAGS: noexport
-#+LINK_UP:   
-#+LINK_HOME:
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t c:nil creator:comment d:(not "LOGBOOK") date:t
+#+OPTIONS: e:t email:nil f:t inline:t num:t p:nil pri:nil stat:t
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:t todo:t |:t
+#+CREATOR: Emacs 24.4.1 (Org mode 8.2.10)
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
 #+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
 
 * About Me
-  I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting.\\
-#+ATTR_HTML: width="120"
-[[./yannik_li.JPG]]
+  I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting. \\
+[[./yannik_li.jpg]]
 
 + My Resume :[[./liyanqing.doc]]
 
@@ -34,6 +33,7 @@
     [[https://github.com/yannik520/YakOS/tree/master/The_Design_and_Realization_of_yakOS/yakOS.html][The Design and Realization of yakOS]]
 
 ** [[./lkm.html][The Implementation of Loadable Kernel Module]]
+** [[./lkm_in_rtos.html][LKM介绍及其在嵌入式系统中的应用]]
 * Bootloader
 ** UBoot
 *** [[./uboot_code_relocate.html][Uboot Code Relocation]]
