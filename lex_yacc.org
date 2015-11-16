@@ -1,0 +1,137 @@
+#+TITLE:     Lex&Yacc Introduction
+#+AUTHOR:    Yanqing Li(Yannik Li)
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      2015-11-16 Mon.
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* Introduction
+Lex is a lexical analyzer and is used to break up the input stream into useful elements, and Yacc(also stands for Yet Another Compiler Compiler), given a grammar, generates a parser for it.
+When both tools are properly used, these tools allow you to parse complex languages and configure file with ease, just as the following example.
+
+* An example
+here we use lex and yacc to parse the following configure file, you can find that it is so convenient to parse a configure file with these tools.
+** Configure File
+[[./lex_yacc/cfg_parser/configure.jpg]]
+
+** Lex source file
+
+#+BEGIN_SRC
+%{
+#include <stdlib.h>
+#include "y.tab.h"
+void yyerror(char *);
+%}
+
+%%
+
+\[[^\n]+\]	{
+			yylval.string = yytext;
+			return ATCMD;
+		}
+
+\"[^\n\"]+\"	{
+			yylval.string = yytext;
+			return RESULT_CODE;
+		}
+
+[\[\]]		{
+			return *yytext;
+		}
+
+\#[^\n]*	;	/* ignore comment line */
+
+[ \t\n]+        ;       /* ignore whitespace */
+
+.               yyerror("Unknown character");
+%%
+
+int yywrap(void) {
+    return 1;
+}
+#+END_SRC
+
+** Yacc source file
+#+BEGIN_SRC
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+/* prototypes */
+int yylex(void);
+void yyerror(char *s);
+
+extern FILE *yyin;
+%}
+
+%union {
+	int number;		/* integer value */
+	char *string;		/* string value */
+ }
+
+%token <number> NUMBER
+%token <string> STRING
+%token ATCMD RESULT_CODE
+
+%%
+
+parameters:
+        | parameters	parameter
+        ;
+
+parameter:
+	atcmd
+	|
+	result_code
+        ;
+
+atcmd:
+	ATCMD		{ printf("%s\n", yylval.string); }
+        ;
+
+result_code:
+	RESULT_CODE	{printf("%s\n", yylval.string);}
+	;
+
+%%
+
+
+void yyerror(char *s) {
+	fprintf(stdout, "%s\n", s);
+}
+
+int main(int argc, char **argv) {
+
+	if (argc > 1) {
+		yyin = fopen(argv[1], "r");
+	}
+	else {
+		fprintf(stdout, "Usage: config <file_path>\n");
+		return -1;
+	}
+	if (yyin == NULL) {
+		fprintf(stdout, "Error: file open error...\n");
+		return -1;
+	}
+	
+	yyparse();
+	
+	fclose(yyin);
+	
+	return 0;
+}
+#+END_SRC
+
+* Build&Run
+[[./lex_yacc/cfg_parser/lex_yacc.jpg]]

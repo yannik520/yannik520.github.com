@@ -1,0 +1,8 @@
+# This is a configure file for test
+
+[ATD]
+	"OK"
+[AT+CSQ]
+	"88,01" "OK"
+
+
