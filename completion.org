@@ -1,0 +1,82 @@
+#+TITLE:     Synchronization Mechanism: Completion
+#+AUTHOR:    Yanqing Li(Yannik Li)
+#+EMAIL:     yannik520@gmail.com
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* Completions Introduction
+In the case some activity is initiated outside of the current thread, and then waiting for that activity to complete, it can be tempting to use a
+semaphore for synchronization of the two tasks, but it not the best solution in this situation, completions are a lightweight mechanism to allow one
+thread to tell another that the job is done.
+
+on one side, creating and waiting for the a completiong by calling:
+#+BEGIN_SRC
+struct completion test_completion;
+init_completion(&test_completion);
+wait_for_completion(&test_completion);
+#+END_SRC
+
+othe the other side, the actual completion event may be signalled by calling one of the following:
+#+BEGIN_SRC
+complete(&test_completion);
+complete_all(&test_completion);
+#+END_SRC
+
+* Completion Inplementation
+The implementation of completion is based on the wait queue, when wait_ for_ completion is called, current task will be delete from the running _task _list,
+so current task can't be scheduled by scheduler, when some other task called complete() to signall the waiting event is completed, the task will be put back
+into the running_ task _list, and it will be schedule in next schedule cycle. the process as following figure showed.
+#+begin_src ditaa :file completion.png :cmdline -r -s 0.8
+
+	 +-----------------------+                 +-----------------+
+	 |    wait_queue_head    |   	      	   |running_task_list|
+	 |     	       	       	 |   	      	   |   	       	     |
+	 |         c1AB          |     	       	   |     cC02        |
+	 +-----------+-----------+     	       	   +--------+--------+
+	    	     ^ 	  	     	      	            ^
+       	       	     | 	       	       	       	       	    |
+	    	     | 	       	     	      	       	    |
+	    	     | 	       	     	      	       	    |
+                     v                                      v
+	 +-----------+-----------+    wait_for_	   +--------+--------+
+	 |     wait_queue        |    completion   |     task1       |
+	 |     	       	       	 +<--=-------------+   	       	     |
+	 | o schedule_timeout  	 +-------+	   |                 |
+	 +-----------+-----------+       |     	   +--------+--------+
+                     ^ 	  	     	 |	   	    ^
+                     | 	  	     	 |	   	    |
+                     | 	       	       	 |     	       	    |
+                     | 	     	     	 |	            |
+                     v         	     	 |	            v
+	 +-----------+-----------+     	 |     	   +--------+--------+
+       	 |     wait_queue        |     	 |     	   |     task2       |
+       	 |     	       	       	 |     	 |     	   |                 |
+ 	 | o schedule_timeout    | 	 |	   |                 |
+	 +-----------------------+ 	 |	   +--------+--------+
+			  		 |	   	    ^
+       	       	       	       	       	 |     	       	    |
+			  		 |	   	    :
+			  		 |         	    |
+			  		 |         	    v
+			  		 |         +------=-+--------+
+			  		 |         |                 |
+			  		 +-----=-->+     task1       |
+					complete   |                 |
+						   +-------=---------+
+
+
+#+end_src
+
+#+CAPTION: The Implementation of Completion
+#+results:
+[[file:completion.png]]

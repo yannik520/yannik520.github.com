@@ -51,6 +51,7 @@
 *** [[./tty/tty_driver.html][Linux TTY Driver]]
 ** Linux Kernel
 *** [[./system_call.html][Access Linux System Call in User Space]]
+*** [[./completion.html][Synchronization Mechanism: Completion]]
 * Windows WDF Device Driver
 ** [[./wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
 ** [[./kmdf.html][Basic Knowledge of KMDF]]
