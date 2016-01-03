@@ -1,0 +1,1058 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>SD and SDIO</title>
+<!-- 2016-01-03 日 21:00 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Yannik Li" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">SD and SDIO</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. The Introduction of SDIO</a>
+<ul>
+<li><a href="#sec-1-1">1.1. SDIO Features</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2. SDIO Signaling Definition</a>
+<ul>
+<li><a href="#sec-2-1">2.1. SDIO Card Types</a></li>
+<li><a href="#sec-2-2">2.2. SDIO Card modes</a>
+<ul>
+<li><a href="#sec-2-2-1">2.2.1. SPI (Card mandatory support)</a></li>
+<li><a href="#sec-2-2-2">2.2.2. 1-bit SD Data Transfer Mode (Card Mandatory Support)</a></li>
+<li><a href="#sec-2-2-3">2.2.3. 4-bit SD Data Transfer Mode (Mandatory for Hight-Speed Cards, Optional for Low-Speed)</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-3">2.3. Signal Pins</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. SD Bus Protocol</a>
+<ul>
+<li>
+<ul>
+<li><a href="#sec-3-0-1">3.0.1. SD Bus</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-1">3.1. SD Memory Card Functional Description</a></li>
+<li><a href="#sec-3-2">3.2. Card Identification Mode</a>
+<ul>
+<li><a href="#sec-3-2-1">3.2.1. Card Reset</a></li>
+<li><a href="#sec-3-2-2">3.2.2. Operating Condition Validation</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-3">3.3. Card Initialization and Identification</a></li>
+<li><a href="#sec-3-4">3.4. Data Transfer Mode</a></li>
+<li><a href="#sec-3-5">3.5. Commands</a>
+<ul>
+<li><a href="#sec-3-5-1">3.5.1. Command Format</a></li>
+<li><a href="#sec-3-5-2">3.5.2. Detailed Command Description</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-6">3.6. Responses</a>
+<ul>
+<li><a href="#sec-3-6-1">3.6.1. R1 (normal response command):</a></li>
+<li><a href="#sec-3-6-2">3.6.2. R1b</a></li>
+<li><a href="#sec-3-6-3">3.6.3. R2 (CID, CSD register)</a></li>
+<li><a href="#sec-3-6-4">3.6.4. R3 (OCR register)</a></li>
+<li><a href="#sec-3-6-5">3.6.5. R6 (Published RCA response)</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-7">3.7. R7 (Card interface condition)</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4. SDIO Card Initializatio</a>
+<ul>
+<li><a href="#sec-4-1">4.1. The IO<sub>SEND</sub><sub>OP</sub><sub>COND</sub> Command (CMD5)</a></li>
+<li><a href="#sec-4-2">4.2. The IO<sub>SNED</sub><sub>OP</sub><sub>COND</sub> Response (R4)</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. Differences with SD Memory Specification</a>
+<ul>
+<li><a href="#sec-5-1">5.1. Unsupported SD Memory Commands</a></li>
+<li><a href="#sec-5-2">5.2. Modified R6 Response</a></li>
+<li><a href="#sec-5-3">5.3. New I/O Read/Write Commands</a>
+<ul>
+<li><a href="#sec-5-3-1">5.3.1. IO<sub>RW</sub><sub>DIRECT</sub> command (CMD52)</a></li>
+<li><a href="#sec-5-3-2">5.3.2. IO<sub>RW</sub><sub>DIRECT</sub> Response (R5)</a></li>
+<li><a href="#sec-5-3-3">5.3.3. IO<sub>RW</sub><sub>EXTENDED</sub> Command (CMD53)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-6">6. SDIO Card Internal Operation</a>
+<ul>
+<li><a href="#sec-6-1">6.1. Overview</a></li>
+<li><a href="#sec-6-2">6.2. Interrupts</a></li>
+<li><a href="#sec-6-3">6.3. SDIO Fixed Internal Map</a></li>
+<li><a href="#sec-6-4">6.4. Common I/O Area (CIA)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> The Introduction of SDIO</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The SD standard offers great flexibility, include the ability to use the SD slot
+for more than memory cards. SDIO card is an interface that extends the functionality of 
+devices by using a standard SD card slot to give devices new capabilities. A partial list
+of new capabilities incudes:
+</p>
+<ul class="org-ul">
+<li>GPS
+</li>
+<li>Camera
+</li>
+<li>Wi-Fi
+</li>
+<li>Ethernet
+</li>
+<li>Barcode readers
+</li>
+<li>Bluetooth
+</li>
+</ul>
+
+<p>
+The SDIO (SD Input/Outpu) card is based on and compatible with the SD memory card. This
+compatibility incudes mechanical, electrical, power, signaling and software. The intent of
+the SDIO card is to provide high-speed data I/O with low power consumption for mobile
+electronic deivices.
+</p>
+</div>
+
+<div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> SDIO Features</h3>
+<div class="outline-text-3" id="text-1-1">
+<ul class="org-ul">
+<li>Targeted for partable and stationary applications
+</li>
+<li>Minimal or no modification to SD Physical bus is required
+</li>
+<li>Minimal change to memory driver software
+</li>
+<li>Extended physical form faactor available for specialized applications
+</li>
+<li>Plug and play (PnP) support
+</li>
+<li>Multi-function support including multiple I/O and combined I/O and memory
+</li>
+<li>Up to 7 I/O functions plus one memory supported on one card.
+</li>
+<li>Allows card to interrupt host.
+</li>
+<li>Operational Voltage range: 2.7-3.6V
+</li>
+<li>Application Specifications for Standard SDIO Functions.
+</li>
+<li>Multiple Form Factos:
+<ul class="org-ul">
+<li>Full-Size SDIO
+</li>
+<li>miniSDIO
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> SDIO Signaling Definition</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> SDIO Card Types</h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li>Full-Speed card:
+</li>
+<li>supports SPI, 1-bit SD and the 4-bit SD transfer modes at the full clock range of 0-25MHz.
+</li>
+<li>Over 100Mb/second (10MB/Sec)
+</li>
+<li>Low-Speed SDIO card:
+</li>
+<li>Requires only the SPI and 1-bit SD transfer modes. 4-bit support is optional.
+</li>
+<li>Support a full clock range of 0-400 KHz
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> SDIO Card modes</h3>
+<div class="outline-text-3" id="text-2-2">
+</div><div id="outline-container-sec-2-2-1" class="outline-4">
+<h4 id="sec-2-2-1"><span class="section-number-4">2.2.1</span> SPI (Card mandatory support)</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+In  this mode pin 8, which is undefined for memory, is used as the interrupt pin.
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-2-2" class="outline-4">
+<h4 id="sec-2-2-2"><span class="section-number-4">2.2.2</span> 1-bit SD Data Transfer Mode (Card Mandatory Support)</h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+In this mode, data is transfered on the DAT[ 0] pin only.
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-2-3" class="outline-4">
+<h4 id="sec-2-2-3"><span class="section-number-4">2.2.3</span> 4-bit SD Data Transfer Mode (Mandatory for Hight-Speed Cards, Optional for Low-Speed)</h4>
+<div class="outline-text-4" id="text-2-2-3">
+<p>
+In this mode, data is transferred on all 4 data pins (DAT[3:0]). The 4-bit SD mode provides the hightest data transfer possible, up to 100Mb/sec.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Signal Pins</h3>
+<div class="outline-text-3" id="text-2-3">
+
+<div class="figure">
+<p><img src="./sdio/signal_pins.jpg" alt="signal_pins.jpg" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> SD Bus Protocol</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-0-1" class="outline-4">
+<h4 id="sec-3-0-1"><span class="section-number-4">3.0.1</span> SD Bus</h4>
+<div class="outline-text-4" id="text-3-0-1">
+<p>
+Communication over the SD bus is based on command and data bit streams that are initiated by a start bit and terminated by a stop bit.
+</p>
+<ul class="org-ul">
+<li>Command : a command is a token that starts an operation. A command is sent from the host either to a single card (addressed command) or to all connected cards (broadcast command). A command is transferred serially on the CMD line.
+</li>
+<li>Response : a response is a token that is sent from an adressed card, or (synchronously) from all connected cards, to the hosts as an answer to a previously received command. A response is transferred serially on the CMD line.
+</li>
+<li>Data : data can be transferred from the card to the host ro vice versa. Data is transfrerred via the data lines.
+</li>
+</ul>
+
+
+<div class="figure">
+<p><img src="./sdio/command_response.png" alt="command_response.png" />
+</p>
+</div>
+
+<p>
+Card addressing is implemented using as session address, assigned to the card druing the initialization phase.<br  />
+Data transfer to/from the SD Memory Card are done in blocks. Data blocks are always succeeded by CRC bits. Single and multiple block operations are defined. Note that the Multiple
+Block operation mode is better for faster write operation. A multiple block transmission is terminated when a stop command follows on the CMD line. Data transfer can be configured by the host to use single or multiple data lines.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/block_read_operation.png" alt="block_read_operation.png" />
+</p>
+</div>
+
+<p>
+The block write operation uses a simple busy signaling of the write operation duration on the DAT0 data line regardless of the number of data lines used for transferring the data.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/block_write_operation.png" alt="block_write_operation.png" />
+</p>
+</div>
+
+<p>
+Command tokens have the following coding scheme:
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/command_token_format.png" alt="command_token_format.png" />
+</p>
+</div>
+
+<p>
+Each command token is precedes by a start bit (0) and succeeded by and end bit (1). The total length is 48 bits. Each token
+is protected by CRC bits so that transmission errors can be detected and the operation may be repeated.
+</p>
+
+<p>
+Resopnse tokens have one of four coding schemes, depending on their content. The token length is either 48 or 136 bits. The CRC protection algorithm for block data is a 16-bit CCITT polynomial.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/response_token_format.png" alt="response_token_format.png" />
+</p>
+</div>
+
+<p>
+In the CMD line the Most Significant Bit (MSB) is transmitted first, the Least Significant Bit (LSB) is the last.
+When the wide bus option is used, the data is transferred 4 bits at a time. Start and end bits, as well as the CRC bits, are transmitted for every one of the DAT lines.
+CRC bits are calculated and checked for every DAT line individually. The CRC status response and Busy indication will be sent by the card to the host on DAT0 only.
+</p>
+
+<p>
+There are two types of Data packet format for the SD card.
+(1) Usual data (8-bit width): The usual data (8-bt width) are sent in LSB (Least Significant Byte) first, MSB (Most Significant Byte) last sequence. But in the individual byte, it is MSB (Most Significant Bit) first, LSB (Least Significant Bit) last.
+(2) Wide width data (SD Memory Register): The wide width data is shifted from the MSB bit.
+</p>
+<ul class="org-ul">
+<li>Data Packet Format for Usual Data(8-bit width)
+</li>
+</ul>
+
+
+<div class="figure">
+<p><img src="./sdio/data_packet_format.png" alt="data_packet_format.png" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>Data Packet Format for Wide Width Data (Ex. ACMD13)
+</li>
+</ul>
+
+
+<div class="figure">
+<p><img src="./sdio/data_packet_format_wide.png" alt="data_packet_format_wide.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> SD Memory Card Functional Description</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+All communication between host and cards is controlled by the host (master). The host send commands of two types:
+broadcast and addressed(point-to-point) commands.
+</p>
+<ul class="org-ul">
+<li>Broadcast commands
+</li>
+</ul>
+<p>
+Broadcast commands are intended for all cards. Some of these commands require a response.
+</p>
+<ul class="org-ul">
+<li>Addressed(point-to-point) commands
+</li>
+</ul>
+<p>
+The addressed commands are sent to the addressed card and cause a response from this card.
+</p>
+<ul class="org-ul">
+<li>Card identification mode
+</li>
+</ul>
+<p>
+The host will be in card identification mode after reset and while it is looking for new cards on the bus. Cards will be in this mode after reset until the SEND<sub>RCA</sub> command (CMD3) is received.
+</p>
+<ul class="org-ul">
+<li>Data transfer mode
+</li>
+</ul>
+<p>
+Cards will enter data transfer mode after their RCA is first published. The host will enter data transfer mode after identifying all the cards on the bus.
+</p>
+
+<p>
+The following table shows the dependencies between operation modes and card states.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/operation_modes.png" alt="operation_modes.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Card Identification Mode</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+While in card identification mode the host resets all the cards that are in card identification mode,
+validates operation voltage range, identifies cards and asks them to publish Relative Card Address(RCA).
+This operation is done to each ard separately on its own CMD line. All data communication in the Card Identification Mode uses the command line (CMD) only.
+During the card identification process, the card shall operate in the SD clock frequency of the identificaiton clock rate.
+</p>
+</div>
+
+<div id="outline-container-sec-3-2-1" class="outline-4">
+<h4 id="sec-3-2-1"><span class="section-number-4">3.2.1</span> Card Reset</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+The command GO<sub>IDLE</sub><sub>STATE</sub>(CMD0) is the software reset command and sets each card into <i>Idle State</i> regardless of the current card state. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2-2" class="outline-4">
+<h4 id="sec-3-2-2"><span class="section-number-4">3.2.2</span> Operating Condition Validation</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<p>
+The host issues a reset command (CMD0) with a specified voltage while assuming it may be supported by the card. To verify the voltage, a following new command (CMD8) is defined in the Physical Layer Specification Version 2.00.<br  />
+SEND<sub>IF</sub><sub>COND</sub> (CMD8) is used to verify SD Memory Card interface operating condition. The card checks the validity of operating condition by analyzing the argument of 
+CMD8 and the host checks the validity by analyzing the reponse of CMD8.  The supplied voltage is indicated by VHS filed in the argument. The card assumes the voltage specified in VHS as the current supplied voltage. Only 1-bit of VHS shall be set to 1 at any given time.
+Both CRC and check pattern are used for the host to check validity of communication between the host and the card. If the card cannot operate on the supplied voltage, it returns no response and stays in idle state. It is mandatory to issue CMD8 prior to first ACMD41 for initialization of High Capacity SD Memory Card.
+</p>
+
+<p>
+SD<sub>SEND</sub><sub>OP</sub><sub>COND</sub> (ACMD41) is designed to provide SD Memory Card hosts with a mechanism to identify and reject cards which do not match
+the V<sub>DD</sub> range desired by the host. Cards which cannot perform data transfer in the specified range shall discard themselves from further bus operations and go into <i>Inactive StTATE</i>. 
+Note that ACMD41 is application specific command, therefore APP<sub>CMD</sub> (CMD55) shall always precede ACMD41.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/card_identification_mode.png" alt="card_identification_mode.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Card Initialization and Identification</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+The initialization process starts with SD<sub>SEND</sub><sub>OP</sub><sub>COND</sub> (ACMD41) by setting its operational conditions and the HCS bit in the OCR. The HCS (Host Capacity Support) bit set to 1 indicates that the
+host supports High Capacity SD Memeory card. The HCS (Host Capacity Support) bit set to 0 indicates that the host does not support Hight Capacity SD Memory card.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/card_initialization.png" alt="card_initialization.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> Data Transfer Mode</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+Until the end of Card Identificaton Mode the host shall remain at f<sub>OD</sub> freequency because some cards may have operating frequency restrictions during the card identification mode. In Data Transfer Mode
+the host may operate the card in f<sub>PP</sub> frequency range. The host issues SEND<sub>CSD</sub>(CMD9) to obtain the Card Specific Data(CSD register), e.g. block length, card storage capacity, etc.
+The broadcast command SET<sub>DSR</sub> (CMD4) configures the driver stages of all identified cards. It programs their DSR registers corresponding to the application bus layout and the number of
+cards on the bus and the data transfer frequency. The clock rate is also switched from f<sub>OD</sub> to f<sub>PP</sub> at that point. SET<sub>DSR</sub> command is an option for the card and the host.
+</p>
+
+<p>
+CMD7 is used to select one card and put it into the Transfer State. Only one card can be in the Transfer State at a given time. If a previously selected card is in the Transfer State its connection with the host is released and it will move back to the 
+<i>Stand-by State</i>. When CMD7 is issued with the reserved relative card address "0x0000", all cards are put back to <i>Stand-by State</i>.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/data_transfer_mode.png" alt="data_transfer_mode.png" />
+</p>
+</div>
+
+<p>
+The relationship between the various data transfer modes is summarized below.
+</p>
+<ul class="org-ul">
+<li>All data read commands can be aborted any time by the stop command (CMD12). The data transfer
+</li>
+</ul>
+<p>
+will terminate and the card will return to the <i>Transfer State</i>. The read command are: block read (CMD17), multiple block read (CMD18), send write protect (CMD30), send scr (ACMD51) and general command in read mode (CMD56).
+</p>
+<ul class="org-ul">
+<li>All data write commands can be aborted any time by the stop command (CMD12). The write commands shall be stopped prior to deselecting the card by CMD7. The write commands are: block write (CMD24 and CMD25), program CSD (CMD27), lock/unlock command (CMD42) and general command in write mode (CMD56).
+</li>
+<li>As soon as the data transfer is completed, the card will exit the data write state and move either to the <i>Programming State</i> (transfer is successful) or <i>Transfer State</i> (transfer failed).
+</li>
+<li>If a block write operation is stopped and the block length and CRC of the last block are valid, the data will be programmmed.
+</li>
+<li>The card may provide buffering for block write. This means that the next block can be sent to the card while the previous is being programmed.
+</li>
+</ul>
+<p>
+If all write buffers are full, and as long as the card is in <i>Programming State</i>, the DAT0 line will be kept low (BUSY).
+</p>
+<ul class="org-ul">
+<li>There is no buffering option for write CSD, write protection and erase. This means that while the card is busy servicing any one of these commands, no other data transfer commands will be accepted.
+</li>
+</ul>
+<p>
+DAT0 line will be kept low as long as the card is busy and in the <i>Programming State</i>.
+Actually if the CMD and DAT0 lines of the cards are kept separated and the host keep the busy DAT0 line disconnected from the
+other DAT0 lines(of the other cards) the host may access the other cards while the card is in busy.
+</p>
+<ul class="org-ul">
+<li>Parameter set commands are <i>not</i> allowed while card is programming.
+</li>
+</ul>
+<p>
+Parmeter set commands are: set block length (CMD16), erase block start (CMD32) and erase block end (CMD33).
+</p>
+<ul class="org-ul">
+<li>Read commands are not allowed while card is programming.
+</li>
+<li>Moving another card from <i>Stand-by</i> to <i>Transfer State</i> (using CMD7) will not terminate erase and
+</li>
+</ul>
+<p>
+programming operations. The card will switch to the <i>Disconnect State</i> and will release the DAT line.
+</p>
+<ul class="org-ul">
+<li>A card can be reslected while in the <i>Disconnect State</i>, using CMD7.  In this case the card will move to the <i>Programming State</i> and reactivate the busy indication.
+</li>
+<li>Resetting a card (using CMD0 or CMD15) will terminate any pending or active programming operation. This may destroy the data contents on the card. It is the host's
+</li>
+</ul>
+<p>
+responsibility to prevent this.
+</p>
+<ul class="org-ul">
+<li>CMD34-37, CMD50 and CMD57 are reserved for SD command system expansion. State transitions for these commands are defined in each command system specification.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-5" class="outline-3">
+<h3 id="sec-3-5"><span class="section-number-3">3.5</span> Commands</h3>
+<div class="outline-text-3" id="text-3-5">
+</div><div id="outline-container-sec-3-5-1" class="outline-4">
+<h4 id="sec-3-5-1"><span class="section-number-4">3.5.1</span> Command Format</h4>
+<div class="outline-text-4" id="text-3-5-1">
+<p>
+All commands have a fixed code length of 48 bits, needing a transmission time of 1.92 us @ 25 MHz and 0.96 us @ 50 MHz.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/command_format.png" alt="command_format.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-5-2" class="outline-4">
+<h4 id="sec-3-5-2"><span class="section-number-4">3.5.2</span> Detailed Command Description</h4>
+<div class="outline-text-4" id="text-3-5-2">
+
+<div class="figure">
+<p><img src="./sdio/basic_command_1.png" alt="basic_command_1.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./sdio/basic_command_2.png" alt="basic_command_2.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./sdio/write_command.png" alt="write_command.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-6" class="outline-3">
+<h3 id="sec-3-6"><span class="section-number-3">3.6</span> Responses</h3>
+<div class="outline-text-3" id="text-3-6">
+<p>
+All responses are sent via the command line CMD. The response transmission always starts with the left bit of the bit string
+corresponding to the response codeword. The code length depends on the response type.
+</p>
+
+<p>
+There are five types of responses for the SD Memory Card. The SDIO Card supports additional response types named R4 and R5.
+</p>
+</div>
+<div id="outline-container-sec-3-6-1" class="outline-4">
+<h4 id="sec-3-6-1"><span class="section-number-4">3.6.1</span> R1 (normal response command):</h4>
+<div class="outline-text-4" id="text-3-6-1">
+<p>
+Code length is 48 bits. The bits 45:40 indicate the index of the command to be responded to, this value being interpreted as a binary coded number (between 0 and 63). The status of the card is coded in 32 bits.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/response_r1.png" alt="response_r1.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-6-2" class="outline-4">
+<h4 id="sec-3-6-2"><span class="section-number-4">3.6.2</span> R1b</h4>
+<div class="outline-text-4" id="text-3-6-2">
+<p>
+R1b is identical to R1 with an optional busy signal transmitted on the data line. The card may become busy after receiving these commands
+based on its state prior to the command reception. The Host shall check for busy at the response.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-6-3" class="outline-4">
+<h4 id="sec-3-6-3"><span class="section-number-4">3.6.3</span> R2 (CID, CSD register)</h4>
+<div class="outline-text-4" id="text-3-6-3">
+<p>
+Code length is 136 bits. The contents of the CID register are sent as a response to the commands CMD2 and CMD10. The contents of the CSD register are sent as a response to CMD9.
+Only the bits [127&#x2026;1] of the CID and CSD are transferred, the reserved bit <sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup> of these regisers is replaced by the end bit of the response.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/response_r2.png" alt="response_r2.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-6-4" class="outline-4">
+<h4 id="sec-3-6-4"><span class="section-number-4">3.6.4</span> R3 (OCR register)</h4>
+<div class="outline-text-4" id="text-3-6-4">
+<p>
+Code length is 48 bits. The contents of the OCR register are sent as a response to ACMD41.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/response_r3.png" alt="response_r3.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-6-5" class="outline-4">
+<h4 id="sec-3-6-5"><span class="section-number-4">3.6.5</span> R6 (Published RCA response)</h4>
+<div class="outline-text-4" id="text-3-6-5">
+<p>
+Code length is 48 bit. The bits 45:40 indicate the index of the Command to be responded to - in that case, it will be '000011'(together with bit 5 in the status bits it means = CMD3). The 16 MSB bits of the argument field are used for the Published RCA number.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/response_r6.png" alt="response_r6.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-7" class="outline-3">
+<h3 id="sec-3-7"><span class="section-number-3">3.7</span> R7 (Card interface condition)</h3>
+<div class="outline-text-3" id="text-3-7">
+<p>
+Code length is 48 bits. The card support voltage information is sent by the response of CMD8. Bits 19-16 indicate the voltage range that the card supports. The card that accepted the supplied voltage returns R7 response.
+In the response, the card echoes back both the voltage range and check pattern set in the argument.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/response_r7.png" alt="response_r7.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> SDIO Card Initializatio</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+After reset or power-up, all I/O functions on the card are disabled and the I/O portion of the card shall not execute any operation except CMD5 or CMD0 with CS=low.
+If there is SD memory installed on the card, that memory shall respond normally to all normal mandatory memory commands.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/sdio_initialization.png" alt="sdio_initialization.png" />
+</p>
+</div>
+
+<p>
+An SDIO aware host shall send CMD5 arg=0 as part of the initialization sequence after either Power On or a CMD52 with write to I/O Reset.
+Sending CMD5 arg=0 that has not been preceded by one of these two reset conditions shall not result int either the host or card entering the initialization sequence.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/card_initialization_flow.png" alt="card_initialization_flow.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./sdio/card_initialization_flow_1.png" alt="card_initialization_flow_1.png" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> The IO<sub>SEND</sub><sub>OP</sub><sub>COND</sub> Command (CMD5)</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+Figure 3-4 shows the format of the IO<sub>SEND<sub>OP</sub><sub>COND</sub></sub> command (CMD5). The function of CMD5 for SDIO cards
+is similar to the operation of ACMD41 for SD memory cards. It is used to inquire about the voltage range needed by the 
+I/O card. The normal response to CMD5 is R4 in either SD or SPI format. The R4 response in SD mode is shown in Figure 3-5 and the SPI version is shown in Figure 3-6.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/cmd5.png" alt="cmd5.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> The IO<sub>SNED</sub><sub>OP</sub><sub>COND</sub> Response (R4)</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+An SDIO card receiving CMD5 shall respond with a SDIO unique response, R4. the format of R4 for both the SD and SPI modes is:
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/r4.png" alt="r4.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Differences with SD Memory Specification</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> Unsupported SD Memory Commands</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+Several commands required for SD Memory cards are not supported by either SDIO-only cards or the I/O partion 
+of Combo cards. Some of these commands have no use in SDIO cards such as Erase commands and thus are not supported in SDIO.
+In addition, there are several commands ofr SD memory cards that have different commands when used with the SDIO section of a card.
+</p>
+
+<p>
+<img src="./sdio/unsupported_sd_memory_commands.png" alt="unsupported_sd_memory_commands.png" />
+<img src="./sdio/unsupported_sd_memory_commands_1.png" alt="unsupported_sd_memory_commands_1.png" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Modified R6 Response</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+The normal response to CMD3 by a memory card is R6.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/r6_response_to_cmd3.png" alt="r6_response_to_cmd3.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-3" class="outline-3">
+<h3 id="sec-5-3"><span class="section-number-3">5.3</span> New I/O Read/Write Commands</h3>
+<div class="outline-text-3" id="text-5-3">
+</div><div id="outline-container-sec-5-3-1" class="outline-4">
+<h4 id="sec-5-3-1"><span class="section-number-4">5.3.1</span> IO<sub>RW</sub><sub>DIRECT</sub> command (CMD52)</h4>
+<div class="outline-text-4" id="text-5-3-1">
+<p>
+The IO<sub>RW<sub>DIRECT</sub></sub> is the simplest means to access a single register within the total 128K of register space in any I/O function,
+including the common I/O area (CIA). This command reads or wirtes 1 byte using only 1 command/response pair. A common use is to initialize registers or monitor status values for I/O functions.
+This command is the fastest means to read or write single I/O registers, as it requires only a sigle command/response pari.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/cmd52.png" alt="cmd52.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5-3-2" class="outline-4">
+<h4 id="sec-5-3-2"><span class="section-number-4">5.3.2</span> IO<sub>RW</sub><sub>DIRECT</sub> Response (R5)</h4>
+<div class="outline-text-4" id="text-5-3-2">
+<p>
+The SDIO card's response to CMD52 shall be in one of two formats. If the communication between the card and host
+is in the 1-bit or 4-bit SD mode.
+</p>
+</div>
+
+<ol class="org-ol"><li><a id="sec-5-3-2-1" name="sec-5-3-2-1"></a>CDM52 Response (SD modes)<br  /><div class="outline-text-5" id="text-5-3-2-1">
+
+<div class="figure">
+<p><img src="./sdio/cmd52_response1.png" alt="cmd52_response1.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./sdio/cmd52_response2.png" alt="cmd52_response2.png" />
+</p>
+</div>
+</div>
+</li>
+
+<li><a id="sec-5-3-2-2" name="sec-5-3-2-2"></a>R5, IO<sub>RW</sub><sub>DIRECT</sub> Response (SPI mode)<br  /><div class="outline-text-5" id="text-5-3-2-2">
+
+<div class="figure">
+<p><img src="./sdio/cmd52_response3.png" alt="cmd52_response3.png" />
+</p>
+</div>
+</div>
+</li></ol>
+</div>
+
+<div id="outline-container-sec-5-3-3" class="outline-4">
+<h4 id="sec-5-3-3"><span class="section-number-4">5.3.3</span> IO<sub>RW</sub><sub>EXTENDED</sub> Command (CMD53)</h4>
+<div class="outline-text-4" id="text-5-3-3">
+<p>
+In order to read and write multiple I/O registers with a single command, a new command, IO<sub>RW</sub><sub>EXTENDED</sub>
+is defined. This command allows the reading or writing of a large number of I/O registers with a single command.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/cmd53.png" alt="cmd53.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="./sdio/cmd53_1.png" alt="cmd53_1.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> SDIO Card Internal Operation</h2>
+<div class="outline-text-2" id="text-6">
+</div><div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> Overview</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+Each SDIO card may have from 1 to 7 functions plus one memory function built into it.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> Interrupts</h3>
+<div class="outline-text-3" id="text-6-2">
+<p>
+All SDIO hosts should support hardware interrupts. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-6-3" class="outline-3">
+<h3 id="sec-6-3"><span class="section-number-3">6.3</span> SDIO Fixed Internal Map</h3>
+<div class="outline-text-3" id="text-6-3">
+<p>
+The SDIO card has a fixed internal register space and a function unique area. The fixed area contains information
+about the card and certain mandatory and optional registers in fixed locations. The fixed loactions allow any host to obtain information about the card and perform simple operations such as enable in a common manner.
+The function unique area is a per-function area, which is defined either by the Application Specifications for Standard SDIO functions or by the 
+verdor for non-standard functions.
+</p>
+
+
+<div class="figure">
+<p><img src="./sdio/sdio_internal_map.png" alt="sdio_internal_map.png" />
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6-4" class="outline-3">
+<h3 id="sec-6-4"><span class="section-number-3">6.4</span> Common I/O Area (CIA)</h3>
+<div class="outline-text-3" id="text-6-4">
+<p>
+The Common I/O Area (CIA) shall be implemented on all SDIO cards. The CIA is accessed by the host via I/O
+reads and writes to function 0. The registers within the CIA are provided to enable/disable the operation of the I/O function(s), control the 
+generation of interrupts and optionally load softwre to support the I/O functions. The registers in the CIA also provide information
+about the function(s) ablilities and requirements. There are three distinct register structes supported within the CIA. They are:
+</p>
+<ol class="org-ol">
+<li>Card Common Control Register (CCCR)
+</li>
+<li>Function Basic Registers (FBR)
+</li>
+<li>Card Information Structure (CIS)
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p>DEFINITION NOT FOUND.</p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: Yannik Li</p>
+<p class="date">Created: 2016-01-03 日 21:00</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.5.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
