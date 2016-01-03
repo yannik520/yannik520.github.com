@@ -22,8 +22,8 @@
 
 * Operating System
 ** My "YakOS"
-*** The instruction to YakOS
-    YakOS is an embedded operating system kernel just support for arm architecture cpu at present, it is in developing.
+*** The Instroduction of YakOS
+    YakOS is an embedded operating system kernel just support for ARM at present, it is in developing.
 *** How to get the code
     You can get code frome:\\
     [[git@github.com:yannik520/YakOS.git]]\\
