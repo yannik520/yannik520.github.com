@@ -1,0 +1,68 @@
+#+TITLE: sdio
+#+DATE: <2016-01-03 Sun>
+#+AUTHOR: yannik li
+#+EMAIL: yannik@yannikdeMacBook-Air.local
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t c:nil creator:comment d:(not "LOGBOOK") date:t
+#+OPTIONS: e:t email:nil f:t inline:t num:t p:nil pri:nil stat:t
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:t todo:t |:t
+#+CREATOR: Emacs 24.5.1 (Org mode 8.2.10)
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+
+* The Introduction of SDIO
+The SD standard offers great flexibility, include the ability to use the SD slot
+for more than memory cards. SDIO card is an interface that extends the functionality of 
+devices by using a standard SD card slot to give devices new capabilities. A partial list
+of new capabilities incudes:
+ + GPS
+ + Camera
+ + Wi-Fi
+ + Ethernet
+ + Barcode readers
+ + Bluetooth
+
+The SDIO (SD Input/Outpu) card is based on and compatible with the SD memory card. This
+compatibility incudes mechanical, electrical, power, signaling and software. The intent of
+the SDIO card is to provide high-speed data I/O with low power consumption for mobile
+electronic deivices.
+
+** SDIO Features
++ Targeted for partable and stationary applications
++ Minimal or no modification to SD Physical bus is required
++ Minimal change to memory driver software
++ Extended physical form faactor available for specialized applications
++ Plug and play (PnP) support
++ Multi-function support including multiple I/O and combined I/O and memory
++ Up to 7 I/O functions plus one memory supported on one card.
++ Allows card to interrupt host.
++ Operational Voltage range: 2.7-3.6V
++ Application Specifications for Standard SDIO Functions.
++ Multiple Form Factos:
+  - Full-Size SDIO
+  - miniSDIO
+
+* SDIO Signaling Definition
+** SDIO Card Types
++ Full-Speed card:
+- supports SPI, 1-bit SD and the 4-bit SD transfer modes at the full clock range of 0-25MHz.
+- Over 100Mb/second (10MB/Sec)
++ Low-Speed SDIO card:
+- Requires only the SPI and 1-bit SD transfer modes. 4-bit support is optional.
+- Support a full clock range of 0-400 KHz
+
+** SDIO Card modes
+*** SPI (Card mandatory support)
+In  this mode pin 8, which is undefined for memory, is used as the interrupt pin.
+*** 1-bit SD Data Transfer Mode (Card Mandatory Support)
+In this mode, data is transfered on the DAT[0] pin only.
+*** 4-bit SD Data Transfer Mode (Mandatory for Hight-Speed Cards, Optional for Low-Speed)
+In this mode, data is transferred on all 4 data pins (DAT[3:0]). The 4-bit SD mode provides the hightest data transfer possible, up to 100Mb/sec.
+
+** Signal Pins
+[[./sdio/signal_pins.jpg]]
+
+
