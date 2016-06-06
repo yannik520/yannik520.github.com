@@ -17,7 +17,7 @@
 #+LATEX_HEADER:
 
 * About Me
-  I'm a software engineer, multy-year experance in linux kernel development and other RTOS porting. \\
+  I'm a software engineer, multi-year experance in linux kernel development and other RTOS porting. \\
 [[./yannik_li.jpg]]
 
 + My Resume :[[./liyanqing.doc]]
