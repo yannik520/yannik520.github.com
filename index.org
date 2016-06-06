@@ -52,6 +52,7 @@
 *** [[./sysv_sem.html][System V Semaphore]]
 *** [[./tty/tty_driver.html][Linux TTY Driver]]
 *** [[./socketCAN.html][Linux SocketCAN Driver]]
+*** [[./usb/usb.html][Linux USB Driver]]
 ** Linux Kernel
 *** [[./system_call.html][Access Linux System Call in User Space]]
 *** [[./completion.html][Synchronization Mechanism: Completion]]
