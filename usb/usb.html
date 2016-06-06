@@ -1,63 +1,91 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Linux USB Driver</title>
-<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
-<meta name="title" content="Linux USB Driver"/>
-<meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2016-06-03"/>
-<meta name="author" content="Yannik Li"/>
-<meta name="description" content=""/>
-<meta name="keywords" content=""/>
+<!-- 2016-06-06 Mon 09:25 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Yannik Li" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
-  html { font-family: Times, serif; font-size: 12pt; }
   .title  { text-align: center; }
-  .todo   { color: red; }
+  .todo   { font-family: monospace; color: red; }
   .done   { color: green; }
-  .tag    { background-color: #add8e6; font-weight:normal }
-  .target { }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
-  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
-  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
-  .center {margin-left:auto; margin-right:auto; text-align:center;}
-  p.verse { margin-left: 3% }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
   pre {
-	border: 1pt solid #AEBDCC;
-	background-color: #F3F5F7;
-	padding: 5pt;
-	font-family: courier, monospace;
-        font-size: 90%;
-        overflow:auto;
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
   }
-  table { border-collapse: collapse; }
-  td, th { vertical-align: top;  }
-  th.right  { text-align:center;  }
-  th.left   { text-align:center;   }
-  th.center { text-align:center; }
-  td.right  { text-align:right;  }
-  td.left   { text-align:left;   }
-  td.center { text-align:center; }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
   dt { font-weight: bold; }
-  div.figure { padding: 0.5em; }
-  div.figure p { text-align: center; }
-  div.inlinetask {
-    padding:10px;
-    border:2px solid gray;
-    margin:10px;
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
     background: #ffffcc;
   }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
   textarea { overflow-x: auto; }
-  .linenr { font-size:smaller }
-  .code-highlighted {background-color:#ffff00;}
-  .org-info-js_info-navigation { border-style:none; }
-  #org-info-js_console-label { font-size:10px; font-weight:bold;
-                               white-space:nowrap; }
-  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
-                                 font-weight:bold; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="../style.css" />
@@ -107,102 +135,98 @@ for the JavaScript code in this tag.
  }
 /*]]>*///-->
 </script>
-
 </head>
 <body>
-
-<div id="preamble">
-
-</div>
-
 <div id="content">
 <h1 class="title">Linux USB Driver</h1>
-
-
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1 USB Architecture</a></li>
-<li><a href="#sec-2">2 Linux-USB Subsystem</a></li>
-<li><a href="#sec-3">3 USB Host Controller Driver</a></li>
-<li><a href="#sec-4">4 Struct Relationship</a></li>
+<li><a href="#sec-1">1. USB Architecture</a></li>
+<li><a href="#sec-2">2. Linux-USB Subsystem</a></li>
+<li><a href="#sec-3">3. USB Host Controller Driver</a></li>
+<li><a href="#sec-4">4. Struct Relationship</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-1" class="outline-2">
+<div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1"><span class="section-number-2">1</span> USB Architecture</h2>
 <div class="outline-text-2" id="text-1">
-
-<p>USB is a master-slave protocol where a host controller communicates with client devices. the following figure shows USB in the PC evironment.
-The USB host controller is part of the South Bridge chipset and communicates with the processor over the PCI bus<sup><a class="footref" name="fnr-.1" href="#fn-.1">1</a></sup>.
+<p>
+USB is a master-slave protocol where a host controller communicates with client devices. the following figure shows USB in the PC evironment.
+The USB host controller is part of the South Bridge chipset and communicates with the processor over the PCI bus<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>.
 </p>
 
+
 <div class="figure">
-<p><img src="./usb_architecture.gif"  alt="./usb_architecture.gif" /></p>
-<p>USB Architecture In PC Environment</p>
+<p><img src="./usb_architecture.gif" alt="usb_architecture.gif" />
+</p>
+<p><span class="figure-number">Figure 1:</span> USB Architecture In PC Environment</p>
+</div>
+</div>
 </div>
 
-</div>
-
-</div>
-
-<div id="outline-container-2" class="outline-2">
+<div id="outline-container-sec-2" class="outline-2">
 <h2 id="sec-2"><span class="section-number-2">2</span> Linux-USB Subsystem</h2>
 <div class="outline-text-2" id="text-2">
-
-<p>The framework of linux usb subsystem as shown in Figure 2, the constituent pieces of the subsystem are as follows:
-</p><dl>
-<dt>1. The USB Core</dt><dd>is a code base consisting of routines and structures available to HCDs and client drivers, the core also provides a level of
- indirection that renders client drivers independent of host controllers.
+<p>
+The framework of linux usb subsystem as shown in Figure 2, the constituent pieces of the subsystem are as follows:
+</p>
+<dl class="org-dl">
+<dt> 1. The USB Core </dt><dd>is a code base consisting of routines and structures available to HCDs and client drivers, the core also provides a level of
+indirection that renders client drivers independent of host controllers.
 </dd>
-<dt>2. HCDs</dt><dd>to drive different host controllers, these host controllers include EHCI, OHCI, UHCI, xHCI, etc.
+<dt> 2. HCDs </dt><dd>to drive different host controllers, these host controllers include EHCI, OHCI, UHCI, xHCI, etc.
 </dd>
-<dt>3. Hub Driver</dt><dd>to detect port status changes and configuring hotplugged devices, 
+<dt> 3. Hub Driver </dt><dd>to detect port status changes and configuring hotplugged devices, 
 </dd>
 </dl>
-
-<p>there are some difference between kernel v4.* and kernel v3.*, in kernel v3.*, a kthread is used to monitor all ports connected to hub, 
+<p>
+there are some difference between kernel v4.* and kernel v3.*, in kernel v3.*, a kthread is used to monitor all ports connected to hub, 
 but in kernel v4.x, which has been replaced by work queue.
-</p><dl>
-<dt>4. Device Driver</dt><dd>the device for USB client devices.
+</p>
+<dl class="org-dl">
+<dt> 4. Device Driver </dt><dd>the device for USB client devices.
 </dd>
-<dt>5. The USB filesystem usbfs</dt><dd>which let you drive USB devices from user space.
+<dt> 5. The USB filesystem usbfs </dt><dd>which let you drive USB devices from user space.
 </dd>
 </dl>
-
 
 
 <div class="figure">
-<p><img src="./linux_usb_subsystem.gif"  alt="./linux_usb_subsystem.gif" /></p>
-<p>Linux USB Subsystem</p>
+<p><img src="./linux_usb_subsystem.gif" alt="linux_usb_subsystem.gif" />
+</p>
+<p><span class="figure-number">Figure 2:</span> Linux USB Subsystem</p>
 </div>
 
 <p>
 The initialization process of usb subsystem as shown in Figure 3, a generic device driver will be registered, the driver will be bind to a device when a usb device is detected:
 </p>
 
+
 <div class="figure">
-<p><img src="./usb_subsystem_init.jpeg"  alt="./usb_subsystem_init.jpeg" /></p>
-<p>The Process of USB Subsystem Initialization and USB Plug-In</p>
+<p><img src="./usb_subsystem_init.jpeg" alt="usb_subsystem_init.jpeg" />
+</p>
+<p><span class="figure-number">Figure 3:</span> The Process of USB Subsystem Initialization and USB Plug-In</p>
+</div>
+</div>
 </div>
 
-</div>
-
-</div>
-
-<div id="outline-container-3" class="outline-2">
+<div id="outline-container-sec-3" class="outline-2">
 <h2 id="sec-3"><span class="section-number-2">3</span> USB Host Controller Driver</h2>
 <div class="outline-text-2" id="text-3">
-
-<p>The USB host controller driver driectly operate the hardware controller to communicate with usb device, here take xHCI as example to show the relationship 
+<p>
+The USB host controller driver driectly operate the hardware controller to communicate with usb device, here take xHCI as example to show the relationship 
 between each layer:
 </p>
 
+
 <div class="figure">
-<p><img src="./usb_host_controller_driver.jpeg"  alt="./usb_host_controller_driver.jpeg" /></p>
-<p>USB Host Controller Driver</p>
+<p><img src="./usb_host_controller_driver.jpeg" alt="usb_host_controller_driver.jpeg" />
+</p>
+<p><span class="figure-number">Figure 4:</span> USB Host Controller Driver</p>
 </div>
 
 <p>
@@ -210,47 +234,47 @@ When a new usb device plugged in a port, hub will report the plug-in event to ho
 and a usb_interface object will be allocated for each interface, and it will be bind to a interface driver.
 </p>
 
+
 <div class="figure">
-<p><img src="./usb_device_plug_in.jpeg"  alt="./usb_device_plug_in.jpeg" /></p>
-<p>The Process of USB Device Plug-In</p>
+<p><img src="./usb_device_plug_in.jpeg" alt="usb_device_plug_in.jpeg" />
+</p>
+<p><span class="figure-number">Figure 5:</span> The Process of USB Device Plug-In</p>
+</div>
+</div>
 </div>
 
-</div>
-
-</div>
-
-<div id="outline-container-4" class="outline-2">
+<div id="outline-container-sec-4" class="outline-2">
 <h2 id="sec-4"><span class="section-number-2">4</span> Struct Relationship</h2>
 <div class="outline-text-2" id="text-4">
-
-<p>The relationship between structs are as following figure showed:
+<p>
+The relationship between structs are as following figure showed:
 </p>
 
-<div class="figure">
-<p><img src="./usb_struct_relation.jpeg"  alt="./usb_struct_relation.jpeg" /></p>
-<p>Struct Relationship</p>
-</div>
 
+<div class="figure">
+<p><img src="./usb_struct_relation.jpeg" alt="usb_struct_relation.jpeg" />
+</p>
+<p><span class="figure-number">Figure 6:</span> Struct Relationship</p>
+</div>
+</div>
+</div>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn-.1" href="#fnr-.1">1</a></sup> <a href="http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch11.html">http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch11.html</a>
-</p>
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p class="footpara">
+<a href="http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch11.html">http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch11.html</a>
+</p></div>
 
 
 </div>
-</div>
-
-</div>
-</div>
-</div>
-
-<div id="postamble">
-<p class="date">Date: 2016-06-03</p>
+</div></div>
+<div id="postamble" class="status">
+<p class="date">Date: <span class="timestamp-wrapper"><span class="timestamp">&lt;2016-06-03 Fri&gt;</span></span></p>
 <p class="author">Author: Yannik Li</p>
-<p class="creator"><a href="http://orgmode.org">Org</a> version 7.9.3f with <a href="http://www.gnu.org/software/emacs/">Emacs</a> version 24</p>
-<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
-
+<p class="date">Created: 2016-06-06 Mon 09:25</p>
+<p class="creator">Emacs 24.5.1 (Org mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>
