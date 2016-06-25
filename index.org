@@ -73,6 +73,8 @@
 ** [[./python_plugin_framework.html][A Ptython Plugin Framework]]
 ** [[./pycurses_example.html][An Example of PyCurses]]
 ** [[./lex_yacc.html][Lex&Yacc Introduction]]
+** [[./spice/spice.html][Spice]]
+
 
 #+BEGIN_HTML
 <!-- BEGIN CBOX - www.cbox.ws - v001 -->
