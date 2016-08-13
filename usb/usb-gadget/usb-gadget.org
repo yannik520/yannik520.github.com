@@ -1,0 +1,57 @@
+#+TITLE: USB Gadget Driver
+#+DATE: <2016-08-13 六>
+#+AUTHOR: Yannik Li
+#+EMAIL: yannik520@gmail.com
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t c:nil creator:comment d:(not "LOGBOOK") date:t
+#+OPTIONS: e:t email:nil f:t inline:t num:t p:nil pri:nil stat:t
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:t todo:t |:t
+#+CREATOR: Emacs 24.5.1 (Org mode 8.2.10)
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../zenburn.css" />
+
+* Struct Relationship Diagram
+
+#+CAPTION: Struct Relationship
+#+begin_src dot :file usb_gadget.png :cmdline -Kdot -Tpng
+digraph G {
+  size="16,9"
+  ratio=expand
+  node [color="skyblue", shape="record"];
+  edge [color="crimson"];
+
+  subgraph cluster_udc {
+    rankdir=BT;
+    label="USB UDC Driver";
+    color=grey;
+
+    xxx_udc [label="{struct xxx_udc | <usb_gadget> struct usb_gadget gadget | <usb_gadget_driver> struct usb_gadget_driver *driver | ...}"];
+    usb_gadget [label="{struct usb_gadget | struct work_struct work | <udc> struct usb_udc *udc | <ops> struct usb_gadget_ops *ops | struct usb_ep *ep0 | struct list_head ep_list | struct device dev}"];
+    usb_gadget_ops [label="{struct usb_gadget_ops | int (*get_frame)() | int (*wakeup)() | int (*set_selfpowered)() | int (*vbus_session)() | int (*vbus_draw)() | int (*pullup)() | int (*ioctl)() | void (*get_config_params)() | void (*udc_start)() | int (*udc_stop)() | struct usb_ep *(*match_ep)()}"];
+    usb_udc [label="{sturct usb_udc | struct usb_gadget_driver *driver | struct usb_gadget *gadget | struct device dev | struct list_head list | bool vbus}"];
+
+    usb_gadget:ops -> usb_gadget_ops;
+    usb_gadget:udc -> usb_udc;  
+  }
+
+  subgraph cluster_composite_driver {
+    rankdir=LR;
+    label="USB Gadget Driver"
+    rank=same;
+
+    usb_gadget_driver [label="{<head> struct usb_gadget_driver | char *function | enum usb_device_speed max_speed | int (*bind)() | void (*unbind)() | int (*setup)() | <disconnect> void (*disconnect)()}"];
+    usb_composite_driver [label="{ struct usb_composite_driver | char *name | struct usb_device_descriptor *dev | struct usb_gadget_strings **strings | int (*bind)() | int (*unbind)() | void (*disconnect)() | void (*suspend)() | void (*resume)() | <gadget_driver> struct usb_gadget_driver gadget_driver}"];
+
+    usb_composite_driver:gadget_driver -> usb_gadget_driver:head [style=dotted];
+  }
+
+  xxx_udc:usb_gadget_driver -> usb_composite_driver:gadget_driver;
+}
+#+end_src
+
+#+results:
+[[file:usb_gadget.png]]

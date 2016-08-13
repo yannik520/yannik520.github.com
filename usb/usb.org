@@ -64,3 +64,4 @@ The relationship between structs are as following figure showed:
 
 [fn:1] http://www.embeddedlinux.org.cn/EssentialLinuxDeviceDrivers/final/ch11.html
 
+* [[./usb-gadget/usb-gadget.html][USB Gadget Driver]]
