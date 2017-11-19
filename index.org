@@ -74,6 +74,7 @@
 ** [[./pycurses_example.html][An Example of PyCurses]]
 ** [[./lex_yacc.html][Lex&Yacc Introduction]]
 ** [[./spice/spice.html][Spice]]
+** [[./freerdp/freerdp_plugin.html][FreeRDP Plugin Framework]]
 
 
 #+BEGIN_HTML

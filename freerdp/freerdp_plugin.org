@@ -1,0 +1,31 @@
+#+TITLE: FreeRDP Plugin Framework
+#+DATE: <2017-11-19 Sun>
+#+AUTHOR: Yannik Li
+#+EMAIL: yannik520@gmail.com
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t c:nil creator:comment d:(not "LOGBOOK") date:t
+#+OPTIONS: e:t email:nil f:t inline:t num:t p:nil pri:nil stat:t
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:t todo:t |:t
+#+CREATOR: Emacs 24.5.1 (Org mode 8.2.10)
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../style.css" />
+
+* FreeRDP Introduction
+The FreeRDP is a free implementation of the Remote Desktop Protocol(RDP), it can be easily installed in multiple desktop environment, you can install the FreeRDP in ubuntu as flollowing command:
+#+begin_src bashea
+sudo apt-get install freerdp
+#+end_src
+and the FreeRDP support plugin framework to extend its functions, the plugin can be specified by --plugin option in old version:
+#+begin_src bash
+xfreerdp --plugin drdynvc --data <subplugin>
+#+end_src
+in new version of FreeRDP, there are currently two command line interfaces, you can now use both --plugin drdynvc and /dvc to load the Dynamic Virtual Channel plugin.
+
+* Plugin Framework
+The following graph shows the function call flow of plugin loading procedure.
+#+CAPTION: The Loading Procedure of FreeRDP Plugin
+[[./freerdp_plugin.jpg]]
