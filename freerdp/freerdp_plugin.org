@@ -26,6 +26,6 @@ xfreerdp --plugin drdynvc --data <subplugin>
 in new version of FreeRDP, there are currently two command line interfaces, you can now use both --plugin drdynvc and /dvc to load the Dynamic Virtual Channel plugin.
 
 * Plugin Framework
-The following graph shows the function call flow of plugin loading procedure.
+The following figure shows the function call flow of plugin loading procedure.
 #+CAPTION: The Loading Procedure of FreeRDP Plugin
 [[./freerdp_plugin.jpg]]
