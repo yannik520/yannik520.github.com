@@ -1,0 +1,25 @@
+* Interrupt Types in PCI Express
+There are three interrupt types in PCI Express. They are as follows:
+1. Legacy Interrups
+2. MSI Interrupts
+3. MSI-X Interrupts
+
+** Legacy Interrupts
+In PCI Express, four physical interrupt signals (INTA-INTD) are defined as in-band messages. 
+When the core needs to generate a legacy interrupt, it sends INTA-INTD message upstream which 
+whould ultimately be routed to the system interrupt controller.
+
+The assert INTx message will result in the assertion of INTx line virtually to the 
+interrupt controller and the Deassert INTx message will result in deassertion of the INTx line.
+
+#+CAPTION: Assert-Deassert INTx Messages
+[[./pcie_interrupts/Assert-Deassert_INTx_Messages.png]]
+
+When a Legacy device delivers an Assert_INTx message, it also sets its Interrupt Pending 
+bit located in memory or I/O space and also sets the Interrupt Pending bit located within the Configuration 
+Status register. Figure 2 shows a snap shot of the interrupt status register.
+
+#+CAPTION: Interrupt Status Register
+[[./pcie_interrupts/interrupt_status_register.png]]
+
+
