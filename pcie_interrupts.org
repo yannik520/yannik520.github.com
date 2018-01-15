@@ -4,7 +4,7 @@ There are three interrupt types in PCI Express. They are as follows:
 2. MSI Interrupts
 3. MSI-X Interrupts
 
-** Legacy Interrupts
+* Legacy Interrupts
 In PCI Express, four physical interrupt signals (INTA-INTD) are defined as in-band messages. 
 When the core needs to generate a legacy interrupt, it sends INTA-INTD message upstream which 
 whould ultimately be routed to the system interrupt controller.
@@ -22,4 +22,93 @@ Status register. Figure 2 shows a snap shot of the interrupt status register.
 #+CAPTION: Interrupt Status Register
 [[./pcie_interrupts/interrupt_status_register.png]]
 
+* MSI Interrupts
+All MSI capable devices implement the MSI capability struct defined in the PCI 
+Local Bus Specification v3.0.
 
+PCI Express Configuration Space Layout as following figure showed:
+
+#+CAPTION: PCI Express Configuration Space Layout
+[[./pcie_interrupts/pci_express_configuration_space_layout.png]]
+
+The Capabilities Pointer is located at offset 34h, this register points to the first item in the list of 
+capabilites, each capability in the list consists of an 8-bit ID field assigned by the PCI SIG, an 8 bit 
+pointer in configuration space to the next capability, and some number of additional registers immediately 
+following the pointer to implement that capability. Each capability must be DWORD aligned. The bottom two bits of all 
+pointers(including the initial pointer at 34h) are reserved and must be implemented as 00b although software must mask 
+them to allow for future uses of these bits. The following figure shows how the capability list is constructed.
+
+#+CAPTION: Example Capabilities List
+[[./pci_express_configuration_space_layout.png]]
+
+The Capability IDs are defined as in follow table:
+#+CAPTION: Capability IDs
+[[./pcie_interrupts/capability_id.png]]
+
+#+CAPTION: Type 0 Configuration Space Header
+[[./pci_express_configuration_space_layout.png]]
+
+The following figure is MSI Capability Structure:
+
+#+CAPTION: MSI Capability Structure
+[[./pcie_interrupts/msi_capability_structure.png]]
+
+PCI and PCI Express devices that enable MSI send interrupts to the CPU in-band. A 
+MSI enabled device will interrupt the CPU by writing to a specific address in memory with 
+a payload of 1 DW (double word). The figure below breaks down the contents of a 
+MSI interrupt.
+
+#+CAPTION: MSI Interrupt Packet Contents
+[[./pcie_interrupts/msi_interrupt_packet_contents.png]]
+
+The memory write address combined with the data field allows a device to generate 
+multiple unique interrupts. A memory write with an exclusive address and data field 
+is commonly referred to as a MSI vector. The device may support 1, 2, 4, 8, 16, or 32 
+interrupt vectors. A device indicates how many vectors it supports through the Multiple Message 
+Capable field within the Message Control Register.
+
+The address of the Memory Write is loaded from the Message Address field and the data 
+payload signifies the MSI vector to be sent. The number of MSI vectors allocated to the 
+device detemines what bits in the lower sixteen are writable. For example, a device which 
+has eight vectors allocated will only be able to modify the lower three bits of message data.
+Three writable bits allows the device to send 8 unique MSI interrupt vectors upstream.
+
+* MSI-X Interrupts
+MSI-X is an extension to MSI. It uses independent capability structure. MSI-X (first defined in PCI 3.0) permits a device to
+allocate up to 2048 interrupts. The single address used by original MSI was found to be restrictive for some architecture.
+In particular, it made it difficult to target individual interrupts to different processors, which is helpful in some high-speed
+networking applications. MSI-X allows a larger number of interrupts and gives each one a separate target address and
+data word. Devices with MSI-X do not necessarily support 2048 interrupts but at least 64 which is double the maximum
+MSI interrupts. Optional features in MSI (64-bit addressing and interrupt masking) are also mandatory with MSI-X.
+
+The MSI-X capability structure contains a BAR Indicator register(BIR) and Table 
+Offset register. The separate MSI-X Table structure typically contains multiple entries, 
+each consisting of a Message Address field and Message Data field, and thus capable of specifying a 
+unique vector. The MSI-X Table is mapped by the Base Address register indicated by the BIR, which refers to one of the 
+function's Base Address registers located beginning at 10h in Configuration Space.
+
+#+CAPTION: MSI-X Capability Structure
+[[./pcie_interrupts/msi-x_capability_structure.png]]
+
+#+CAPTION: MSI-X Table Sturcture
+[[./pcie_interrupts/msi-x_table_structure.png]]
+
+The Pending Bit Array (PBA) structure, illustrated in Figure below, contains the function’s
+Pending Bits, one per Table entry, organized as a packed array of bits within QWORDs.
+The last QWORD will not necessarily be fully populated.
+
+#+CAPTION: MSI-X PBA Structure
+[[./pcie_interrupts/msi-x_pba_structure.png]]
+
+To send a message, a function does a DWORD memory write to appropriate message address with 
+the appropriate message data.
+For MSI, the DWORD that is written is made up of the value in the MSI Message Data register in 
+the lower two bytes and zeroes in the upper two bytes.
+
+For MSI-X, the MSI-X Table contains at least one entry for every allocated vector, and the 32-bit 
+Message Data field value from a selected table entry is used in the message without any modification to 
+the low-order bits by the function.
+
+* References
+1. Xilinx_Answer_58495_PCIe_Interrupt_Debugging_Guide.pdf
+2. PCI Local Bus Specification Revision 3.0
