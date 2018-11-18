@@ -68,6 +68,7 @@
 * Project Management
 ** [[./git_and_repo.html][Git and Repo]]
 ** [[./git_server.html][Config Git Server]]
+** [[./create_a_new_yocto_layer.html][Yocto: Create a New Layer]]
 * Other
 ** [[./rpm_on_ubuntu.html][Create RPM Package On Ubuntu]]
 ** [[./python_plugin_framework.html][A Ptython Plugin Framework]]

@@ -1,0 +1,136 @@
+#+TITLE:     Yocto: Create a New Layer
+#+AUTHOR:    yannik
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      <2018-11-18 日>
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+CREATOR: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)
+#+HTML_CONTAINER: div
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_HEAD:
+#+HTML_HEAD_EXTRA:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+INFOJS_OPT:
+#+LATEX_HEADER:
+#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+
+* Creat a new layer
+To use yocto-layer command to create a new layer: yannik
+#+BEGIN_SRC shell
+$ yocto-layer create yannik
+#+END_SRC
+
+A new directory meta-yannik will be created after the command is executed, and add the layer to BBLAYERS in conf/bblayers.conf:
+#+BEGIN_SRC shell
+$ bitbake-layers add-layer <path-to-new-layer>
+#+END_SRC
+
+or directly edit bblayers.conf file to add the new layer to BBLAYERS.
+
+* Create sub-dirctories
+To create some necessary sub-directories:
+#+BEGIN_SRC shell
+$ mkdir -p recipes-kernel/linux
+$ mkdir -p recipes-kernel/linux/files
+#+END_SRC
+
+* Create Kernel Patch
+** Enter into kernel source code dirctory
+#+BEGIN_SRC shell
+$ bitbake -c devshell linux-renesas
+#+END_SRC
+
+** Add a new kernel module
+/drivers/misc/testmod.c:
+#+BEGIN_SRC c
+#include <linux/module.h>
+
+static int __init testmod_init(void)
+{
+	pr_infoi("%s ...\n", __func__);
+}
+
+static void __exit testmod_exit(void)
+{
+	pr_info("%s ...\n", __func__);
+}
+
+module_init(testmod_init);
+module_exit(testmod_exit);
+
+MODULE_LICENSE("GPL");
+#+END_SRC
+
+drivers/misc/Makefile (add to the end of the file):
+#+BEGIN_SRC shell
+obj-$(CONFIG_TESTMOD_DRIVER)     += testmod.o
+#+END_SRC
+
+drivers/misk/Kconfig (add to the end of the file):
+#+BEGIN_SRC shell
+config TESTMOD_DRIVER
+	tristate "Yocto Project Test Driver"
+	help
+	  This driver does nothing but print a message.
+#+END_SRC
+
+** Commit the new code
+#+BEGIN_SRC shell
+$ git status
+$ git add .
+$ git commit -m "Add the testmod driver"
+#+END_SRC
+
+** Create a patch file
+#+BEGIN_SRC shell
+$ git format-patch -n HEAD^
+#+END_SRC
+
+** Move the patch to our new layer
+Move the patch file 0001-Add-testmod-driver.patch to recipes-kernel/linux/files in our new layer. 
+
+** Add configuration fragment
+meta-yannik/recipes-kernel/linux/files/testmod.cfg:
+#+BEGIN_SRC shell
+# Enabel testmode driver
+CONFIG_TESTMODE_DRIVER=y
+#+END_SRC
+
+** Add configuration fragment and patch file into bbappend file
+meta-yannik/recipes-kernel/linux/linux-renesas_4.14.bbappend:
+#+BEGIN_SRC shell
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+SRC_URI += "file://testmod.cfg"
+SRC_URI += "file://0001-Add-testmod-driver.patch"
+#+END_SRC
+
+directory structure:
+#+BEGIN_SRC shell
+~/work/yocto_linux/meta-yannik ⌚ 15:52:43
+⚡ tree
+.
+├── conf
+│   └── layer.conf
+├── COPYING.MIT
+├── README
+└── recipes-kernel
+    └── linux
+        ├── bitbake-cookerdaemon.log
+        ├── files
+        │   ├── 0001-Add-testmod-driver.patch
+        │   ├── bitbake-cookerdaemon.log
+        │   └── testmod.cfg
+        └── linux-renesas_4.14.bbappend
+
+4 directories, 8 files
+#+END_SRC
+
+* Reconstruct Kernel
+#+BEGIN_SRC shell
+$ bitbake -C fetch linux-renesas
+#+END_SRC
+
