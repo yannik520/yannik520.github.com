@@ -44,7 +44,7 @@
 *** [[./input_dev_framework.html][The Framework of Input Device]]
 *** [[./sd_host_driver.html][SD Host Controller Driver]]
 *** [[./blkdevarch.html][Linux Block Device Architecture]]
-*** [[./chrdevarch.html][Linux Char Device Architecture]]
+*** [[./chrdevarch.html][Linux Character Device Architecture]]
 *** [[./i2c_driver_framework.html][I2C Driver Framework]]
 *** [[./spi_driver_framework.html][SPI Driver Framework]]
 *** [[./v4l2_framework.html][V4L2 Driver Architecture]]
