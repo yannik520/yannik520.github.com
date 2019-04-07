@@ -1,4 +1,4 @@
-#+TITLE:     Linux Char Device Architecture
+#+TITLE:     Linux Character Device Architecture
 #+AUTHOR:    Yannik Li
 #+EMAIL:     yqli_520@hotmail.com
 #+DATE:      2012-07-18 三
@@ -7,6 +7,7 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:nil skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+OPTIONS:   ^:nil
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
@@ -15,16 +16,16 @@
 #+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
 
 * Introduction
-  The data of char device just can be accessed as a stream, read/write it one by one, in other word, you can't random access the data from char device, which is the diffrence with block device.\\
-  heree, we will show how to write a char device driver, and to study linux char device driver in deeper level --- to analize the relationship between file system and char device driver. we'll to show how to access char device in user space in next section.
+  The data of character device just can be accessed as a stream, read/write it one by one, in other word, you can't random access the data from character device, which is the diffrence with block device.\\
+  heree, we will show how to write a character device driver, and to study linux character device driver in deeper level --- to analize the relationship between file system and character device driver. we'll to show how to access character device in user space in next section.
 ** Accress from user space
    In Linux, everything is a file, that means device can be accessed as a special type of file. you can call open() to get the file handle, and call read() to get data frome the device. in linux system, device node always be created in /dev directory, but it not means you must create it in the directory, you can create it in any directory, e.g., /tmp.\\
-   A device can access as the way mentioned above, and it has some differance with a nomal file, for a char device, we can use ioctl() to send cmd to device driver, and use mmap() to map memory from kernel space to user space, then the memory can access in user sapce directly.
-** How to write a char device driver
-   To write a char device driver, need to define a variable in the type of struct file\_operations, and initialize it with functions defied in driver, in the callback of \_\_init, you can call register\_chrdev() with MAJOR and file\_operations variable parameter to register a char device. after the step, you can mknode with MAJOR and access it with open/read/write fuctions in userspace.
-   It look likes very simple to complete a char device driver, Yes, it is so simple!
-* Char Device File System Init
-  There is a chrdev\_init() function in the file char\_dev.c, char device file system is initialized here, the first thing in this function to do is initializing the kobj\_map with kobj\_map\_init() function, the struct kboj\_map is defined as following:
+   A device can access as the way mentioned above, and it has some differance with a nomal file, for a character device, we can use ioctl() to send cmd to device driver, and use mmap() to map memory from kernel space to user space, then the memory can access in user sapce directly.
+** How to write a character device driver
+   To write a character device driver, need to define a variable in the type of struct file_operations, and initialize it with functions defied in driver, in the callback of __init, you can call register_chrdev() with MAJOR and file_operations variable parameter to register a character device. after the step, you can mknode with MAJOR and access it with open/read/write fuctions in userspace.
+   It look likes very simple to complete a character device driver, Yes, it is so simple!
+* Character Device File System Init
+  There is a chrdev_init() function in the file char_dev.c, character device file system is initialized here, the first thing in this function to do is initializing the kobj_map with kobj_map_init() function, the struct kboj_map is defined as following:
 #+BEGIN_SRC C
 struct kobj_map {
 	struct probe {
@@ -39,12 +40,12 @@ struct kobj_map {
 	struct mutex *lock;
 };
 #+END_SRC
-The number of array probes is defined as MAX major number for char device, so the max major number for char device is 255.
-** kobj\_map init
-the result of calling kobj\_map\_init() is as the following graph showd.\\
+The number of array probes is defined as MAX major number for character device, so the max major number for character device is 255.
+** kobj_map init
+the result of calling kobj_map_init() is as the following graph showd.\\
 [[./kobj_map_init.png]]
-** The analices of register\_chrdev()
-+ to call \_\_register\_chrdev\_region() to alloc a major not used and make chardevs[major] point to a new aclloced variable in type of struct char\_device\_struct.
+** The analices of register_chrdev()
++ to call __register_chrdev_region() to alloc a major not used and make chardevs[major] point to a new aclloced variable in type of struct char_device_struct.
 #+BEGIN_SRC C
 static struct char_device_struct {
 	struct char_device_struct *next;
@@ -55,20 +56,20 @@ static struct char_device_struct {
 	struct cdev *cdev;		/* will die */
 } *chrdevs[CHRDEV_MAJOR_HASH_SIZE];
 #+END_SRC
-+ to call cdev\_alloc to alloc a struct cdev variable and fill the fileds with fops and name passed in 
-+ then call cdev\_add() to add the char device.
-in cdev\_add() function, called kobj\_map() to add a probe to cdev\_map, which the probe with the field be filled with MKDEV(major, 0), the major is the major number of the char device. what happend as showed in following graph.\\
++ to call cdev_alloc to alloc a struct cdev variable and fill the fileds with fops and name passed in 
++ then call cdev_add() to add the char device.
+in cdev_add() function, called kobj_map() to add a probe to cdev_map, which the probe with the field be filled with MKDEV(major, 0), the major is the major number of the character device. what happend as showed in following graph.\\
 [[./kobj_map.png]]
 * Opening A Device File
 ** The interface with file system
-def\_chr\_fops is defined in char\_dev.c as following:
+def_chr_fops is defined in char_dev.c as following:
 #+BEGIN_SRC C
 const struct file_operations def_chr_fops = {
 	.open = chrdev_open,
 	.llseek = noop_llseek,
 };
 #+END_SRC
-and the def\_chr\_fops assigned to inode->i\_fops in init\_special\_inode()
+and the def_chr_fops assigned to inode->i_fops in init_special_inode()
 #+BEGIN_SRC C
 void init_special_inode(struct inode *inode, umode_t mode, dev_t rdev)
 {
@@ -90,7 +91,7 @@ void init_special_inode(struct inode *inode, umode_t mode, dev_t rdev)
 }
 #+END_SRC
 
-** What have been done in chrdev\_open()
+** What have been done in chrdev_open()
 The detail please see the comment in following code.
 #+BEGIN_SRC C
 static int chrdev_open(struct inode *inode, struct file *filp)

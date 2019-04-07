@@ -1,67 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>Linux Char Device Architecture</title>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-<meta name="title" content="Linux Char Device Architecture"/>
-<meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-07-18 三"/>
-<meta name="author" content="Yannik Li"/>
-<meta name="description" content=""/>
-<meta name="keywords" content=""/>
+<title>Linux Character Device Architecture</title>
+<!-- 2019-04-07 Sun 14:13 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Yannik Li" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
-  html { font-family: Times, serif; font-size: 12pt; }
   .title  { text-align: center; }
-  .todo   { color: red; }
+  .todo   { font-family: monospace; color: red; }
   .done   { color: green; }
-  .tag    { background-color: #add8e6; font-weight:normal }
-  .target { }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
   .timestamp { color: #bebebe; }
   .timestamp-kwd { color: #5f9ea0; }
-  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
-  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
-  .center {margin-left:auto; margin-right:auto; text-align:center;}
-  p.verse { margin-left: 3% }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
   pre {
-	border: 1pt solid #AEBDCC;
-	background-color: #F3F5F7;
-	padding: 5pt;
-	font-family: courier, monospace;
-        font-size: 90%;
-        overflow:auto;
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
   }
-  table { border-collapse: collapse; }
-  td, th { vertical-align: top;  }
-  th.right  { text-align:center;  }
-  th.left   { text-align:center;   }
-  th.center { text-align:center; }
-  td.right  { text-align:right;  }
-  td.left   { text-align:left;   }
-  td.center { text-align:center; }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
   dt { font-weight: bold; }
-  div.figure { padding: 0.5em; }
-  div.figure p { text-align: center; }
-  div.inlinetask {
-    padding:10px;
-    border:2px solid gray;
-    margin:10px;
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
     background: #ffffcc;
   }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
   textarea { overflow-x: auto; }
-  .linenr { font-size:smaller }
-  .code-highlighted {background-color:#ffff00;}
-  .org-info-js_info-navigation { border-style:none; }
-  #org-info-js_console-label { font-size:10px; font-weight:bold;
-                               white-space:nowrap; }
-  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
-                                 font-weight:bold; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
   /*]]>*/-->
 </style>
 <link rel="stylesheet" type="text/css" href="./style.css" />
 <script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
  function CodeHighlightOn(elem, id)
  {
@@ -83,282 +135,259 @@
  }
 /*]]>*///-->
 </script>
-
 </head>
 <body>
-
-<div id="preamble">
-
-</div>
-
 <div id="content">
-<h1 class="title">Linux Char Device Architecture</h1>
-
-
+<h1 class="title">Linux Character Device Architecture</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1 Introduction</a>
+<li><a href="#sec-1">1. Introduction</a>
 <ul>
-<li><a href="#sec-1-1">1.1 Accress from user space</a></li>
-<li><a href="#sec-1-2">1.2 How to write a char device driver</a></li>
+<li><a href="#sec-1-1">1.1. Accress from user space</a></li>
+<li><a href="#sec-1-2">1.2. How to write a character device driver</a></li>
 </ul>
 </li>
-<li><a href="#sec-2">2 Char Device File System Init</a>
+<li><a href="#sec-2">2. Character Device File System Init</a>
 <ul>
-<li><a href="#sec-2-1">2.1 kobj_map init</a></li>
-<li><a href="#sec-2-2">2.2 The analices of register_chrdev()</a></li>
+<li><a href="#sec-2-1">2.1. kobj_map init</a></li>
+<li><a href="#sec-2-2">2.2. The analices of register_chrdev()</a></li>
 </ul>
 </li>
-<li><a href="#sec-3">3 Opening A Device File</a>
+<li><a href="#sec-3">3. Opening A Device File</a>
 <ul>
-<li><a href="#sec-3-1">3.1 The interface with file system</a></li>
-<li><a href="#sec-3-2">3.2 What have been done in chrdev_open()</a></li>
-<li><a href="#sec-3-3">3.3 The call graph of open()</a></li>
+<li><a href="#sec-3-1">3.1. The interface with file system</a></li>
+<li><a href="#sec-3-2">3.2. What have been done in chrdev_open()</a></li>
+<li><a href="#sec-3-3">3.3. The call graph of open()</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-1" class="outline-2">
+<div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
-
-<p>  The data of char device just can be accessed as a stream, read/write it one by one, in other word, you can't random access the data from char device, which is the diffrence with block device.<br/>
-  heree, we will show how to write a char device driver, and to study linux char device driver in deeper level &mdash; to analize the relationship between file system and char device driver. we'll to show how to access char device in user space in next section.
+<p>
+The data of character device just can be accessed as a stream, read/write it one by one, in other word, you can't random access the data from character device, which is the diffrence with block device.<br  />
+  heree, we will show how to write a character device driver, and to study linux character device driver in deeper level &#x2014; to analize the relationship between file system and character device driver. we'll to show how to access character device in user space in next section.
 </p>
 </div>
-
-<div id="outline-container-1-1" class="outline-3">
+<div id="outline-container-sec-1-1" class="outline-3">
 <h3 id="sec-1-1"><span class="section-number-3">1.1</span> Accress from user space</h3>
 <div class="outline-text-3" id="text-1-1">
-
-<p>   In Linux, everything is a file, that means device can be accessed as a special type of file. you can call open() to get the file handle, and call read() to get data frome the device. in linux system, device node always be created in /dev directory, but it not means you must create it in the directory, you can create it in any directory, e.g., /tmp.<br/>
-   A device can access as the way mentioned above, and it has some differance with a nomal file, for a char device, we can use ioctl() to send cmd to device driver, and use mmap() to map memory from kernel space to user space, then the memory can access in user sapce directly.
-</p></div>
-
-</div>
-
-<div id="outline-container-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> How to write a char device driver</h3>
-<div class="outline-text-3" id="text-1-2">
-
-<p>   To write a char device driver, need to define a variable in the type of struct file_operations, and initialize it with functions defied in driver, in the callback of __init, you can call register_chrdev() with MAJOR and file_operations variable parameter to register a char device. after the step, you can mknode with MAJOR and access it with open/read/write fuctions in userspace.
-   It look likes very simple to complete a char device driver, Yes, it is so simple!
-</p></div>
-</div>
-
-</div>
-
-<div id="outline-container-2" class="outline-2">
-<h2 id="sec-2"><span class="section-number-2">2</span> Char Device File System Init</h2>
-<div class="outline-text-2" id="text-2">
-
-<p>  There is a chrdev_init() function in the file char_dev.c, char device file system is initialized here, the first thing in this function to do is initializing the kobj_map with kobj_map_init() function, the struct kboj_map is defined as following:
+<p>
+In Linux, everything is a file, that means device can be accessed as a special type of file. you can call open() to get the file handle, and call read() to get data frome the device. in linux system, device node always be created in /dev directory, but it not means you must create it in the directory, you can create it in any directory, e.g., /tmp.<br  />
+   A device can access as the way mentioned above, and it has some differance with a nomal file, for a character device, we can use ioctl() to send cmd to device driver, and use mmap() to map memory from kernel space to user space, then the memory can access in user sapce directly.
 </p>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> How to write a character device driver</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+To write a character device driver, need to define a variable in the type of struct file_operations, and initialize it with functions defied in driver, in the callback of __init, you can call register_chrdev() with MAJOR and file_operations variable parameter to register a character device. after the step, you can mknode with MAJOR and access it with open/read/write fuctions in userspace.
+It look likes very simple to complete a character device driver, Yes, it is so simple!
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Character Device File System Init</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+There is a chrdev_init() function in the file char_dev.c, character device file system is initialized here, the first thing in this function to do is initializing the kobj_map with kobj_map_init() function, the struct kboj_map is defined as following:
+</p>
+<div class="org-src-container">
 
-
-<pre class="example">struct kobj_map {
-        struct probe {
-                struct probe *next;
-                dev_t dev;
-                unsigned long range;
-                struct module *owner;
-                kobj_probe_t *get;
-                int (*lock)(dev_t, void *);
-                void *data;
-        } *probes[255];
-        struct mutex *lock;
+<pre class="src src-C">struct kobj_map {
+	struct probe {
+		struct probe *next;
+		dev_t dev;
+		unsigned long range;
+		struct module *owner;
+		kobj_probe_t *get;
+		int (*lock)(dev_t, void *);
+		void *data;
+	} *probes[255];
+	struct mutex *lock;
 };
 </pre>
-
+</div>
 <p>
-The number of array probes is defined as MAX major number for char device, so the max major number for char device is 255.
+The number of array probes is defined as MAX major number for character device, so the max major number for character device is 255.
 </p>
 </div>
-
-<div id="outline-container-2-1" class="outline-3">
+<div id="outline-container-sec-2-1" class="outline-3">
 <h3 id="sec-2-1"><span class="section-number-3">2.1</span> kobj_map init</h3>
 <div class="outline-text-3" id="text-2-1">
-
-<p>the result of calling kobj_map_init() is as the following graph showd.<br/>
-<img src="./kobj_map_init.png"  alt="./kobj_map_init.png" />
-</p></div>
-
+<p>
+the result of calling kobj_map_init() is as the following graph showd.<br  />
+<img src="./kobj_map_init.png" alt="kobj_map_init.png" />
+</p>
 </div>
-
-<div id="outline-container-2-2" class="outline-3">
+</div>
+<div id="outline-container-sec-2-2" class="outline-3">
 <h3 id="sec-2-2"><span class="section-number-3">2.2</span> The analices of register_chrdev()</h3>
 <div class="outline-text-3" id="text-2-2">
-
-<ul>
+<ul class="org-ul">
 <li>to call __register_chrdev_region() to alloc a major not used and make chardevs[major] point to a new aclloced variable in type of struct char_device_struct.
 </li>
 </ul>
+<div class="org-src-container">
 
-
-
-
-<pre class="example">static struct char_device_struct {
-        struct char_device_struct *next;
-        unsigned int major;
-        unsigned int baseminor;
-        int minorct;
-        char name[64];
-        struct cdev *cdev;              /* will die */
+<pre class="src src-C">static struct char_device_struct {
+	struct char_device_struct *next;
+	unsigned int major;
+	unsigned int baseminor;
+	int minorct;
+	char name[64];
+	struct cdev *cdev;              /* will die */
 } *chrdevs[CHRDEV_MAJOR_HASH_SIZE];
 </pre>
-
-<ul>
+</div>
+<ul class="org-ul">
 <li>to call cdev_alloc to alloc a struct cdev variable and fill the fileds with fops and name passed in 
 </li>
 <li>then call cdev_add() to add the char device.
 </li>
 </ul>
-
-<p>in cdev_add() function, called kobj_map() to add a probe to cdev_map, which the probe with the field be filled with MKDEV(major, 0), the major is the major number of the char device. what happend as showed in following graph.<br/>
-<img src="./kobj_map.png"  alt="./kobj_map.png" />
-</p></div>
+<p>
+in cdev_add() function, called kobj_map() to add a probe to cdev_map, which the probe with the field be filled with MKDEV(major, 0), the major is the major number of the character device. what happend as showed in following graph.<br  />
+<img src="./kobj_map.png" alt="kobj_map.png" />
+</p>
 </div>
-
 </div>
-
-<div id="outline-container-3" class="outline-2">
+</div>
+<div id="outline-container-sec-3" class="outline-2">
 <h2 id="sec-3"><span class="section-number-2">3</span> Opening A Device File</h2>
 <div class="outline-text-2" id="text-3">
-
-
-</div>
-
-<div id="outline-container-3-1" class="outline-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
 <h3 id="sec-3-1"><span class="section-number-3">3.1</span> The interface with file system</h3>
 <div class="outline-text-3" id="text-3-1">
-
-<p>def_chr_fops is defined in char_dev.c as following:
+<p>
+def_chr_fops is defined in char_dev.c as following:
 </p>
+<div class="org-src-container">
 
-
-<pre class="example">const struct file_operations def_chr_fops = {
-        .open = chrdev_open,
-        .llseek = noop_llseek,
+<pre class="src src-C">const struct file_operations def_chr_fops = {
+	.open = chrdev_open,
+	.llseek = noop_llseek,
 };
 </pre>
-
+</div>
 <p>
 and the def_chr_fops assigned to inode-&gt;i_fops in init_special_inode()
 </p>
+<div class="org-src-container">
 
-
-<pre class="example">void init_special_inode(struct inode *inode, umode_t mode, dev_t rdev)
+<pre class="src src-C">void init_special_inode(struct inode *inode, umode_t mode, dev_t rdev)
 {
-        inode-&gt;i_mode = mode;
-        if (S_ISCHR(mode)) {
-                inode-&gt;i_fop = &amp;def_chr_fops;
-                inode-&gt;i_rdev = rdev;
-        } else if (S_ISBLK(mode)) {
-                inode-&gt;i_fop = &amp;def_blk_fops;
-                inode-&gt;i_rdev = rdev;
-        } else if (S_ISFIFO(mode))
-                inode-&gt;i_fop = &amp;def_fifo_fops;
-        else if (S_ISSOCK(mode))
-                inode-&gt;i_fop = &amp;bad_sock_fops;
-        else
-                printk(KERN_DEBUG "init_special_inode: bogus i_mode (%o) for"
-                                  " inode %s:%lu\n", mode, inode-&gt;i_sb-&gt;s_id,
-                                  inode-&gt;i_ino);
+	inode-&gt;i_mode = mode;
+	if (S_ISCHR(mode)) {
+		inode-&gt;i_fop = &amp;def_chr_fops;
+		inode-&gt;i_rdev = rdev;
+	} else if (S_ISBLK(mode)) {
+		inode-&gt;i_fop = &amp;def_blk_fops;
+		inode-&gt;i_rdev = rdev;
+	} else if (S_ISFIFO(mode))
+		inode-&gt;i_fop = &amp;def_fifo_fops;
+	else if (S_ISSOCK(mode))
+		inode-&gt;i_fop = &amp;bad_sock_fops;
+	else
+		printk(KERN_DEBUG "init_special_inode: bogus i_mode (%o) for"
+				  " inode %s:%lu\n", mode, inode-&gt;i_sb-&gt;s_id,
+				  inode-&gt;i_ino);
 }
 </pre>
-
-
+</div>
+</div>
 </div>
 
-</div>
-
-<div id="outline-container-3-2" class="outline-3">
+<div id="outline-container-sec-3-2" class="outline-3">
 <h3 id="sec-3-2"><span class="section-number-3">3.2</span> What have been done in chrdev_open()</h3>
 <div class="outline-text-3" id="text-3-2">
-
-<p>The detail please see the comment in following code.
+<p>
+The detail please see the comment in following code.
 </p>
+<div class="org-src-container">
 
-
-<pre class="example">static int chrdev_open(struct inode *inode, struct file *filp)
+<pre class="src src-C">static int chrdev_open(struct inode *inode, struct file *filp)
 {
-        struct cdev *p;
-        struct cdev *new = NULL;
-        int ret = 0;
+	struct cdev *p;
+	struct cdev *new = NULL;
+	int ret = 0;
 
-        spin_lock(&amp;cdev_lock);
-        p = inode-&gt;i_cdev;
-        if (!p) {
-                struct kobject *kobj;
-                int idx;
-                spin_unlock(&amp;cdev_lock);
-                kobj = kobj_lookup(cdev_map, inode-&gt;i_rdev, &amp;idx); // to lookup kobj in cdev_map with major and minor number
-                if (!kobj)
-                        return -ENXIO;
-                new = container_of(kobj, struct cdev, kobj);
-                spin_lock(&amp;cdev_lock);
-                /* Check i_cdev again in case somebody beat us to it while
-                   we dropped the lock. */
-                p = inode-&gt;i_cdev;
-                if (!p) {
-                        inode-&gt;i_cdev = p = new;
-                        list_add(&amp;inode-&gt;i_devices, &amp;p-&gt;list);
-                        new = NULL;
-                } else if (!cdev_get(p))
-                        ret = -ENXIO;
-        } else if (!cdev_get(p))
-                ret = -ENXIO;
-        spin_unlock(&amp;cdev_lock);
-        cdev_put(new);
-        if (ret)
-                return ret;
+	spin_lock(&amp;cdev_lock);
+	p = inode-&gt;i_cdev;
+	if (!p) {
+		struct kobject *kobj;
+		int idx;
+		spin_unlock(&amp;cdev_lock);
+		kobj = kobj_lookup(cdev_map, inode-&gt;i_rdev, &amp;idx); // to lookup kobj in cdev_map with major and minor number
+		if (!kobj)
+			return -ENXIO;
+		new = container_of(kobj, struct cdev, kobj);
+		spin_lock(&amp;cdev_lock);
+		/* Check i_cdev again in case somebody beat us to it while
+		   we dropped the lock. */
+		p = inode-&gt;i_cdev;
+		if (!p) {
+			inode-&gt;i_cdev = p = new;
+			list_add(&amp;inode-&gt;i_devices, &amp;p-&gt;list);
+			new = NULL;
+		} else if (!cdev_get(p))
+			ret = -ENXIO;
+	} else if (!cdev_get(p))
+		ret = -ENXIO;
+	spin_unlock(&amp;cdev_lock);
+	cdev_put(new);
+	if (ret)
+		return ret;
 
-        ret = -ENXIO;
-        /* get file_operations defined in driver and assigned to filp-&gt;f_op,
-        when user call read/write in user space, it will call read/write define in driver directly.*/
-        filp-&gt;f_op = fops_get(p-&gt;ops);
-        if (!filp-&gt;f_op)
-                goto out_cdev_put;
+	ret = -ENXIO;
+	/* get file_operations defined in driver and assigned to filp-&gt;f_op,
+	when user call read/write in user space, it will call read/write define in driver directly.*/
+	filp-&gt;f_op = fops_get(p-&gt;ops);
+	if (!filp-&gt;f_op)
+		goto out_cdev_put;
 
-        if (filp-&gt;f_op-&gt;open) {
-                ret = filp-&gt;f_op-&gt;open(inode, filp); // call open defined in driver
-                if (ret)
-                        goto out_cdev_put;
-        }
+	if (filp-&gt;f_op-&gt;open) {
+		ret = filp-&gt;f_op-&gt;open(inode, filp); // call open defined in driver
+		if (ret)
+			goto out_cdev_put;
+	}
 
-        return 0;
+	return 0;
 
  out_cdev_put:
-        cdev_put(p);
-        return ret;
+	cdev_put(p);
+	return ret;
 }
 </pre>
-
-
+</div>
+</div>
 </div>
 
-</div>
-
-<div id="outline-container-3-3" class="outline-3">
+<div id="outline-container-sec-3-3" class="outline-3">
 <h3 id="sec-3-3"><span class="section-number-3">3.3</span> The call graph of open()</h3>
 <div class="outline-text-3" id="text-3-3">
 
-<p><img src="./open.png"  alt="./open.png" />
-</p></div>
+<div class="figure">
+<p><img src="./open.png" alt="open.png" />
+</p>
 </div>
 </div>
 </div>
-
-<div id="postamble">
+</div>
+</div>
+<div id="postamble" class="status">
 <p class="date">Date: 2012-07-18 三</p>
 <p class="author">Author: Yannik Li</p>
-<p class="creator">Org version 7.8.11 with Emacs version 24</p>
-<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
-
+<p class="date">Created: 2019-04-07 Sun 14:13</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.3.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>
