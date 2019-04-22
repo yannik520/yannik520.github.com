@@ -17,7 +17,7 @@
 #+LATEX_HEADER:
 
 * About Me
-  I'm a software engineer, multi-year experance in linux kernel development and other RTOS porting. \\
+  I'm a software engineer, with more than 10 years of experience in Android/Linux kernel development and RTOS porting. \\
 [[./yannik_li.jpg]]
 
 + My Resume :[[./liyanqing.doc]]
@@ -25,17 +25,17 @@
 * Operating System
 ** My "YakOS"
 *** The Instroduction of YakOS
-    YakOS is an embedded operating system kernel just support for ARM at present, it is in developing.
+    YakOS is an embedded operating system kernel just support for ARM architecture at present, it is still under development.
 *** How to get the code
-    You can get code frome:\\
-    [[git@github.com:yannik520/YakOS.git]]\\
+    You can clone code from: \\
+    https://github.com/yannik520/YakOS.git \\
     or read code directly from:\\
-    https://github.com/yannik520/YakOS\\
+    https://github.com/yannik520/YakOS \\
     Documents about YakOS:\\
-    [[https://github.com/yannik520/YakOS/tree/master/The_Design_and_Realization_of_yakOS/yakOS.html][The Design and Realization of yakOS]]
+    [[https://github.com/yannik520/YakOS/tree/master/The_Design_and_Realization_of_yakOS/yakOS.html][The Design and Implementation of yakOS]]
 
 ** [[./lkm.html][The Implementation of Loadable Kernel Module]]
-** [[./lkm_in_rtos.html][LKM介绍及其在嵌入式系统中的应用]]
+** [[./lkm_in_rtos.html][LKM Itroduction and Its Application in Embeddded System]]
 * Bootloader
 ** UBoot
 *** [[./uboot_code_relocate.html][Uboot Code Relocation]]
