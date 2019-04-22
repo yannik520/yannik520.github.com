@@ -1,0 +1,42 @@
+#+TITLE:     Wait Queue Example
+#+AUTHOR:    Yanqing.Li
+#+EMAIL:     yannik520@gmail.com
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+OPTIONS: ^:nil
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../style.css" />
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+CREATOR: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.0.50 (<a href="https://orgmode.org">Org</a> mode 9.1.9)
+#+LATEX_HEADER:
+
+* Wait queue introduction
+Wait queues are used to wait for particular conditions to be true, and to sense data and resource availability.
+Every process want to sleep is queued in the task_list in wait queue and put into sleep state until a condition becomes true.
+
+* Wait queue API
+The functions related to wait queue are defined in <linux/wait.h>, all these functions are as following:
++ Static declaration: \\
+  DECLATION_WAIT_QUEUE_HEAD(name)
+
++ Dynamic declaration: \\
+  wait_queue_head_t my_wait_queue; \\
+  init_waitqueue_head(&my_wait_queue);
+
++ Blocking: \\
+  int wait_event_interruptible(wait_queue_head_t q, CONDITION);
+
++ Unblocking: \\
+  void wake_up_interruptible(wait_queue_head_t *q);
+
+* Example Code
+[[./src/wait_queue.c][wait_queue.c]]

@@ -1,7 +1,6 @@
 #+TITLE:     Linux Driver Code
 #+AUTHOR:    Yanqing Li
 #+EMAIL:     yannik520@gmail.com
-#+DATE:      2012-11-01 四
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en
@@ -13,7 +12,7 @@
 #+LINK_UP:   
 #+LINK_HOME: 
 #+XSLT:
-#+STYLE: <link rel="stylesheet" type="text/css" href="./style.css" />
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
 
 * Virtual Mouse Driver
 I wrote a virtual mouse driver to use keyboard to control mouse cursor.\\
@@ -39,3 +38,9 @@ qfs is a simple file system just has one file.
 maskfs is modified from ecryptfs, I used it to mask all files in a directory, and want to say: what you saw is not necessarily true.
 
 [[./linux_driver_code/maskfs.tar.bz2][maskfs code]]
+
+* [[./linux_driver_code/wait_queue/wait_queue_example.html][Wait Queue Example]]
+* [[./linux_driver_code/timer/timer_example.html][Timer Example]]
+* [[./linux_driver_code/locking_mechanism/locking_mechanism.html][Kernel Locking Mechanism]]
+* [[./linux_driver_code/deferring_mechanism/deferring_mechanism.html][Work Deferring Mechanism]]
+

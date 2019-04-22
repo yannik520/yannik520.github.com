@@ -1,0 +1,82 @@
+#+TITLE:     Timer Example
+#+AUTHOR:    Yanqing.Li
+#+EMAIL:     yannik520@gmail.com
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+OPTIONS: ^:nil
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../style.css" />
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+CREATOR: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.0.50 (<a href="https://orgmode.org">Org</a> mode 9.1.9)
+#+LATEX_HEADER:
+
+* Timer API
+A timer is represented in the kernel as an instance of timer_list:
+#+BEGIN_SRC 
+#include <linux/timer.h>
+
+struct timer_list {
+	/*
+	 * All fields that change during normal runtime grouped to the
+	 * same cacheline
+	 */
+	struct hlist_node	entry;
+	unsigned long		expires;
+	void			(*function)(struct timer_list *);
+	u32			flags;
+
+#ifdef CONFIG_LOCKDEP
+	struct lockdep_map	lockdep_map;
+#endif
+};
+#+END_SRC
+
+expires is an absolute value in jiffies. entry is a doubley linked list, and a callback function.
+
+* Timer setup initialization
+The following are steps to initialize timers:
+
++ *Setting up the timer:* Set up the timer, feeding the user-defined callback function.
+#+BEGIN_SRC 
+/**
+ * timer_setup - prepare a timer for first use
+ * @timer: the timer in question
+ * @callback: the function to call when timer expires
+ * @flags: any TIMER_* flags
+ *
+ * Regular timer initialization should use either DEFINE_TIMER() above,
+ * or timer_setup(). For timers on the stack, timer_setup_on_stack() must
+ * be used and must be balanced with a call to destroy_timer_on_stack().
+ */
+#define timer_setup(timer, callback, flags)			\
+	__init_timer((timer), (callback), (flags))
+#+END_SRC
+
++ *Setting the expiration time:* When the timer is initialized, we need to set its expiration before the callback gets fired:
+#+BEGIN_SRC 
+int mod_timer(struct timer_list *timer, unsigned long expires);
+#+END_SRC
+
++ *Releasing the timer:* When you are done with the timer, it needs to be released:
+#+BEGIN_SRC 
+int del_timer(struct timer_list * timer);
+int del_timer_sync(struct timer_list *timer);
+#+END_SRC
+del_timer() return 0 on an inactive timer, and return 1 on an active timer, del_timer_sync waits for the handler to finish its execution, even those that may happen on another CPU.
+You should not hold a lock preventing the handler's completion, otherwise it will result in a dead lock. You should release the timer in the module cleanup routine.
+You can independently check whether the timer is running or not:
+#+BEGIN_SRC 
+int timer_pending(const struct timer_list * timer);
+#+END_SRC
+
+* Example Code
+[[./src/timer_module.c][timer_module.c]]

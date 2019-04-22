@@ -1,0 +1,94 @@
+#+TITLE:     Locking Mechanism
+#+AUTHOR:    Yanqing Li
+#+EMAIL:     yannik520@gmail.com
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+OPTIONS: ^:nil
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../style.css" />
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+CREATOR: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.0.50 (<a href="https://orgmode.org">Org</a> mode 9.1.9)
+#+LATEX_HEADER:
+
+* Kernel locking mechanism
+The kernel provides several locking mechanisms. The most important are:
+ 
++ Semaphore
++ Mutex
++ Spinlock
+
+* Mutex
+The required header is include/linux/mutex.h
+
+** Mutex API
+*** Declare
++ Statically: \\
+  DEFINE_MUTE(my_mutex); \\
++ Dynamically: \\
+  struct mutex my_mutex; \\
+  mutex_init(&my_mutex); \\
+*** Acquire and release
++ Lock: \\
+  void mutex_lock(struct mutex *lock); \\
+  int __must_check mutex_lock_interruptible(struct mutex *lock); \\
+  int __must_check mutex_lock_killable(struct mutex *lock); \\
++ Unlock: \\
+  void mutex_unlock(struct mutex *lock); \\
+
+You can use mutex_is_locked() to check whether a mutex is locked or not: \\
+bool mutex_is_locked(struct mutex *lock);
+
+There is also mutex_trylock(), that acquires the mutex if it is not already locked, and return1; otherwise, it returns 0: \\
+int mutex_trylock(struct mutex *lock);
+
+Here is an example of a muex implementation:
+#+BEGIN_SRC 
+struct mutex my_mutex;
+mutex_init(&my_mutex);
+
+/* inside a work or a thread */
+mutex_lock(&my_mutex);
+access_shared_memory();
+mutex_unlock(&my_mutex);
+#+END_SRC
+
+* Spinelock
+spin_lock() and spin_lock_irqsave() are used to acquire a spinlock, all of them will disable the preemption on the process, Since spin_lock_irqsave also disable the interrupts on the CPU.
+If you do not know in advance what system you will write the driver for, it is recommended you acquire a spinlock using spin_lock_irqsave(), which disables interrupts on the current process before the
+spinlock. spin_lock_irqsave() internally calls local_irq_save().
+
+The following is an example:
+#+BEGIN_SRC 
+#include <linux/spinlock.h>
+
+/* some where */
+spinlock_t my_spinlock;
+spin_lock_init(&my_spinlock);
+
+static irqreturn_t my_irq_handler(int irq, void *data)
+{
+	unsigned long status, flags;
+
+	spin_lock_irqsave(&my_spinlock, flags);
+	status = access_shared_resources();
+	spin_unlock_irqrestore(&my_spinlock, flags);
+
+	return IRQ_HANDLED;
+}
+#+END_SRC
+
+* Spinlock versus mutexes
+Uesd for concurrency in the kernel, spinlocks and mutexes each have their own objectives.
+
++ Mutexes protect the process's critical resource, whereas spinlock protects the IRQ handler's critical sections.
++ Mutexes put contenders to sleep until the lock is acquired, whereas spinlocks infinitely spin in a loop(consuming CPU) until the lock is acquired.
++ Because of the previous poing, you can't hold spinlock for a long time, since waiters will waste CPU time waiting for the lock, whereas a mutex can be held as long as the resource needs to be protected, since contenders are put to sleep in a wait queue.

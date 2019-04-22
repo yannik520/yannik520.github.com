@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-04-22 一 21:28 -->
+<!-- 2019-04-20 六 18:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Linux Driver Code</title>
+<title>Timer Example</title>
 <meta name="generator" content="Org mode" />
-<meta name="author" content="Yanqing Li" />
+<meta name="author" content="Yanqing.Li" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center;
@@ -180,7 +180,7 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" />
+<link rel="stylesheet" type="text/css" href="../../style.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -230,89 +230,111 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">Linux Driver Code</h1>
+<h1 class="title">Timer Example</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge5470cc">1. Virtual Mouse Driver</a></li>
-<li><a href="#org147064e">2. A simple file system: qfs</a></li>
-<li><a href="#org7612cc6">3. A stackable file system: maskfs</a></li>
-<li><a href="#org1135a96">4. Wait Queue Example</a></li>
-<li><a href="#org235271b">5. Timer Example</a></li>
-<li><a href="#orgb4fdf11">6. Kernel Locking Mechanism</a></li>
-<li><a href="#org31aec7b">7. Work Deferring Mechanism</a></li>
+<li><a href="#orge944cd5">1. Timer API</a></li>
+<li><a href="#org91d05a9">2. Timer setup initialization</a></li>
+<li><a href="#org0ce15dc">3. Example Code</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orge5470cc" class="outline-2">
-<h2 id="orge5470cc"><span class="section-number-2">1</span> Virtual Mouse Driver</h2>
+<div id="outline-container-orge944cd5" class="outline-2">
+<h2 id="orge944cd5"><span class="section-number-2">1</span> Timer API</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-I wrote a virtual mouse driver to use keyboard to control mouse cursor.<br />
-Usage:<br />
+A timer is represented in the kernel as an instance of timer_list:
 </p>
-<ul class="org-ul">
-<li>Ctr+Alt+p: move cursor upward</li>
-<li>Ctr+Alt+n: move cursor down</li>
-<li>Ctr+Alt+b: move cursor left</li>
-<li>Ctr+Alt+f: move cursor right</li>
-<li>Ctr+Alt+Space: left mouse button clicked</li>
-<li>Ctr+Alt+m: right mouse button clicked</li>
-<li>Alt+u: wheel scroll up</li>
-<li>Alt+v: Wheel scroll down</li>
-<li>Capslock: lock speed</li>
-</ul>
+<pre class="example">
+#include &lt;linux/timer.h&gt;
+
+struct timer_list {
+	/*
+	 * All fields that change during normal runtime grouped to the
+	 * same cacheline
+	 */
+	struct hlist_node	entry;
+	unsigned long		expires;
+	void			(*function)(struct timer_list *);
+	u32			flags;
+
+#ifdef CONFIG_LOCKDEP
+	struct lockdep_map	lockdep_map;
+#endif
+};
+</pre>
 
 <p>
-<a href="./linux_driver_code/vmouse_driver.tar.bz2">virtual mouse driver code</a>
+expires is an absolute value in jiffies. entry is a doubley linked list, and a callback function.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org147064e" class="outline-2">
-<h2 id="org147064e"><span class="section-number-2">2</span> A simple file system: qfs</h2>
+<div id="outline-container-org91d05a9" class="outline-2">
+<h2 id="org91d05a9"><span class="section-number-2">2</span> Timer setup initialization</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-qfs is a simple file system just has one file.
+The following are steps to initialize timers:
 </p>
 
+<ul class="org-ul">
+<li><b>Setting up the timer:</b> Set up the timer, feeding the user-defined callback function.</li>
+</ul>
+<pre class="example">
+/**
+ * timer_setup - prepare a timer for first use
+ * @timer: the timer in question
+ * @callback: the function to call when timer expires
+ * @flags: any TIMER_* flags
+ *
+ * Regular timer initialization should use either DEFINE_TIMER() above,
+ * or timer_setup(). For timers on the stack, timer_setup_on_stack() must
+ * be used and must be balanced with a call to destroy_timer_on_stack().
+ */
+#define timer_setup(timer, callback, flags)			\
+	__init_timer((timer), (callback), (flags))
+</pre>
+
+<ul class="org-ul">
+<li><b>Setting the expiration time:</b> When the timer is initialized, we need to set its expiration before the callback gets fired:</li>
+</ul>
+<pre class="example">
+int mod_timer(struct timer_list *timer, unsigned long expires);
+</pre>
+
+<ul class="org-ul">
+<li><b>Releasing the timer:</b> When you are done with the timer, it needs to be released:</li>
+</ul>
+<pre class="example">
+int del_timer(struct timer_list * timer);
+int del_timer_sync(struct timer_list *timer);
+</pre>
 <p>
-<a href="./linux_driver_code/qfs.tar.bz2">qfs code</a>
+del_timer() return 0 on an inactive timer, and return 1 on an active timer, del_timer_sync waits for the handler to finish its execution, even those that may happen on another CPU.
+You should not hold a lock preventing the handler's completion, otherwise it will result in a dead lock. You should release the timer in the module cleanup routine.
+You can independently check whether the timer is running or not:
 </p>
+<pre class="example">
+int timer_pending(const struct timer_list * timer);
+</pre>
 </div>
 </div>
 
-<div id="outline-container-org7612cc6" class="outline-2">
-<h2 id="org7612cc6"><span class="section-number-2">3</span> A stackable file system: maskfs</h2>
+<div id="outline-container-org0ce15dc" class="outline-2">
+<h2 id="org0ce15dc"><span class="section-number-2">3</span> Example Code</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-maskfs is modified from ecryptfs, I used it to mask all files in a directory, and want to say: what you saw is not necessarily true.
-</p>
-
-<p>
-<a href="./linux_driver_code/maskfs.tar.bz2">maskfs code</a>
+<a href="./src/timer_module.c">timer_module.c</a>
 </p>
 </div>
-</div>
-
-<div id="outline-container-org1135a96" class="outline-2">
-<h2 id="org1135a96"><span class="section-number-2">4</span> <a href="./linux_driver_code/wait_queue/wait_queue_example.html">Wait Queue Example</a></h2>
-</div>
-<div id="outline-container-org235271b" class="outline-2">
-<h2 id="org235271b"><span class="section-number-2">5</span> <a href="./linux_driver_code/timer/timer_example.html">Timer Example</a></h2>
-</div>
-<div id="outline-container-orgb4fdf11" class="outline-2">
-<h2 id="orgb4fdf11"><span class="section-number-2">6</span> <a href="./linux_driver_code/locking_mechanism/locking_mechanism.html">Kernel Locking Mechanism</a></h2>
-</div>
-<div id="outline-container-org31aec7b" class="outline-2">
-<h2 id="org31aec7b"><span class="section-number-2">7</span> <a href="./linux_driver_code/deferring_mechanism/deferring_mechanism.html">Work Deferring Mechanism</a></h2>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: Yanqing Li</p>
-<p class="date">Created: 2019-04-22 一 21:28</p>
+<p class="author">Author: Yanqing.Li</p>
+<p class="date">Created: 2019-04-20 六 18:22</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

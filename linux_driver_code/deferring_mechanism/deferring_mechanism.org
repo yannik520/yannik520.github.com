@@ -1,0 +1,177 @@
+#+TITLE:     Work Deferring Mechanism
+#+AUTHOR:    Yanqing Li
+#+EMAIL:     yannik520@gmail.com
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+OPTIONS: ^:nil
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_CONTAINER: div
+#+DESCRIPTION:
+#+KEYWORDS:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../style.css" />
+#+HTML_HEAD_EXTRA:
+#+SUBTITLE:
+#+INFOJS_OPT:
+#+CREATOR: <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.0.50 (<a href="https://orgmode.org">Org</a> mode 9.1.9)
+#+LATEX_HEADER:
+
+There are three deferring mechanism in the kernel:
++ *SoftIRQs*: Executed in an atomic context
++ *Tasklets*: Executed in an atomic context
++ *Workueues*: Executed in a process context
+
+* Tasklets
+Tasklets are an instantiation of softirqs, and will be sufficient in almost every case that you feel the ned to use softirqs.
+Tasklets are a bottom-half mechanism built on top of softirqs.
+Tasklet can run on one and only one CPU simultaneously, which is the CPU it was scheduled on, but different tasklets may be run simultaneously
+on different CPUs.
+
+Tasklet are represented in the kernel as instances of struct tasklet_struct:
+#+BEGIN_SRC 
+struct tasklet_struct
+{
+	struct tasklet_struct *next;
+	unsigned long state;
+	atomic_t count;
+	void (*func)(unsigned long);
+	unsigned long data;
+};
+#+END_SRC
+
+** Declare
++ Dynamically:
+#+BEGIN_SRC 
+void tasklet_init(struct tasklet_struct *t,
+			 void (*func)(unsigned long), unsigned long data);
+#+END_SRC
+
++ Statically:
+#+BEGIN_SRC 
+DECLARE_TASKLET(name, func, data);
+DECLARE_TASKLET_DISABLED(name, func, data);
+#+END_SRC
+
+There is one difference between above two functins, the former cteates a tasklet already enabled and ready to e scheduled without any other funciton call,
+done by setting the count field to 0, whereas the latter creates a tasklet disabled(done by setting count to 1), on which one has to call tasklet_enable()
+before the tasklet can be schedulable.
+
+** Ealabing and disabling a tasklet
+tasklet_enable() function is used to enable a tasklet:
+#+BEGIN_SRC 
+void tasklet_enable(struct tasklet_struct *t);
+#+END_SRC
+
+You can call tasklet_disable() function to disable a tasklet, and it will disable the tasklet and return only when the tasklet has terminated its execution(if it was running),
+or call tasklet_disable_nosync returns immediately, even if the termination has not occured.
+#+BEGIN_SRC 
+void tasklet_disable(struct tasklet_struct *t);
+void tasklet_disable_nosync(struct tasklet_struct *t);
+#+END_SRC
+
+** Tasklet scheduling
+There are two scheduling functions for tasklet, depending on whther your tasklet has normal or higher priority:
+#+BEGIN_SRC 
+void tasklet_schedule(struct tasklet_struct *t);
+void tasklet_hi_schedule(struct tasklet_struct *t);
+#+END_SRC
+
+The kernel maintains normal priority and high priority tasklets in two different lists.
+tasklet_schedule adds the tasklet into the normal priority list, scheduling the associated softirq with a TASKLET_SOFTIRQ flag. With tasklet_hi__schedule,
+the tasklet is added into the high priority list, scheduling the associated softirq with a HI_SOFTIRQ flag. High priority tasklets are meant to be used for
+soft interrupt handlers with low latency requirements. There are some properties associated with tasklets you should know.
+
++ Calling tasklet_schedule on a tasklet already scheduled, but whose executions has not started, will do nothing, resulting in the tasklet being executed only once.
++ tasklet_schedule can be called in a tasklet, meaning that a tasklet can reschedule itself.
++ Hight prority tasks will increase the system latency. Only use them for really quick stuff.
+
+You can stop a tasklet using the tasklet_kill function that wil prevent the tasklet from running again or wait for its completion before killing it if the tasklet is currently scheduled to run.
+#+BEGIN_SRC 
+void tasklet_kill(struct tasklet_struct *t);
+#+END_SRC
+
+** Example Code
+[[./src/tasklet.c][tasklet.c]]
+
+* Work queues
+There are two types of work queue, one is shared work queue, another is dedicated work queue, the shared work queue are handled by a set of kernel threads,
+each running on a CPU. Once you have work to schedule, you queue that work into the global work queue, which will be executed at the appropriate moment.
+The dedicated work queue run the work queue in a dedicated kernel thread. It means whenever your work queue handler needs to be executed, your kernel thread
+is woken up to handle it, instead of one of the default predefined threads.
+
+** Kernel-global workqueue - the shared queue
+
+*** Initialize the workqueue
+#+BEGIN_SRC 
+INIT_WORK(_work, _func);
+#+END_SRC
+
+*** Schedule the workqueue
+#+BEGIN_SRC 
+bool schedule_work(struct work_struct *work);
+bool schedule_delayed_work(struct delayed_work *dwork,
+					 unsigned long delay);
+bool schedule_work_on(int cpu, struct work_struct *work);
+bool schedule_delayed_work_on(int cpu, struct delayed_work *dwork,
+					    unsigned long delay);
+#+END_SRC
+
+A work already submitted to the shared queue can be cancelled with the cancel_delayed_work function, You can flush the shared workqueue with:
+#+BEGIN_SRC 
+void flush_scheduled_work(void);
+#+END_SRC
+
+** Dedicated work queue
+There are four steps to scheduling your work in your own kernel thread:
++ Declare/initialize a struct workqueue_struct.
++ Create your work function.
++ Create a struct work_struct so that your work function will be embedded into it.
++ Embed your work function in the work_struct.
+
++ Declare work and work queue:
+#+BEGIN_SRC 
+struct workqueue_struct *myqueue;
+struct work_struct mywork;
+#+END_SRC
+
++ Define the worker function (the handler):
+#+BEGIN_SRC 
+void dowork(void *data) { /* Code goes heae */ };
+#+END_SRC
+
+*** Initialize our work queue and embed our work into:
+#+BEGIN_SRC 
+myqueue = create_singlethread_workqueue("mywork");
+INIT_WORK( &mywork, dowork, <data-pointer> );
+#+END_SRC
+
+*** Scheduling work:
+#+BEGIN_SRC 
+queue_work(myqueue, &mywork);
+#+END_SRC
+Queue after the given  delay to the given worker thread:
+#+BEGIN_SRC 
+queue_delayed_work(myqueue, &mywork, <delay>);
+#+END_SRC
+
+*** Wait on all pending work on the given work queue:
+#+BEGIN_SRC 
+void flush_workqueue(struct workqueue_struct *wq);
+#+END_SRC
+flush_workqueue sleeps until all queued work has finished their execution.
+
+*** Cleanup:
+Use cancle_work_sync() or cancel_delayed_work_sync for synchronous cancellation, which will cancel the work if it is not already running, or block until the work has completed.
+The work will be cancelled even if it requeues itself.
+#+BEGIN_SRC 
+bool cancel_work_sync(struct work_struct *work);
+bool cancel_delayed_work_sync(struct delayed_work *dwork);
+#+END_SRC
+
+cancel_work and cancel_delayed_work which are aynchronous forms of cancellation.
+
+*** Example Code
+[[./src/work_queue.c][workqueue_example.c]]

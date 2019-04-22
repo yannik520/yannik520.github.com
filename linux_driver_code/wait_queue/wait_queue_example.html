@@ -3,12 +3,12 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-04-22 一 21:28 -->
+<!-- 2019-04-20 六 16:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Linux Driver Code</title>
+<title>Wait Queue Example</title>
 <meta name="generator" content="Org mode" />
-<meta name="author" content="Yanqing Li" />
+<meta name="author" content="Yanqing.Li" />
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center;
@@ -180,7 +180,7 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" />
+<link rel="stylesheet" type="text/css" href="../../style.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -230,89 +230,63 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">Linux Driver Code</h1>
+<h1 class="title">Wait Queue Example</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge5470cc">1. Virtual Mouse Driver</a></li>
-<li><a href="#org147064e">2. A simple file system: qfs</a></li>
-<li><a href="#org7612cc6">3. A stackable file system: maskfs</a></li>
-<li><a href="#org1135a96">4. Wait Queue Example</a></li>
-<li><a href="#org235271b">5. Timer Example</a></li>
-<li><a href="#orgb4fdf11">6. Kernel Locking Mechanism</a></li>
-<li><a href="#org31aec7b">7. Work Deferring Mechanism</a></li>
+<li><a href="#orgcb14701">1. Wait queue introduction</a></li>
+<li><a href="#orga0dac02">2. Wait queue API</a></li>
+<li><a href="#org130a155">3. Example Code</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orge5470cc" class="outline-2">
-<h2 id="orge5470cc"><span class="section-number-2">1</span> Virtual Mouse Driver</h2>
+<div id="outline-container-orgcb14701" class="outline-2">
+<h2 id="orgcb14701"><span class="section-number-2">1</span> Wait queue introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-I wrote a virtual mouse driver to use keyboard to control mouse cursor.<br />
-Usage:<br />
-</p>
-<ul class="org-ul">
-<li>Ctr+Alt+p: move cursor upward</li>
-<li>Ctr+Alt+n: move cursor down</li>
-<li>Ctr+Alt+b: move cursor left</li>
-<li>Ctr+Alt+f: move cursor right</li>
-<li>Ctr+Alt+Space: left mouse button clicked</li>
-<li>Ctr+Alt+m: right mouse button clicked</li>
-<li>Alt+u: wheel scroll up</li>
-<li>Alt+v: Wheel scroll down</li>
-<li>Capslock: lock speed</li>
-</ul>
-
-<p>
-<a href="./linux_driver_code/vmouse_driver.tar.bz2">virtual mouse driver code</a>
+Wait queues are used to wait for particular conditions to be true, and to sense data and resource availability.
+Every process want to sleep is queued in the task_list in wait queue and put into sleep state until a condition becomes true.
 </p>
 </div>
 </div>
 
-<div id="outline-container-org147064e" class="outline-2">
-<h2 id="org147064e"><span class="section-number-2">2</span> A simple file system: qfs</h2>
+<div id="outline-container-orga0dac02" class="outline-2">
+<h2 id="orga0dac02"><span class="section-number-2">2</span> Wait queue API</h2>
 <div class="outline-text-2" id="text-2">
 <p>
-qfs is a simple file system just has one file.
+The functions related to wait queue are defined in &lt;linux/wait.h&gt;, all these functions are as following:
 </p>
+<ul class="org-ul">
+<li>Static declaration: <br />
+DECLATION_WAIT_QUEUE_HEAD(name)</li>
 
-<p>
-<a href="./linux_driver_code/qfs.tar.bz2">qfs code</a>
-</p>
+<li>Dynamic declaration: <br />
+wait_queue_head_t my_wait_queue; <br />
+init_waitqueue_head(&amp;my_wait_queue);</li>
+
+<li>Blocking: <br />
+int wait_event_interruptible(wait_queue_head_t q, CONDITION);</li>
+
+<li>Unblocking: <br />
+void wake_up_interruptible(wait_queue_head_t *q);</li>
+</ul>
 </div>
 </div>
 
-<div id="outline-container-org7612cc6" class="outline-2">
-<h2 id="org7612cc6"><span class="section-number-2">3</span> A stackable file system: maskfs</h2>
+<div id="outline-container-org130a155" class="outline-2">
+<h2 id="org130a155"><span class="section-number-2">3</span> Example Code</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-maskfs is modified from ecryptfs, I used it to mask all files in a directory, and want to say: what you saw is not necessarily true.
-</p>
-
-<p>
-<a href="./linux_driver_code/maskfs.tar.bz2">maskfs code</a>
+<a href="./src/wait_queue.c">wait_queue.c</a>
 </p>
 </div>
-</div>
-
-<div id="outline-container-org1135a96" class="outline-2">
-<h2 id="org1135a96"><span class="section-number-2">4</span> <a href="./linux_driver_code/wait_queue/wait_queue_example.html">Wait Queue Example</a></h2>
-</div>
-<div id="outline-container-org235271b" class="outline-2">
-<h2 id="org235271b"><span class="section-number-2">5</span> <a href="./linux_driver_code/timer/timer_example.html">Timer Example</a></h2>
-</div>
-<div id="outline-container-orgb4fdf11" class="outline-2">
-<h2 id="orgb4fdf11"><span class="section-number-2">6</span> <a href="./linux_driver_code/locking_mechanism/locking_mechanism.html">Kernel Locking Mechanism</a></h2>
-</div>
-<div id="outline-container-org31aec7b" class="outline-2">
-<h2 id="org31aec7b"><span class="section-number-2">7</span> <a href="./linux_driver_code/deferring_mechanism/deferring_mechanism.html">Work Deferring Mechanism</a></h2>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: Yanqing Li</p>
-<p class="date">Created: 2019-04-22 一 21:28</p>
+<p class="author">Author: Yanqing.Li</p>
+<p class="date">Created: 2019-04-20 六 16:29</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

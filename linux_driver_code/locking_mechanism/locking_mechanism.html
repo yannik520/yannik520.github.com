@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-04-22 一 21:28 -->
+<!-- 2019-04-20 六 22:11 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Linux Driver Code</title>
+<title>Locking Mechanism</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Yanqing Li" />
 <style type="text/css">
@@ -180,7 +180,7 @@
   .org-svg { width: 90%; }
   /*]]>*/-->
 </style>
-<link rel="stylesheet" type="text/css" href="style.css" />
+<link rel="stylesheet" type="text/css" href="../../style.css" />
 <script type="text/javascript">
 /*
 @licstart  The following is the entire license notice for the
@@ -230,89 +230,157 @@ for the JavaScript code in this tag.
 </head>
 <body>
 <div id="content">
-<h1 class="title">Linux Driver Code</h1>
+<h1 class="title">Locking Mechanism</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orge5470cc">1. Virtual Mouse Driver</a></li>
-<li><a href="#org147064e">2. A simple file system: qfs</a></li>
-<li><a href="#org7612cc6">3. A stackable file system: maskfs</a></li>
-<li><a href="#org1135a96">4. Wait Queue Example</a></li>
-<li><a href="#org235271b">5. Timer Example</a></li>
-<li><a href="#orgb4fdf11">6. Kernel Locking Mechanism</a></li>
-<li><a href="#org31aec7b">7. Work Deferring Mechanism</a></li>
+<li><a href="#orga834504">1. Kernel locking mechanism</a></li>
+<li><a href="#org7988104">2. Mutex</a>
+<ul>
+<li><a href="#orged92e36">2.1. Mutex API</a>
+<ul>
+<li><a href="#org82adbc3">2.1.1. Declare</a></li>
+<li><a href="#org9569f64">2.1.2. Acquire and release</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org784df86">3. Spinelock</a></li>
+<li><a href="#orgc7525e7">4. Spinlock versus mutexes</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orge5470cc" class="outline-2">
-<h2 id="orge5470cc"><span class="section-number-2">1</span> Virtual Mouse Driver</h2>
+<div id="outline-container-orga834504" class="outline-2">
+<h2 id="orga834504"><span class="section-number-2">1</span> Kernel locking mechanism</h2>
 <div class="outline-text-2" id="text-1">
 <p>
-I wrote a virtual mouse driver to use keyboard to control mouse cursor.<br />
-Usage:<br />
+The kernel provides several locking mechanisms. The most important are:
 </p>
+
 <ul class="org-ul">
-<li>Ctr+Alt+p: move cursor upward</li>
-<li>Ctr+Alt+n: move cursor down</li>
-<li>Ctr+Alt+b: move cursor left</li>
-<li>Ctr+Alt+f: move cursor right</li>
-<li>Ctr+Alt+Space: left mouse button clicked</li>
-<li>Ctr+Alt+m: right mouse button clicked</li>
-<li>Alt+u: wheel scroll up</li>
-<li>Alt+v: Wheel scroll down</li>
-<li>Capslock: lock speed</li>
+<li>Semaphore</li>
+<li>Mutex</li>
+<li>Spinlock</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org7988104" class="outline-2">
+<h2 id="org7988104"><span class="section-number-2">2</span> Mutex</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The required header is include/linux/mutex.h
+</p>
+</div>
+
+<div id="outline-container-orged92e36" class="outline-3">
+<h3 id="orged92e36"><span class="section-number-3">2.1</span> Mutex API</h3>
+<div class="outline-text-3" id="text-2-1">
+</div>
+<div id="outline-container-org82adbc3" class="outline-4">
+<h4 id="org82adbc3"><span class="section-number-4">2.1.1</span> Declare</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<ul class="org-ul">
+<li>Statically: <br />
+DEFINE_MUTE(my_mutex); <br /></li>
+<li>Dynamically: <br />
+struct mutex my_mutex; <br />
+mutex_init(&amp;my_mutex); <br /></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9569f64" class="outline-4">
+<h4 id="org9569f64"><span class="section-number-4">2.1.2</span> Acquire and release</h4>
+<div class="outline-text-4" id="text-2-1-2">
+<ul class="org-ul">
+<li>Lock: <br />
+void mutex_lock(struct mutex *lock); <br />
+int __must_check mutex_lock_interruptible(struct mutex *lock); <br />
+int __must_check mutex_lock_killable(struct mutex *lock); <br /></li>
+<li>Unlock: <br />
+void mutex_unlock(struct mutex *lock); <br /></li>
 </ul>
 
 <p>
-<a href="./linux_driver_code/vmouse_driver.tar.bz2">virtual mouse driver code</a>
-</p>
-</div>
-</div>
-
-<div id="outline-container-org147064e" class="outline-2">
-<h2 id="org147064e"><span class="section-number-2">2</span> A simple file system: qfs</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-qfs is a simple file system just has one file.
+You can use mutex_is_locked() to check whether a mutex is locked or not: <br />
+bool mutex_is_locked(struct mutex *lock);
 </p>
 
 <p>
-<a href="./linux_driver_code/qfs.tar.bz2">qfs code</a>
+There is also mutex_trylock(), that acquires the mutex if it is not already locked, and return1; otherwise, it returns 0: <br />
+int mutex_trylock(struct mutex *lock);
 </p>
+
+<p>
+Here is an example of a muex implementation:
+</p>
+<pre class="example">
+struct mutex my_mutex;
+mutex_init(&amp;my_mutex);
+
+/* inside a work or a thread */
+mutex_lock(&amp;my_mutex);
+access_shared_memory();
+mutex_unlock(&amp;my_mutex);
+</pre>
+</div>
+</div>
 </div>
 </div>
 
-<div id="outline-container-org7612cc6" class="outline-2">
-<h2 id="org7612cc6"><span class="section-number-2">3</span> A stackable file system: maskfs</h2>
+<div id="outline-container-org784df86" class="outline-2">
+<h2 id="org784df86"><span class="section-number-2">3</span> Spinelock</h2>
 <div class="outline-text-2" id="text-3">
 <p>
-maskfs is modified from ecryptfs, I used it to mask all files in a directory, and want to say: what you saw is not necessarily true.
+spin_lock() and spin_lock_irqsave() are used to acquire a spinlock, all of them will disable the preemption on the process, Since spin_lock_irqsave also disable the interrupts on the CPU.
+If you do not know in advance what system you will write the driver for, it is recommended you acquire a spinlock using spin_lock_irqsave(), which disables interrupts on the current process before the
+spinlock. spin_lock_irqsave() internally calls local_irq_save().
 </p>
 
 <p>
-<a href="./linux_driver_code/maskfs.tar.bz2">maskfs code</a>
+The following is an example:
 </p>
+<pre class="example">
+#include &lt;linux/spinlock.h&gt;
+
+/* some where */
+spinlock_t my_spinlock;
+spin_lock_init(&amp;my_spinlock);
+
+static irqreturn_t my_irq_handler(int irq, void *data)
+{
+	unsigned long status, flags;
+
+	spin_lock_irqsave(&amp;my_spinlock, flags);
+	status = access_shared_resources();
+	spin_unlock_irqrestore(&amp;my_spinlock, flags);
+
+	return IRQ_HANDLED;
+}
+</pre>
 </div>
 </div>
 
-<div id="outline-container-org1135a96" class="outline-2">
-<h2 id="org1135a96"><span class="section-number-2">4</span> <a href="./linux_driver_code/wait_queue/wait_queue_example.html">Wait Queue Example</a></h2>
+<div id="outline-container-orgc7525e7" class="outline-2">
+<h2 id="orgc7525e7"><span class="section-number-2">4</span> Spinlock versus mutexes</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+Uesd for concurrency in the kernel, spinlocks and mutexes each have their own objectives.
+</p>
+
+<ul class="org-ul">
+<li>Mutexes protect the process's critical resource, whereas spinlock protects the IRQ handler's critical sections.</li>
+<li>Mutexes put contenders to sleep until the lock is acquired, whereas spinlocks infinitely spin in a loop(consuming CPU) until the lock is acquired.</li>
+<li>Because of the previous poing, you can't hold spinlock for a long time, since waiters will waste CPU time waiting for the lock, whereas a mutex can be held as long as the resource needs to be protected, since contenders are put to sleep in a wait queue.</li>
+</ul>
 </div>
-<div id="outline-container-org235271b" class="outline-2">
-<h2 id="org235271b"><span class="section-number-2">5</span> <a href="./linux_driver_code/timer/timer_example.html">Timer Example</a></h2>
-</div>
-<div id="outline-container-orgb4fdf11" class="outline-2">
-<h2 id="orgb4fdf11"><span class="section-number-2">6</span> <a href="./linux_driver_code/locking_mechanism/locking_mechanism.html">Kernel Locking Mechanism</a></h2>
-</div>
-<div id="outline-container-org31aec7b" class="outline-2">
-<h2 id="org31aec7b"><span class="section-number-2">7</span> <a href="./linux_driver_code/deferring_mechanism/deferring_mechanism.html">Work Deferring Mechanism</a></h2>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Yanqing Li</p>
-<p class="date">Created: 2019-04-22 一 21:28</p>
+<p class="date">Created: 2019-04-20 六 22:11</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
