@@ -1,0 +1,42 @@
+#+TITLE:     Access File in Kernel
+#+AUTHOR:    yannik
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      <2018-11-18 日>
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+CREATOR: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)
+#+HTML_CONTAINER: div
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD_EXTRA:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+INFOJS_OPT:
+#+LATEX_HEADER:
+
+* How to Read/Write File in Kernel
+In generally, you should not open and read/write a file from kernel space, but in same case you really have to, please refrence the following example:
+#+BEGIN_SRC c
+static int virtio_file_write(char *path, uint8_t *buf, uint32_t size)
+{
+	struct file *fp;
+	int ret = 0;
+
+	fp = filp_open(path, O_RDWR | O_CREAT, 0644);
+	if (IS_ERR(fp)) {
+		ret = PTR_ERR(fp);
+	}
+	else {
+		loff_t pos = 0;
+		ret = kernel_write(fp, buf, size, &pos);
+		if (ret < 0)
+			VIRTIO_DRM_ERROR("Error writing plane data");
+
+		filp_close(fp, NULL);
+	}
+	return ret;
+}
+#+END_SRC
+

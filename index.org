@@ -54,6 +54,7 @@
 *** [[./socketCAN.html][Linux SocketCAN Driver]]
 *** [[./usb/usb.html][Linux USB Driver]]
 ** Linux Kernel
+*** [[./access_file_in_kernel.html][Access File in Kernel]]
 *** [[./system_call.html][Access Linux System Call in User Space]]
 *** [[./completion.html][Synchronization Mechanism: Completion]]
 * Windows WDF Device Driver
