@@ -66,6 +66,7 @@
 ** [[./suspend_and_resume.html][Suspend&Resume]]
 ** [[./ashmem.html][Ashmem Analysis]]
 ** [[./emacs_android.html][Developing Android APP with Emacs]]
+** [[./android_display.html][Android Display]]
 * Project Management
 ** [[./git_and_repo.html][Git and Repo]]
 ** [[./git_server.html][Config Git Server]]
