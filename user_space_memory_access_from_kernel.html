@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-07-14 Tue 22:27 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>User Space Memory Access From The Linux Kernel</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="yannik" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">User Space Memory Access From The Linux Kernel</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org81e7895">1. The User Space Memory Access API</a></li>
+<li><a href="#orgb5ae26d">2. An example to map user space pages into kernel</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org81e7895" class="outline-2">
+<h2 id="org81e7895"><span class="section-number-2">1</span> The User Space Memory Access API</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+In Linux, the kernel itself resides in one address space, and each process resides in its own address space.
+there are group of kernel APIs to manipulate user memory, these functions are listed in below table.
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Function</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">access_ok</td>
+<td class="org-left">Checks the validity of the user space memory pointer</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">get_user</td>
+<td class="org-left">Gets a simple variable from user space</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">put_user</td>
+<td class="org-left">Puts a simple variable to user space</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">copy_to_user</td>
+<td class="org-left">Copies a block of data from the kernel to user space</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">copy_from_user</td>
+<td class="org-left">Copies a block of data from user space to the kernel</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">strnlen_user</td>
+<td class="org-left">Gets the size of a string buffer in user space</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">strncpy_from_user</td>
+<td class="org-left">Copies a string from user space into the kernel</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+except above functions, you can map some pages of memory buffer into kernel virtual space with get_user_pages_unlocked.
+the following section will show you an example to map a page of user space buffer into the kernel.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb5ae26d" class="outline-2">
+<h2 id="orgb5ae26d"><span class="section-number-2">2</span> An example to map user space pages into kernel</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Let me show the code directly.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c">
+#include &lt;linux/types.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/init.h&gt;
+#include &lt;linux/string.h&gt;
+#include &lt;linux/slab.h&gt;
+#include &lt;linux/fs.h&gt;
+#include &lt;linux/errno.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/major.h&gt;
+#include &lt;linux/mutex.h&gt;
+#include &lt;linux/device.h&gt;
+#include &lt;linux/uaccess.h&gt;
+#include &lt;linux/mm.h&gt;
+#include &lt;asm/cacheflush.h&gt;
+
+#define MAX_PAGES 5
+
+struct cdev_buffer {
+	struct page **mapped_pages;
+	unsigned long offset;
+	int nr_pages;
+};
+
+static int cdev_map_user_pages(struct cdev_buffer *cbuf,
+			      const unsigned int max_pages, unsigned long uaddr,
+			      size_t count, int rw)
+{
+	unsigned long end = (uaddr + count + PAGE_SIZE - 1) &gt;&gt; PAGE_SHIFT;
+	unsigned long start = uaddr &gt;&gt; PAGE_SHIFT;
+	const int nr_pages = end - start;
+	int res, i, j;
+	struct page **pages;
+
+	if ((uaddr + count) &lt; uaddr)
+		return -EINVAL;
+
+	if (nr_pages &gt; max_pages)
+		return -ENOMEM;
+
+	if (count == 0)
+		return 0;
+
+	if ((pages = kmalloc(max_pages * sizeof(*pages), GFP_KERNEL)) == NULL)
+		return -ENOMEM;
+
+	/* Try to fault in all of the necessary pages */
+	/* rw==WRITE means write into memory area */
+	res = get_user_pages_unlocked(
+		uaddr,
+		nr_pages,
+		pages,
+		rw == WRITE ? FOLL_WRITE : 0); /* don't force */
+
+	/* Errors and no page mapped should return here */
+	if (res &lt; nr_pages)
+		goto out_unmap;
+
+	for (i = 0; i &lt; nr_pages; i++) {
+		flush_dcache_page(pages[i]);
+	}
+
+	cbuf-&gt;offset = uaddr &amp; ~PAGE_MASK;
+	cbuf-&gt;mapped_pages = pages;
+
+	return nr_pages;
+ out_unmap:
+	if (res &gt; 0) {
+		for (j = 0; j &lt; res; j++)
+			put_page(pages[j]);
+		res = 0;
+	}
+	kfree(pages);
+	return res;
+}
+
+static int cdev_unmap_user_pages(struct cdev_buffer *cbuf,
+				const unsigned int nr_pages, int dirtied)
+{
+	int i;
+
+	for (i = 0; i &lt; nr_pages; i++) {
+		struct page *page = cbuf-&gt;mapped_pages[i];
+
+		if (dirtied)
+			SetPageDirty(page);
+
+		put_page(page);
+	}
+	kfree(cbuf-&gt;mapped_pages);
+	cbuf-&gt;mapped_pages = NULL;
+
+	return 0;
+}
+
+static int cdev_open(struct inode *inode, struct file *filp)
+{
+	struct cdev_buffer *cbuf = NULL;
+
+	cbuf = kzalloc(sizeof(struct cdev_buffer), GFP_KERNEL);
+	if (!cbuf) {
+		pr_err("%s: alloc cdev_buffer failed\n", __func__);
+		return -1;
+	}
+
+	filp-&gt;private_data = cbuf;
+	return 0;
+}
+
+static int cdev_close(struct inode *inode, struct file *filp)
+{
+	struct cdev_buffer *cbuf = filp-&gt;private_data;
+
+	if (cbuf) {
+		if (cbuf-&gt;nr_pages) {
+			cdev_unmap_user_pages(cbuf, cbuf-&gt;nr_pages, true);
+		}
+		kfree(cbuf);
+	}
+	return 0;
+}
+
+static ssize_t cdev_read(struct file *filp, char __user *buf,
+			 size_t count, loff_t *ppos)
+{
+	struct cdev_buffer *cbuf = filp-&gt;private_data;
+	struct page *page = cbuf-&gt;mapped_pages[0];
+	unsigned long kaddr = (unsigned long)page_address(page) + cbuf-&gt;offset;
+
+	pr_debug("%s: read data(%lu): %s\n", __func__, count, (char *)kaddr);
+
+	return count - copy_to_user(buf, (const void *)kaddr, count);
+}
+
+static ssize_t cdev_write(struct file *filp, const char __user *buf,
+			  size_t count, loff_t *ppos)
+{
+	struct cdev_buffer *cbuf = filp-&gt;private_data;
+	int ret;
+
+	ret = cdev_map_user_pages(cbuf, MAX_PAGES, (unsigned long)buf, count, WRITE);
+	if (ret &lt;= 0) {
+		pr_err("%s: map user pages failed.\n", __func__);
+		return 0;
+	}
+
+	cbuf-&gt;nr_pages = ret;
+
+	return count;
+}
+
+static const struct file_operations cdev_fops = {
+	.owner	 = THIS_MODULE,
+	.open    = cdev_open,
+	.read    = cdev_read,
+	.write   = cdev_write,
+	.release = cdev_close,
+	.llseek  = no_llseek,
+};
+
+static char *cdev_devnode(struct device *dev, umode_t *mode)
+{
+	if (mode)
+		*mode = 0666;
+	return kasprintf(GFP_KERNEL, "cdev/%s", dev_name(dev));
+}
+
+static struct class *cdev_class;
+int major = 0;
+int minor = 0;
+
+static int __init cdev_init(void)
+{
+	major = register_chrdev(0, "cdev", &amp;cdev_fops);
+	if (major &lt; 0) {
+		pr_err("register character device failed\n");
+		return major;
+	}
+
+	cdev_class = class_create(THIS_MODULE, "cdev");
+	if (IS_ERR(cdev_class))
+		return PTR_ERR(cdev_class);
+
+	cdev_class-&gt;devnode = cdev_devnode;
+
+	device_create(cdev_class, NULL, MKDEV(major, minor),
+		      NULL, "cdev%d", minor);
+
+	return 0;
+}
+
+static void __exit cdev_exit(void)
+{
+	device_destroy(cdev_class, MKDEV(major, minor));
+	class_destroy(cdev_class);
+	unregister_chrdev(major, "cdev");
+}
+
+module_init(cdev_init);
+module_exit(cdev_exit);
+
+MODULE_AUTHOR("Yannik Li");
+MODULE_LICENSE("GPL");
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2020-07-14 Tue 00:00</p>
+<p class="author">Author: yannik</p>
+<p class="date">Created: 2020-07-14 Tue 22:27</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

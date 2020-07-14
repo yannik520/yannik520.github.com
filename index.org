@@ -57,6 +57,7 @@
 *** [[./access_file_in_kernel.html][Access File in Kernel]]
 *** [[./system_call.html][Access Linux System Call in User Space]]
 *** [[./completion.html][Synchronization Mechanism: Completion]]
+*** [[./user_space_memory_access_from_kernel.html][User Space Memory Access From The Linux Kernel]]
 * Windows WDF Device Driver
 ** [[./wdf_windbg.html][Debug WDF Device Driver with WinDbg]]
 ** [[./kmdf.html][Basic Knowledge of KMDF]]
