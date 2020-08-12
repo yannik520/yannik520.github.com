@@ -1,0 +1,55 @@
+#+TITLE:     Get The Remaining Size of A Typed Memory
+#+AUTHOR:    yannik
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      <2018-11-18 日>
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+CREATOR: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)
+#+HTML_CONTAINER: div
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../style.css" />
+#+HTML_HEAD_EXTRA:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+INFOJS_OPT:
+#+LATEX_HEADER:
+
+Sometimes you may want to get the reamining size of a typed memory region, but you can't find the right tool to view the remaining size, you can use the following code to get it.
+
+#+BEGIN_SRC c
+
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+
+int main(void) {
+	int fd;
+	int ret;
+	struct posix_typed_mem_info info;
+
+	fd = posix_typed_mem_open( "/memory/below4G/ram", O_RDWR,
+				POSIX_TYPED_MEM_ALLOCATE_CONTIG);
+	if (fd == -1) {
+		printf("Can not open below4G ram\n");
+		return EXIT_FAILURE;
+	}
+
+	ret = posix_typed_mem_get_info(
+	        fd,
+	        &info);
+	if (!ret) {
+		printf("below4G ram: %.2fMB\n", (float)info.posix_tmi_length/1024/1024);
+	}
+
+	close(fd);
+
+	return EXIT_SUCCESS;
+}
+
+#+END_SRC
+ 

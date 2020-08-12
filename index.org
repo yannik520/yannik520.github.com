@@ -68,6 +68,8 @@
 ** [[./ashmem.html][Ashmem Analysis]]
 ** [[./emacs_android.html][Developing Android APP with Emacs]]
 ** [[./android_display.html][Android Display]]
+* QNX & Hypervisor
+** [[./QNX_Hypervisor/get_the_remaining_size_of_typed_memory.html][Get The Remaining Size of A Typed Memory]]
 * Project Management
 ** [[./git_and_repo.html][Git and Repo]]
 ** [[./git_server.html][Config Git Server]]
