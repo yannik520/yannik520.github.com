@@ -629,3 +629,6 @@ int main(void)
 }
 #+END_SRC
 
+* References:
+1. http://www.ethernut.de/en/documents/arm-inline-asm.html
+2. https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html

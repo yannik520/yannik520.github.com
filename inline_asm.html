@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-10-08 Thu 17:34 -->
+<!-- 2020-10-08 Thu 17:40 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>GCC Inline ASM</title>
@@ -270,45 +270,46 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgbf55480">1. Basic Inline</a></li>
-<li><a href="#orgcfd225c">2. Extended Asm.</a>
+<li><a href="#org10c8479">1. Basic Inline</a></li>
+<li><a href="#org6e8cd5a">2. Extended Asm.</a>
 <ul>
-<li><a href="#org8023f4f">2.1. Assembler Template</a>
+<li><a href="#org5d085c4">2.1. Assembler Template</a>
 <ul>
-<li><a href="#orgb755491">2.1.1. Special format strings</a></li>
+<li><a href="#org014dae8">2.1.1. Special format strings</a></li>
 </ul>
 </li>
-<li><a href="#org719ed74">2.2. Output Operands</a>
+<li><a href="#orgf39d089">2.2. Output Operands</a>
 <ul>
-<li><a href="#orga8c5a6d">2.2.1. asmSymbolicName</a></li>
-<li><a href="#org091486a">2.2.2. constrint</a></li>
-<li><a href="#org62cf1b1">2.2.3. cvariablename</a></li>
+<li><a href="#orgbac00fc">2.2.1. asmSymbolicName</a></li>
+<li><a href="#org7d7b81e">2.2.2. constrint</a></li>
+<li><a href="#orgf7039e1">2.2.3. cvariablename</a></li>
 </ul>
 </li>
-<li><a href="#org9f13354">2.3. Input Operands</a>
+<li><a href="#org0f15613">2.3. Input Operands</a>
 <ul>
-<li><a href="#org3302fde">2.3.1. asmSymbolicName</a></li>
-<li><a href="#orgd703d57">2.3.2. constraint</a></li>
-<li><a href="#org8662fc2">2.3.3. cexpression</a></li>
+<li><a href="#org757d9e9">2.3.1. asmSymbolicName</a></li>
+<li><a href="#org5577098">2.3.2. constraint</a></li>
+<li><a href="#orgc6c8004">2.3.3. cexpression</a></li>
 </ul>
 </li>
-<li><a href="#orgb6b6e55">2.4. Clobbers and Scratch Registers</a></li>
+<li><a href="#org6bf2701">2.4. Clobbers and Scratch Registers</a></li>
 </ul>
 </li>
-<li><a href="#orga741912">3. More Recipes</a>
+<li><a href="#org992fac4">3. More Recipes</a>
 <ul>
-<li><a href="#org8d19e0b">3.1. Inline assembler as preprocessor macor</a></li>
-<li><a href="#orgb966d88">3.2. C stub functions</a></li>
-<li><a href="#org01732fd">3.3. Forcing usage of specific registers</a></li>
-<li><a href="#org041b548">3.4. Using constants</a></li>
+<li><a href="#orgb21acee">3.1. Inline assembler as preprocessor macor</a></li>
+<li><a href="#org865d0b4">3.2. C stub functions</a></li>
+<li><a href="#org13b37dc">3.3. Forcing usage of specific registers</a></li>
+<li><a href="#org6b2b118">3.4. Using constants</a></li>
 </ul>
 </li>
+<li><a href="#org4d91960">4. References:</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgbf55480" class="outline-2">
-<h2 id="orgbf55480"><span class="section-number-2">1</span> Basic Inline</h2>
+<div id="outline-container-org10c8479" class="outline-2">
+<h2 id="org10c8479"><span class="section-number-2">1</span> Basic Inline</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The format of basic inline assembly is very much straight forward, the format is as following:
@@ -322,8 +323,8 @@ Example:
 </div>
 </div>
 
-<div id="outline-container-orgcfd225c" class="outline-2">
-<h2 id="orgcfd225c"><span class="section-number-2">2</span> Extended Asm.</h2>
+<div id="outline-container-org6e8cd5a" class="outline-2">
+<h2 id="org6e8cd5a"><span class="section-number-2">2</span> Extended Asm.</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The extended assembly code format is:
@@ -337,8 +338,8 @@ The extended assembly code format is:
 </div>
 </div>
 
-<div id="outline-container-org8023f4f" class="outline-3">
-<h3 id="org8023f4f"><span class="section-number-3">2.1</span> Assembler Template</h3>
+<div id="outline-container-org5d085c4" class="outline-3">
+<h3 id="org5d085c4"><span class="section-number-3">2.1</span> Assembler Template</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 The assembler template contains the set of assembly instructions that gets inserted inside the C program. 
@@ -374,8 +375,8 @@ int main(void)
 </div>
 </div>
 
-<div id="outline-container-orgb755491" class="outline-4">
-<h4 id="orgb755491"><span class="section-number-4">2.1.1</span> Special format strings</h4>
+<div id="outline-container-org014dae8" class="outline-4">
+<h4 id="org014dae8"><span class="section-number-4">2.1.1</span> Special format strings</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <p>
 In addition to the tokens described by the input, output, and goto operands, these tokens have special 
@@ -448,8 +449,8 @@ meanings in the assembler template:
 </div>
 </div>
 
-<div id="outline-container-org719ed74" class="outline-3">
-<h3 id="org719ed74"><span class="section-number-3">2.2</span> Output Operands</h3>
+<div id="outline-container-orgf39d089" class="outline-3">
+<h3 id="orgf39d089"><span class="section-number-3">2.2</span> Output Operands</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 C expressions serve as operands for the assembly instructions inside "asm". 
@@ -470,8 +471,8 @@ If we use more than one operand, they are separated by comma. Each operand has t
 </p>
 </div>
 
-<div id="outline-container-orga8c5a6d" class="outline-4">
-<h4 id="orga8c5a6d"><span class="section-number-4">2.2.1</span> asmSymbolicName</h4>
+<div id="outline-container-orgbac00fc" class="outline-4">
+<h4 id="orgbac00fc"><span class="section-number-4">2.2.1</span> asmSymbolicName</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <p>
 Specifies a symbolic name for the operand. Reference the name in the assembler template by enclosing
@@ -486,8 +487,8 @@ For example if there are three output operands, use '%0' in the template to refe
 </div>
 </div>
 
-<div id="outline-container-org091486a" class="outline-4">
-<h4 id="org091486a"><span class="section-number-4">2.2.2</span> constrint</h4>
+<div id="outline-container-org7d7b81e" class="outline-4">
+<h4 id="org7d7b81e"><span class="section-number-4">2.2.2</span> constrint</h4>
 <div class="outline-text-4" id="text-2-2-2">
 <p>
 A string constant specifying constraints on the placement of the operand; Output constraints must begin ith either '<code>' (a variable overwriting an existing value) or '+' (when reading and writing). When using '</code>', do not 
@@ -499,7 +500,7 @@ you want, local register variables may provide a solution.
 </div>
 
 <ol class="org-ol">
-<li><a id="orgcbc4554"></a>Simple Constraints<br />
+<li><a id="org5c40dc2"></a>Simple Constraints<br />
 <div class="outline-text-5" id="text-2-2-2-1">
 <p>
 The simplest kind of constraint is a string full of letters, each of which describes one kind of operand that is permitted. Here are the letters that are allowed:
@@ -791,7 +792,7 @@ The simplest kind of constraint is a string full of letters, each of which descr
 </div>
 </li>
 
-<li><a id="orgc521f51"></a>Constraints for Particular Machines<br />
+<li><a id="orgd63c804"></a>Constraints for Particular Machines<br />
 <div class="outline-text-5" id="text-2-2-2-2">
 <p>
 Whenever possible, you should use the general-purpose constraint letters in asm arguments, since they will convey meaning more readily to people
@@ -1095,7 +1096,7 @@ in the table heading for each architecture is the definitive reference for the m
 </div>
 </li>
 
-<li><a id="org565e9d0"></a>Constraint Modifier Characters<br />
+<li><a id="org1220724"></a>Constraint Modifier Characters<br />
 <div class="outline-text-5" id="text-2-2-2-3">
 <p>
 Here are constraint modifier characters.
@@ -1230,8 +1231,8 @@ Here are constraint modifier characters.
 </div>
 
 
-<div id="outline-container-org62cf1b1" class="outline-4">
-<h4 id="org62cf1b1"><span class="section-number-4">2.2.3</span> cvariablename</h4>
+<div id="outline-container-orgf7039e1" class="outline-4">
+<h4 id="orgf7039e1"><span class="section-number-4">2.2.3</span> cvariablename</h4>
 <div class="outline-text-4" id="text-2-2-3">
 <p>
 Specifies a C lvalue expression to hold the output, typically a variable name. The enclosing parentheses are a required part of the syntax.
@@ -1332,8 +1333,8 @@ Here use asmSymbolicName instead of digital index.
 </div>
 </div>
 
-<div id="outline-container-org9f13354" class="outline-3">
-<h3 id="org9f13354"><span class="section-number-3">2.3</span> Input Operands</h3>
+<div id="outline-container-org0f15613" class="outline-3">
+<h3 id="org0f15613"><span class="section-number-3">2.3</span> Input Operands</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 Input operands make values form C variables and expressions avaliable to the assembly code.
@@ -1348,8 +1349,8 @@ Operands are separated by commas. Each operand has this format:
 </p>
 </div>
 
-<div id="outline-container-org3302fde" class="outline-4">
-<h4 id="org3302fde"><span class="section-number-4">2.3.1</span> asmSymbolicName</h4>
+<div id="outline-container-org757d9e9" class="outline-4">
+<h4 id="org757d9e9"><span class="section-number-4">2.3.1</span> asmSymbolicName</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <p>
 Specifies a symbolic name for the operand. Reference the name in the assembler template by enclosing it in square brackets (i.e. '%[Value]'). The 
@@ -1364,8 +1365,8 @@ For example if there are two output operands and three inputs, use '%2' in the t
 </div>
 </div>
 
-<div id="outline-container-orgd703d57" class="outline-4">
-<h4 id="orgd703d57"><span class="section-number-4">2.3.2</span> constraint</h4>
+<div id="outline-container-org5577098" class="outline-4">
+<h4 id="org5577098"><span class="section-number-4">2.3.2</span> constraint</h4>
 <div class="outline-text-4" id="text-2-3-2">
 <p>
 A string constant specifying constrints on the placement of the operand.
@@ -1384,8 +1385,8 @@ in the output constraint list. When using asmSymbolicName syntax for the output 
 </div>
 </div>
 
-<div id="outline-container-org8662fc2" class="outline-4">
-<h4 id="org8662fc2"><span class="section-number-4">2.3.3</span> cexpression</h4>
+<div id="outline-container-orgc6c8004" class="outline-4">
+<h4 id="orgc6c8004"><span class="section-number-4">2.3.3</span> cexpression</h4>
 <div class="outline-text-4" id="text-2-3-3">
 <p>
 This is the C varialbe or expression being passed to the asm statement as input. The enclosing parentheses are a required part of the syntax.
@@ -1407,8 +1408,8 @@ If there are no output operands but there are input operands, place two consecut
 </div>
 
 
-<div id="outline-container-orgb6b6e55" class="outline-3">
-<h3 id="orgb6b6e55"><span class="section-number-3">2.4</span> Clobbers and Scratch Registers</h3>
+<div id="outline-container-org6bf2701" class="outline-3">
+<h3 id="org6bf2701"><span class="section-number-3">2.4</span> Clobbers and Scratch Registers</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 While the compiler is aware of changes to entries listed in the output operands the inline asm code may modify more than
@@ -1546,12 +1547,12 @@ Also, there are two special clobber arguments:
 </div>
 </div>
 
-<div id="outline-container-orga741912" class="outline-2">
-<h2 id="orga741912"><span class="section-number-2">3</span> More Recipes</h2>
+<div id="outline-container-org992fac4" class="outline-2">
+<h2 id="org992fac4"><span class="section-number-2">3</span> More Recipes</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org8d19e0b" class="outline-3">
-<h3 id="org8d19e0b"><span class="section-number-3">3.1</span> Inline assembler as preprocessor macor</h3>
+<div id="outline-container-orgb21acee" class="outline-3">
+<h3 id="orgb21acee"><span class="section-number-3">3.1</span> Inline assembler as preprocessor macor</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 In order to resue your assembler language parts, it is useful to define them as macros and put them into incude files.
@@ -1594,8 +1595,8 @@ Build and execute above code, it will output "value after swaped: a0a1a2a3" on c
 </div>
 
 
-<div id="outline-container-orgb966d88" class="outline-3">
-<h3 id="orgb966d88"><span class="section-number-3">3.2</span> C stub functions</h3>
+<div id="outline-container-org865d0b4" class="outline-3">
+<h3 id="org865d0b4"><span class="section-number-3">3.2</span> C stub functions</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 Macro definitions will include the same assembler code whenever they are referenced. This may not be acceptable for large routines.
@@ -1635,8 +1636,8 @@ int main(void)
 </div>
 </div>
 
-<div id="outline-container-org01732fd" class="outline-3">
-<h3 id="org01732fd"><span class="section-number-3">3.3</span> Forcing usage of specific registers</h3>
+<div id="outline-container-org13b37dc" class="outline-3">
+<h3 id="org13b37dc"><span class="section-number-3">3.3</span> Forcing usage of specific registers</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 A local variable may be held in a register. You can instruct the inline assembler to use a specific register for it.
@@ -1679,8 +1680,8 @@ registers during code generation.
 </div>
 </div>
 
-<div id="outline-container-org041b548" class="outline-3">
-<h3 id="org041b548"><span class="section-number-3">3.4</span> Using constants</h3>
+<div id="outline-container-org6b2b118" class="outline-3">
+<h3 id="org6b2b118"><span class="section-number-3">3.4</span> Using constants</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 You can use the mov instruction to load an immediate constant value into a register:
@@ -1713,11 +1714,21 @@ int main(void)
 </div>
 </div>
 </div>
+
+<div id="outline-container-org4d91960" class="outline-2">
+<h2 id="org4d91960"><span class="section-number-2">4</span> References:</h2>
+<div class="outline-text-2" id="text-4">
+<ol class="org-ol">
+<li><a href="http://www.ethernut.de/en/documents/arm-inline-asm.html">http://www.ethernut.de/en/documents/arm-inline-asm.html</a></li>
+<li><a href="https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html">https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html</a></li>
+</ol>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2020-10-07 Wed 00:00</p>
 <p class="author">Author: yannik</p>
-<p class="date">Created: 2020-10-08 Thu 17:34</p>
+<p class="date">Created: 2020-10-08 Thu 17:40</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
