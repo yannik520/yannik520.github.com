@@ -63,6 +63,7 @@
 ** [[./kmdf.html][Basic Knowledge of KMDF]]
 * ARM & x86 & Hardware
 ** [[./hardware.html][Hardware and Protocol]]
+** [[./inline_asm.html][GCC Inline ASM]]
 * Android 
 ** [[./suspend_and_resume.html][Suspend&Resume]]
 ** [[./ashmem.html][Ashmem Analysis]]

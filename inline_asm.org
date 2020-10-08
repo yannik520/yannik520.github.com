@@ -1,0 +1,631 @@
+#+TITLE:     GCC Inline ASM
+#+AUTHOR:    yannik
+#+EMAIL:     yannik520@gmail.com
+#+DATE:      <2020-10-07 Wed>
+#+OPTIONS: html-link-use-abs-url:nil html-postamble:auto
+#+OPTIONS: html-preamble:t html-scripts:t html-style:t
+#+OPTIONS: html5-fancy:nil tex:t
+#+CREATOR: <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.2.2 (<a href="http://orgmode.org">Org</a> mode 8.2.10)
+#+HTML_CONTAINER: div
+#+HTML_DOCTYPE: xhtml-strict
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./style.css" />
+#+HTML_HEAD_EXTRA:
+#+HTML_LINK_HOME:
+#+HTML_LINK_UP:
+#+HTML_MATHJAX:
+#+INFOJS_OPT:
+#+LATEX_HEADER:
+
+* Basic Inline
+The format of basic inline assembly is very much straight forward, the format is as following:
+asm("assembly code");
+Example:
+#+BEGIN_SRC asm
+asm("nop");
+#+END_SRC
+
+* Extended Asm.
+The extended assembly code format is:
+#+BEGIN_SRC asm
+asm(assembler template 
+    : output operands /* optional */
+    : input operands /* optional */
+    : list of clobbered registers /* optional */);
+#+END_SRC
+
+** Assembler Template
+The assembler template contains the set of assembly instructions that gets inserted inside the C program. 
+each instruction should be enclosed withing double quotes, or the entire group of instructions should be within double quotes. 
+Each instruction should also end with a delimiter. The valid delimiters are newline(\n) and semicolon(;). '\n' may be followed by a tab(\t).
+
+Example:
+#+BEGIN_SRC asm
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static inline void dbg(const void *str)
+{
+	__asm__ __volatile__(
+		"push {lr}\n"
+		"mov r0, %0\n"
+		"bl printf\n"
+		"pop {lr}"
+		:: "p" (str));
+}
+
+int main(void)
+{
+    dbg("debug string\n");
+
+    return 0;
+}
+#+END_SRC
+
+*** Special format strings
+In addition to the tokens described by the input, output, and goto operands, these tokens have special 
+meanings in the assembler template:
+
+|-------+-------------------------------------------------------------------|
+| Token | Descriptions                                                      |
+|-------+-------------------------------------------------------------------|
+| '%%'  | Outputs a single '%' into the assembler code.                     |
+|-------+-------------------------------------------------------------------|
+| '%='  | Outputs a number that is unique to each instance of the asm       |
+|       | statement in the entire compilation. This option is useful        |
+|       | when creating local labels and referring to them multiple         |
+|       | times in a single template that generates multiple assembler      |
+|       | instructions.                                                     |
+|-------+-------------------------------------------------------------------|
+| '%{'  | Outputs '{', and '}' characters (respectively) into the assembler |
+| '%}'  | code.                                                             |
+|-------+-------------------------------------------------------------------|
+
+'%|' outputs '|' character into the assembler code.
+
+** Output Operands
+C expressions serve as operands for the assembly instructions inside "asm". 
+Each operand is written as first an operand constraint in double quotes. For output
+operands, there'll be a constraint modifier also within the quotes and then follows
+the C expression which stands for the operand. ie, "constraint" (C expression) is the
+general form. For output operands an additional modifier will be there. Constraints are 
+primarily used to decide the addressing modes for operands. They are also used in specifying the 
+registers to be used.
+
+If we use more than one operand, they are separated by comma. Each operand has this format:
+
+[ [asmSbolicName] ] constraint (cvariablename)
+
+*** asmSymbolicName
+
+Specifies a symbolic name for the operand. Reference the name in the assembler template by enclosing
+it in square brackets(i.e. '%[Value]'). The scope of the name is the asm statement that contains the definition. Any valid C 
+variable name is acceptable, including names already in the surrounding code. No two operands within the same asm statement can use the same symbolic name.
+
+When not using an asmSymbolicName, use the (zero-based) position of the operand in the list of operands in the assembler template. 
+For example if there are three output operands, use '%0' in the template to refer to the first, '%1' for the second, and '%2' for the third.
+
+*** constrint
+
+A string constant specifying constraints on the placement of the operand; Output constraints must begin ith either '=' (a variable overwriting an existing value) or '+' (when reading and writing). When using '=', do not 
+assume the location contains the existing value on entry to the asm, except when the operand is tied to an input; After the prefix, there must be one or more additional constraints that describe where the value resides. 
+Common constraints include 'r' for register and 'm' for memory. When you list more than one possible location (for example, "=rm"), the compiler chooses the mode efficient on based on the current context. If you list as many 
+alternates as the asm statement allows, ou permit the optimizers to produce the best possible code. If you ust use a specific register, but your Machine Constraints do not provide sufficient control to select the specific register 
+you want, local register variables may provide a solution.
+
+**** Simple Constraints
+The simplest kind of constraint is a string full of letters, each of which describes one kind of operand that is permitted. Here are the letters that are allowed:
+
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| Constraint     | Descriptions                                                                                                              |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| whitespace     | Whitespace characters are ignored and can be inserted at any position except the first.                                   |
+|                | This enables each alternative for different operands to be visually aligned in the machine                                |
+|                | description even if they have different number of constraints and modifiers.                                              |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'm'            | A memory operand is allowed, with any kind of address that the machine supports in general.                               |
+|                | Note that the letter used ofr the general memory constraint can be re-defied by a back end using                          |
+|                | the TARGET_MEM_CONSTRAINT macro.                                                                                          |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'o'            | A memory operand is allowed, but only if the address is offsetable. This means that adding a small                        |
+|                | integer (actually, the width in bytes of the operand, as determined by its machine mode) may be added                     |
+|                | to the address and the result is also a valid memory address.                                                             |
+|                | For example, an address which is constant is offsettable; so is an address that is the sumo of a register                 |
+|                | and a constant (as long as a slightly larger constant is also within the range of address-offsets supported               |
+|                | by the machine); but an autoincrement or autodescrement address is not offsettable. More complicated                      |
+|                | indirect/indexed addresses may or may not be offsetable depending on the other addressing modes that the                  |
+|                | machine supports.                                                                                                         |
+|                | Note that in an output operand which can be matched by another operand, the constraint letter 'o' is valid                |
+|                | only when accompanied by both '<' (if the target machine has predecrement addressing) and '>' (if the target              |
+|                | machine has preincrement addressing).                                                                                     |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'V'            | A memory operand that is not offsetable. In other words, anything that would fit the 'm' constraint but not               |
+|                | the 'o' constraint.                                                                                                       |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| '<'            | A memory operand with autodecrement addressing (either predecrement or postdescrement) is allowed. In inline              |
+|                | asm this constraint is only allowed if the operand is used exactly once in an instruction that can handle the             |
+|                | side effects. Not using an operand with '<' in constraint string in the inline asm pattern at all or using it             |
+|                | in multiple instructions isn't valid, because the side effects wouldn't be performed or would be performed more           |
+|                | than once.                                                                                                                |
+|                | Furthermore, on some targets the operand with '<' in constraint string must be accompanied by special instruction         |
+|                | suffixes like %U0 instruction suffix on PowerPC or %P0 on IA-64.                                                          |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| '>'            | A memory perand with autoincrement addressing (either preincrement or postincrement) is allowed. In inline asm the        |
+|                | same restrictions as for '<' apply.                                                                                       |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'r'            | A register operand is allowed provided that it is in a general register.                                                  |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'i'            | An immediate integer operand (one with constant value) is allowed. This includes symbolic constants whose values will     |
+|                | be known only at assembly time or later.                                                                                  |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'n'            | An immediate integer operand with a known numeric value is allowed. Many systems cannot support assembly-time constants   |
+|                | for opernds less than a word wide. Constraints for these operads should use 'n' rather than 'i'.                          |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'I','J','K',   | Other letters in the range 'I' througth 'P' may be defined in a machine-dependent fashion to permit immediate integer     |
+| ... 'P'        | operands with explict integer values in specified ranges. For example, on the 68000, 'I' is defined to stand for the      |
+|                | range of values 1 to 8. This is the range permitted as a shift count in the sift instructions.                            |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'E'            | An immediate floating operand (expression code const_double) is allowed, but only if the target floating point format is  |
+|                | the same as that of the host machine (on which the compiler is running).                                                  |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'F'            | An immediate floating operand (expression code const_double or const_vector) is allowed.                                  |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'G', 'H'       | 'G' and 'H' may be defined in a machine-depedent fashion to permit immediate floating operands in particular ranges of    |
+|                | values.                                                                                                                   |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 's'            | An immediate integer operand whose value is not an explicit integer is allowed.                                           |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'g'            | Any register, memory or immediate integer operand is allowed, except for registers that are not general registers.        |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'X'            | Any operand whatsoever is allowed.                                                                                        |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| '0', '1', '2', | An operand that matches the specified operand number is allowed. If a digit is used together with letters within the same |
+| ... '9'        | alternative, the digit should come last.                                                                                  |
+|                | This is called a matching constraint and what it really means is that the assembler has only a single operand that fills  |
+|                | two roles which asm distinguishes. For example, an add instruction uses two input operands and an output operand, but on  |
+|                | most CISC machines an add instruction really has only two operands, one of them an input-output operand.                  |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+| 'p'            | An operand that is a valid memory address is allowed. This is for "load address" and "push address" instructions.         |
+|----------------+---------------------------------------------------------------------------------------------------------------------------|
+
+**** Constraints for Particular Machines
+Whenever possible, you should use the general-purpose constraint letters in asm arguments, since they will convey meaning more readily to people
+reading your code. Failing that, use the constraint letters that usually have very similar meanings across architectures. The most commonly used 
+constraints are 'm' and 'r' (for memory and general-purpose registers respectively), and 'I', usually the letter indicating the most common 
+immediate-constant format.
+
+Each architecture define additional constraints. These constraints are used by the compiler itself for instruction generation, as well as for asm 
+statements; therefore, some of the constraints are not particularly useful for asm. Here is a summary of some of the machine-dependent constraints 
+available on some particular machines; it includes both constraints that are useful for asm and constraints that aren't. The compiler source file mentioned 
+in the table heading for each architecture is the definitive reference for the meanings of that architecure's constraints.
+
+#+caption: AArch64 family
+| Constraint | Descriptions                                                                               |
+|------------+--------------------------------------------------------------------------------------------|
+| k          | The stack pointer register (SP)                                                            |
+|------------+--------------------------------------------------------------------------------------------|
+| w          | Floating point register, Advanced SIMD vector register or SVE vector register              |
+|------------+--------------------------------------------------------------------------------------------|
+| x          | Like w, but restricted to registers 0 to 15 inclusive.                                     |
+|------------+--------------------------------------------------------------------------------------------|
+| y          | Like w, but restricted to registers 0 to 7 inclusive.                                      |
+|------------+--------------------------------------------------------------------------------------------|
+| Upl        | One of the low eight SVE predicate registers (P0 to P7)                                    |
+|------------+--------------------------------------------------------------------------------------------|
+| Upa        | Any of the SVE predicate registers (P0 to P15)                                             |
+|------------+--------------------------------------------------------------------------------------------|
+| I          | Integer constant that is valid as an immediate operand in an ADD instruction               |
+|------------+--------------------------------------------------------------------------------------------|
+| J          | Integer constant that is valid as an immediate operand in a SUB instruction (once negated) |
+|------------+--------------------------------------------------------------------------------------------|
+| K          | Integer constant that can be used with a 32-bit logical instruction                        |
+|------------+--------------------------------------------------------------------------------------------|
+| L          | Integer constant that can be used with a 64-bit logical instruction                        |
+|------------+--------------------------------------------------------------------------------------------|
+| M          | Integer constant that is valid as an immediate operand in a 32-bit MOV pseudo instruction. |
+|            | The MOV may be assembled to one of several different machine instructions depending on the |
+|            | value.                                                                                     |
+|------------+--------------------------------------------------------------------------------------------|
+| N          | Integer constant that is valid as an immediate operant in a 64-bit MOV pseudo instruction  |
+|------------+--------------------------------------------------------------------------------------------|
+| S          | An absolute symbolic address or a label reference                                          |
+|------------+--------------------------------------------------------------------------------------------|
+| Y          | Floating point constant zero                                                               |
+|------------+--------------------------------------------------------------------------------------------|
+| Z          | Integer constant zero                                                                      |
+|------------+--------------------------------------------------------------------------------------------|
+| Ush        | The high part (bits 12 and upwards) of the pc-relative address of a symbol within 4GB of   |
+|            | the istruction                                                                             |
+|------------+--------------------------------------------------------------------------------------------|
+| Q          | A memory address which uses a single base register with no offset                          |
+|------------+--------------------------------------------------------------------------------------------|
+| Ump        | A memory address suitable for a load/store pair instruction in SI, DI, SF and DF modes     |
+|------------+--------------------------------------------------------------------------------------------|
+
+
+
+#+caption: ARM family
+|------------+---------------------------------------------------------------------------------------------|
+| Constraint | Descriptions                                                                                |
+|------------+---------------------------------------------------------------------------------------------|
+| h          | In Thumb state, the core registers r8-r15                                                   |
+|------------+---------------------------------------------------------------------------------------------|
+| k          | The stack pointer register                                                                  |
+|------------+---------------------------------------------------------------------------------------------|
+| l          | In Thumb State the core registers r0-r7. In ARM state this is an alias for the r constraint |
+|------------+---------------------------------------------------------------------------------------------|
+| t          | VFP floating-point registers s0-s31. Used for 32 bit values.                                |
+|------------+---------------------------------------------------------------------------------------------|
+| w          | VFP floting-point registers d0-d31 and the appropriate subset d0-d15 based on command line  |
+|            | options. Used for 64 bit values only. Not valid for Thumb1.                                 |
+|------------+---------------------------------------------------------------------------------------------|
+| y          | The iWMMX co-processor registers.                                                           |
+|------------+---------------------------------------------------------------------------------------------|
+| z          | The iWMMX RG registers.                                                                     |
+|------------+---------------------------------------------------------------------------------------------|
+| G          | The floating-point constant 0.0                                                             |
+|------------+---------------------------------------------------------------------------------------------|
+| I          | Integer that is valid as an immediate operand in a data processing instruction. That is, an |
+|            | integer in the range 0 to 255 rotated by a multiple of 2                                    |
+|------------+---------------------------------------------------------------------------------------------|
+| J          | Integer in the range -4095 to 4095                                                          |
+|------------+---------------------------------------------------------------------------------------------|
+| K          | Integer that satisfies constraint 'I' when inverted (ones complement)                       |
+|------------+---------------------------------------------------------------------------------------------|
+| L          | Interger that satisfies constraint 'I' when negated (twos complement)                       |
+|------------+---------------------------------------------------------------------------------------------|
+| M          | Integer in the range 0 to 32                                                                |
+|------------+---------------------------------------------------------------------------------------------|
+| Q          | A memory reference where the exact address is in a single register ("m" is preferable for   |
+|            | asm statements)                                                                             |
+|------------+---------------------------------------------------------------------------------------------|
+| R          | An item in the constant pool                                                                |
+|------------+---------------------------------------------------------------------------------------------|
+| S          | A symbol in the text segment of the current file                                            |
+|------------+---------------------------------------------------------------------------------------------|
+| Uv         | A memory reference suitable for VFP load/store insns (reg+constant offset)                  |
+|------------+---------------------------------------------------------------------------------------------|
+| Uy         | A memory reference suitable for iWMMXt load/store instructions.                             |
+|------------+---------------------------------------------------------------------------------------------|
+| Uq         | A memory reference suitable for the ARMv4 ldrsb instruction.                                |
+|------------+---------------------------------------------------------------------------------------------|
+
+**** Constraint Modifier Characters
+Here are constraint modifier characters.
+| Modifier | Descriptions                                                                                            |
+|----------+---------------------------------------------------------------------------------------------------------|
+| '='      | Means that this operand is written to by this instruction: the previous value is discarded and          |
+|          | replaced by new data.                                                                                   |
+|          | Write-only operand, usuall used for all output operands.                                                |
+|----------+---------------------------------------------------------------------------------------------------------|
+| '+'      | Means that this operand is both read and written by the instruction.                                    |
+|          | When the compiler fixes up the operands to satify the constraints, it needs to know which               |
+|          | operands are read by the instruction and which are written by it. '=' identifies an operand             |
+|          | which is only written; '+' identifies an operand that is both read and written; all other               |
+|          | operands are assumed to only be read.                                                                   |
+|          | If you specify '=' or '+' in a constraint, you put it in the first character of the constraint          |
+|          | string.                                                                                                 |
+|          | Read-Write operand, must be listed as an output operand.                                                |
+|----------+---------------------------------------------------------------------------------------------------------|
+| '&'      | Means (in a particular alternative) that this operand is an earlyclobber operand, which is written      |
+|          | before the instruction is finished using the input operands. Therefore, this operand may not lie in     |
+|          | a register that is read by the instruction or as part of any memory address.                            |
+|          | '&' applies only to the alternative in which it is written. In constraints with multiple alternatives,  |
+|          | sometimes one alternative requires '&' while others do not.                                             |
+|          | A register that should be used for output only.                                                         |
+|----------+---------------------------------------------------------------------------------------------------------|
+| '%'      | Declares the instruction to be comutative for this operand and the following operand. This means that   |
+|          | the compiler may interchange the two operands if that is the cheapest way to make all operands fit the  |
+|          | constraints. '%' applies to all alternatives and must appear as the first character int the constraint. |
+|          | Only read-only operands can use '%'.                                                                    |
+|----------+---------------------------------------------------------------------------------------------------------|
+
+
+*** cvariablename
+
+Specifies a C lvalue expression to hold the output, typically a variable name. The enclosing parentheses are a required part of the syntax.
+
+When the compiler selects the registers to use to represent the output operands it does not use any of the clobbered registers.
+
+Output operand expressions must be lvalues. The compiler cannot check whether the operands have data types that are reasonable for the instruction being executed. For output expressions that are not directly addressable(for example a bit-field), 
+the constraint must allow a register. In that case, GCC uses the register as the output of the asm, and then stores that register into the output.
+
+Operands using the '+' constraint modifier count as two operands (that is, both as input and output) towards the total maximum of 30 operands per asm satement.
+
+Use the '&' constraint modifier on all output operands that must not overlap an input. Otherwise, GCC may allocate the output operand in the same register as an unrelated input operand, on the assumption that the assembler code consumes its inputs before producing outputs. This 
+assumption may be false if the assembler code actually consists of more than one instruction.
+
+Example:
+
+#+BEGIN_SRC asm
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static inline uint32_t read_register(uint32_t *reg)
+{
+	uint32_t value;
+
+	__asm__ __volatile__(
+		"mov %0, %1\n"
+		: "=rm" (value)
+		: "rm" (*reg)
+		);
+
+	return value;
+}
+
+int main(void)
+{
+    uint32_t reg = 0x80;
+    printf("register value: %lx\n", read_register(&reg));
+
+    return 0;
+}
+#+END_SRC
+
+This code makes no use of the optional asmSymbolicName. Therefore it references the first output operand as %0, 
+and the first input operand as %1.
+
+Here, value may either be in a register or in memory. Since the compiler might already have the current value of the uint32_t location pointed to by reg in a 
+register, you can enable it to choose the best location for value by specifying both constraints.
+
+#+BEGIN_SRC asm
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static inline uint32_t read_register(uint32_t *reg)
+{
+	uint32_t value;
+
+	__asm__ __volatile__(
+		"mov %[val], %[reg]\n"
+		: [val] "=rm" (value)
+		: [reg] "rm" (*reg)
+		);
+
+	return value;
+}
+
+int main(void)
+{
+    uint32_t reg = 0x80;
+    printf("register value: %lx\n", read_register(&reg));
+
+    return 0;
+}
+#+END_SRC
+
+Here use asmSymbolicName instead of digital index.
+
+** Input Operands
+Input operands make values form C variables and expressions avaliable to the assembly code.
+
+Operands are separated by commas. Each operand has this format:
+
+[ [asmSymbolicName] ] constraint (cxepression)
+
+*** asmSymbolicName
+Specifies a symbolic name for the operand. Reference the name in the assembler template by enclosing it in square brackets (i.e. '%[Value]'). The 
+scope of the name is the asm statement that contains the definition. Any valid C variable name is acceptable, including names already defined in the surrounding code.
+No two operands within the same asm statement can use the same symbolic name.
+
+When not using an asmSymbolicName, use the (zero-based) position of the operand in the list of operands in the assembler template.
+For example if there are two output operands and three inputs, use '%2' in the template to refer to the first input operand, '%3' for the second, and '%4' for the third.
+
+*** constraint
+A string constant specifying constrints on the placement of the operand.
+
+Input constraint strings may not begin with either '=' or '+'. When you list more than one possible location (for example, 'irm'), the compiler chooses the most efficient
+one based on the current context. If you must use a specific register, but your Machine Constraints do not privide sufficient control to select the specific register you
+want, local register variables may provide a solution.
+
+Input constraints can also be digits (for example, "0"). This indicates that the specified input must be in the same place as the output constraint at the (zero-based) index
+in the output constraint list. When using asmSymbolicName syntax for the output operands, you may use these names (enclosed in brackets '[]' instead of digits).
+
+*** cexpression
+This is the C varialbe or expression being passed to the asm statement as input. The enclosing parentheses are a required part of the syntax.
+When the compiler selects the registers to use to represent the input operands, it does not use any of the clobbered registers.
+
+If there are no output operands but there are input operands, place two consecutive colons where the output operands would go:
+
+#+BEGIN_SRC asm
+__asm__ __volatile__("some instructions"
+                     : /* No outputs. */
+                     : "r" (Offset / 8));
+#+END_SRC
+
+
+** Clobbers and Scratch Registers
+While the compiler is aware of changes to entries listed in the output operands the inline asm code may modify more than
+just the outputs. For example, calculations may require additional registers, or the processor may overwrite a register 
+as a side effect of a particular assembler instruction. In order to inform the compiler of these changes, list them in the 
+clobber list. Clobber list items are either register names or the special clobbers (listed below). Each clobber list item
+is a string constant enclosed in double quotes and separated by commas.
+
+Clobber descriptions may not in any way overlap with an input or output operand. For example, you may not have an operand 
+describing a register class with one member when listing that registerin the clobber list. Varialbes declared to live in 
+specific registers and used as asm input or otput operands must have no part mentioned in the clobber description. In particular,
+there is no way to specify that input operands get modified without also specifying them as output operands.
+
+When the compiler selects which registers to use to represent input and output operands, it doses not use any of the clobbered registers.
+As a result, clobbered registers are available for any use in the assembler code.
+
+Another restriction is that the clobber list should not contain the stack pointer regiset. This is because the compiler requires the value
+of the stack pointer to be the same after an asm statement as it was on entry to the statement. However, previous versions of GCC did not enforce
+this rule and allowed the stack pointer to appear in the list, with unclear semantics. This behavior is deprecated and listing the stack pointer may become
+an error in future versions of GCC.
+
+Here is an example for showing the use of clobbered registers:
+
+#+BEGIN_SRC asm
+#define BIT_OP(op, c_op, asm_op)					\
+static inline void op##_bit(unsigned long nr, volatile unsigned long *m)\
+{									\
+	m += nr >> 5;							\
+									\
+	nr = (1UL << (nr & 0x1f));					\
+	if (asm_op == CTOP_INST_AAND_DI_R2_R2_R3)			\
+		nr = ~nr;						\
+									\
+	__asm__ __volatile__(						\
+	"	mov r2, %0\n"						\
+	"	mov r3, %1\n"						\
+	"	.word %2\n"						\
+	:								\
+	: "r"(nr), "r"(m), "i"(asm_op)					\
+	: "r2", "r3", "memory");					\
+}
+#+END_SRC
+
+Also, there are two special clobber arguments:
+
+|          |                                                                                                            |
+| "cc"     | The "cc" clobber indicates that the assmebler code modifies the flags register.                            |
+|          | On some machines, GCC represents the condition codes as a specific hareware register;                      |
+|          | "cc" serves to name this register. On other machines, condition code handling is different,                |
+|          | and specifying "cc" has no effect. But it is valid no matter what the target.                              |
+|----------+------------------------------------------------------------------------------------------------------------|
+| "memory" | The "memory" clobber tells the compiler that the assembly code performs memory reads or writes             |
+|          | to items other than those listed in the input and output operands (for example, accessing the memory       |
+|          | pointed to by one of the input parameters). To ensure memory contains correct values, GCC may need to      |
+|          | flush specific register values to memory before executing the asm. Further, the compiler dose not assume   |
+|          | that any values read from memory before an asm remain unchanged after that asm; it reloads them as needed. |
+|          | Using the "memory" clobber effectively forms a read/write memory barrier for the compiler.                 |
+|          | Note that this clobber does not prevent the processor from doing speculative reads past the asm statement. |
+|          | To prevent that, you need processor-specific fence instructions.                                           |
+|----------+------------------------------------------------------------------------------------------------------------|
+
+* More Recipes
+** Inline assembler as preprocessor macor
+In order to resue your assembler language parts, it is useful to define them as macros and put them into incude files.
+Using such files may produce compiler warnings, if they are used in modules, which are compiled in strict ANSI mode.
+To avoid that, you can write __asm__ instead of asm and __volatile__ instead of volatile. These are equivalent aliases.
+Here is a macro which will convert a long value little endian to big endian or vice versa:
+
+#+BEGIN_SRC asm
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define BYTESWAP(val) \
+    __asm__ __volatile__ ( \
+        "eor     r3, %1, %1, ror #16\n" \
+        "bic     r3, r3, #0x00FF0000\n" \
+        "mov     %0, %1, ror #8\n" \
+        "eor     %0, %0, r3, lsr #8" \
+        : "=r" (val) \
+        : "0" (val) \
+        : "r3", "cc" \
+    );
+
+int main(void)
+{
+    uint32_t value = 0xa3a2a1a0;
+    BYTESWAP(value);
+    printf("value after swaped: %lx\n", value);
+
+    return 0;
+}
+#+END_SRC
+
+Build and execute above code, it will output "value after swaped: a0a1a2a3" on console.
+
+
+** C stub functions
+Macro definitions will include the same assembler code whenever they are referenced. This may not be acceptable for large routines.
+In this case you may define a C stub function. Here is the byte swap procedure again, this time implemented as a C function.
+
+#+BEGIN_SRC asm
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+uint32_t ByteSwap(uint32_t val)
+{
+    asm volatile (
+        "eor     r3, %1, %1, ror #16\n"
+        "bic     r3, r3, #0x00FF0000\n"
+        "mov     %0, %1, ror #8\n"
+        "eor     %0, %0, r3, lsr #8"
+        : "=r" (val)
+        : "0" (val)
+        : "r3", "cc"
+    );
+
+    return val;
+}
+
+int main(void)
+{
+    uint32_t value = 0xa3a2a1a0;
+    value = ByteSwap(value);
+    printf("value after swaped: %lx\n", value);
+
+    return 0;
+}
+#+END_SRC
+
+** Forcing usage of specific registers
+A local variable may be held in a register. You can instruct the inline assembler to use a specific register for it.
+
+#+BEGIN_SRC asm
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+
+static inline void count(void)
+{
+	register uint32_t count asm("r3") = 0;
+	asm volatile(
+		"add r3, r3, #1\n"
+		: "=r" (count)
+		: "0" (count));
+
+	printf("count = %ld\n", count);
+}
+
+int main(void)
+{
+    count();
+
+    return 0;
+}
+#+END_SRC
+
+Be warned, that this sample is bad in most situations, because it interferes with the compiler's optimizer. 
+Furthermore, GCC will not completely reserve the specified register. If the optimizer recognizes that the variable will not
+be referenced any longer, the register may be re-used. But the compiler is not able to check whether this register
+usage conflicts with any predefined register. If you reserve too many registers in this way, the compiler may even run out of
+registers during code generation.
+
+** Using constants
+You can use the mov instruction to load an immediate constant value into a register:
+
+#+BEGIN_SRC asm
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static inline void using_constant(void)
+{
+	uint32_t flag = 0;
+	asm volatile(
+		"mov %0, %1\n"
+		: "=r" (flag)
+		: "I" (0x80));
+
+	printf("flag = %ld\n", flag);
+}
+
+int main(void)
+{
+    using_constant();
+
+    return 0;
+}
+#+END_SRC
+
