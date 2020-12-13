@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-12-13 Sun 21:31 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OpenHarmony HDF</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="yannik" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="../../style.css" />
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2020 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">OpenHarmony HDF</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge73e1e8">1. Introduction</a></li>
+<li><a href="#org8ebe2d9">2. HDF In Detail</a>
+<ul>
+<li><a href="#org3fc6623">2.1. Start Device Manager</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge73e1e8" class="outline-2">
+<h2 id="orge73e1e8"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+OpenHarmony Driver Foundation adopts the master-slave architecuture design pattern, which is built around the framework, driver model, capability library and tools. 
+the architecture is shown as below:
+</p>
+
+
+<div class="figure">
+<p><img src="./hdf_architecture.png" alt="hdf_architecture.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>HDF Architecture</p>
+</div>
+
+<ul class="org-ul">
+<li>Driver Framework - located in frameworks/core direcotry
+<ul class="org-ul">
+<li>Provide the driver framework, mainly complete the function of driver loading and startup</li>
+<li>Provide the fexible deployment and expansion ability based on the object manager.</li>
+</ul></li>
+
+<li>Driver Models - located int the frameworks/model directory
+<ul class="org-ul">
+<li>It provide the driver models, such as network device model.</li>
+</ul></li>
+
+<li>Driver Capability Library - located in the frameworks/capability directory
+<ul class="org-ul">
+<li>Provide basic driving capability model, such as IO communication capability model.</li>
+</ul></li>
+
+<li>Driver Tools - located in the frameworks/tools directory
+<ul class="org-ul">
+<li>Provide the tools such as HDI interface conversion, driver configuration and compilation.</li>
+</ul></li>
+
+<li>Driver Interface - located in lite/hdi directory
+<ul class="org-ul">
+<li>Provide standardized driver interface.</li>
+</ul></li>
+
+<li>Support - located in the frameworks/support directory
+<ul class="org-ul">
+<li>Provide standardized platform driver interface and abstracted system interface.</li>
+</ul></li>
+</ul>
+
+
+<div class="figure">
+<p><img src="./driver_hdf_interaction.png" alt="driver_hdf_interaction.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>The Interaction of Driver and HDF</p>
+</div>
+
+<p>
+A driver is developed based on HDF mainly includes three parts:
+</p>
+<ol class="org-ol">
+<li>Device Driver - to complete the basic function.</li>
+<li>Driver Configuration - to indicates the load information of a driver</li>
+<li>Driver Resource - provide the hardware configuration information</li>
+</ol>
+
+<p>
+For developers, the first thing to see is the driver entry, which is desciribed by DriverEntry which mainly includes three interfaces: bind, init and release.
+As shown in the following code:
+</p>
+
+<div class="org-src-container">
+<label class="org-src-name"><span class="listing-number">Listing 1: </span>An Example of DiverEntry</label><pre class="src src-C">struct HdfDriverEntry g_deviceSample = {
+    .moduleVersion = 1,
+    .moduleName = "sample_driver", 
+    .Bind = SampleDriverBind,
+    .Init = SampleDriverInit,
+    .Release = SampleDriverRelease,
+};
+</pre>
+</div>
+
+<p>
+Bind Interface : to bind the device service to device object.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C">int32_t SampleDriverBind(struct HdfDeviceObject *deviceObject)
+{
+    // TODO: Bind device service to device object.
+    // And you can also initialize device resources here.
+    return HDF_SUCCESS;
+}
+</pre>
+</div>
+
+<p>
+Init Interface: the HDF start to call the driver initialization interface after the device binding action is completed.
+In the case of the initialization is successful, the driver framework will decides whether to crate a device service interface externally or only visible to the current service interface accroding to the configuration file.
+otherwise, the driver framework will release the created device interface.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C">int32_t SampleDriverInit(struct HdfDeviceObject *deviceObject)
+{
+    // TODO: Init hardware or other resources here.
+    return HDF_SUCCESS;
+}
+</pre>
+</div>
+
+<p>
+Release Interface: the driver framework will call this interface to notify driver to release all resources when user want to unload the dirver.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C">void SampleDriverRelease(struct HdfDeviceObject *deviceObject)
+{
+    // Release all resources.
+    return;
+}
+</pre>
+</div>
+
+
+<div class="figure">
+<p><img src="./driver_install.png" alt="driver_install.png" />
+</p>
+<p><span class="figure-number">Figure 3: </span>Driver Install and Deploy</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8ebe2d9" class="outline-2">
+<h2 id="org8ebe2d9"><span class="section-number-2">2</span> HDF In Detail</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org3fc6623" class="outline-3">
+<h3 id="org3fc6623"><span class="section-number-3">2.1</span> Start Device Manager</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+The DeviceManagerStart() function is called from SystemInit(), the detail show as below:
+</p>
+
+<pre class="example">
+reset_vector_up.S
+|-&gt; bl main
+    |-&gt; OsMain()
+        |-&gt; OsSystemInit()
+            |-&gt; SystemInit()
+                |-&gt; DeviceManagerStart()
+                |-&gt; OsUserInitProcess(VOID)
+</pre>
+
+
+<p>
+Device Manager will load device driver based on HCS configuration:
+</p>
+
+<pre class="example">
+system_init.c
+DeviceManagerStart()
+|-&gt; HdfIoServiceBind("dev_mgr", DEV_MGR_NODE_PERM);
+    |-&gt; hdf_vnode_adapter.c
+        struct HdfIoService *HdfIoServiceAdapterObtain(const char *serviceName, mode_t mode)
+|-&gt; instance-&gt;StartService(instance);
+    |-&gt; devmgr_service.c
+        int DevmgrServiceStartService(struct IDevmgrService *inst)
+        |-&gt; int DevmgrServiceStartDeviceHosts(struct DevmgrService *inst)
+</pre>
+
+<pre class="example">
+devmgr_service.c
+int DevmgrServiceStartService(struct IDevmgrService *inst)
+|-&gt; DevmgrServiceStartDeviceHosts(dmService);
+    |-&gt; HdfSListInit(&amp;hostList)
+    |-&gt; HdfAttributeManagerGetHostList(&amp;hostList) //HCS
+    |-&gt; DevHostServiceClntNewInstance(hostAttr-&gt;hostId, hostAttr-&gt;hostName); // for each host
+        |-&gt; DevHostServiceClntConstruct(hostClnt)
+    |-&gt; installer-&gt;StartDeviceHost(hostAttr-&gt;hostId, hostAttr-&gt;hostName); // for each host
+        |-&gt; hdf_driver_installer.c
+            int DriverInstallerStartDeviceHost(uint32_t devHostId, const char *devHostName)
+            |-&gt; hostServiceIf-&gt;StartService(hostServiceIf);
+                |-&gt; devhost_service.c
+                    int DevHostServiceStartService(struct IDevHostService *service)
+                    |-&gt; devmgr_service_clnt.c
+                        int DevmgrServiceClntAttachDeviceHost(uint16_t hostId, struct IDevHostService *hostService)
+                        |-&gt; devmgr_service.c
+                            int DevmgrServiceAttachDeviceHost(struct IDevmgrService *inst, uint16_t hostId, struct IDevHostService *hostService)
+                            |-&gt; hostClnt-&gt;deviceInfos = HdfAttributeManagerGetDeviceList(hostClnt-&gt;hostId, hostClnt-&gt;hostName);
+                            |-&gt; hostClnt-&gt;hostService = hostService
+                            |-&gt; DevHostServiceClntInstallDriver(hostClnt);
+                                |-&gt; devHostSvcIf-&gt;AddDevice(devHostSvcIf, deviceInfo); //for each deviceInfos
+</pre>
+
+<p>
+AddDevice() start loading the driver and calling the driverEntry interface, and driver service will be published:
+</p>
+
+<pre class="example">
+devhost_service.c
+hostServiceIf-&gt;AddDevice = DevHostServiceAddDevice;
+int DevHostServiceAddDevice(struct IDevHostService *inst, const struct HdfDeviceInfo *deviceInfo)
+|-&gt; device = DevHostServiceGetDevice(hostService, deviceInfo-&gt;deviceId);
+|-&gt; devNode = driverLoader-&gt;LoadNode(driverLoader, deviceInfo);
+    |-&gt; hdf_driver_loader.c
+        struct HdfDeviceNode *HdfDriverLoaderLoadNode(struct IDriverLoader *loader, const struct HdfDeviceInfo *deviceInfo)
+        |-&gt; driverEntry = loader-&gt;GetDriverEntry(deviceInfo);
+        |-&gt; devNode = HdfDeviceNodeNewInstance();
+        |-&gt; devNode-&gt;driverEntry = driverEntry;
+        |-&gt; devNode-&gt;deviceInfo = deviceInfo;
+        |-&gt; devNode-&gt;deviceObject.property = HcsGetNodeByMatchAttr(HcsGetRootNode(), deviceInfo-&gt;deviceMatchAttr);
+        |-&gt; driverEntry-&gt;Bind(&amp;devNode-&gt;deviceObject)
+|-&gt; devNode-&gt;hostService = hostService;
+|-&gt; device-&gt;super.Attach(&amp;device-&gt;super, devNode);
+    |-&gt; hdf_device.c
+        int HdfDeviceAttach(struct IHdfDevice *devInst, struct HdfDeviceNode *devNode)
+        |-&gt; hdf_device_node.c
+            int HdfDeviceLaunchNode(struct HdfDeviceNode *devNode, struct IHdfDevice *devInst)
+            |-&gt; driverEntry-&gt;Init(&amp;devNode-&gt;deviceObject);
+            |-&gt; HdfDeviceNodePublishService(devNode, deviceInfo, devInst)
+                |-&gt; nodeIf-&gt;PublishService(devNode, deviceInfo-&gt;svcName)
+                    int HdfDeviceNodePublishPublicService(struct HdfDeviceNode *devNode, const char *svcName)
+                    |-&gt; devsvc_manager_clnt.c
+                        int DevSvcManagerClntAddService(const char *svcName, struct HdfDeviceObject *service)
+                        |-&gt; serviceManager-&gt;AddService(serviceManager, svcName, service);
+		            |-&gt; devsvc_manager.c
+			        int DevSvcManagerAddService(struct IDevSvcManager *inst, const char *svcName, struct HdfDeviceObject *service)
+                                |-&gt; HdfServiceObserverPublishService(&amp;devSvcManager-&gt;observer, svcName, 0, SERVICE_POLICY_PUBLIC, (struct HdfObject *)service-&gt;service)
+                                    |-&gt; hdf_service_observer.c
+                                        int HdfServiceObserverPublishService(struct HdfServiceObserver *observer, const char *svcName, uint32_t matchId, uint16_t policy, struct HdfObject *service)
+                |-&gt; HdfDeviceNodePublishLocalService(devNode, deviceInfo)
+                    |-&gt; HdfServiceObserverPublishService(&amp;hostService-&gt;observer, deviceInfo-&gt;svcName, matchId, deviceInfo-&gt;policy, (struct HdfObject *)devNode-&gt;deviceObject.service);
+            |-&gt; DevmgrServiceClntAttachDevice(deviceInfo, deviceToken);
+                |-&gt; devMgrSvcIf-&gt;AttachDevice(devMgrSvcIf, deviceInfo, deviceToken)
+                    |-&gt; devmgr_service.c
+                        int DevmgrServiceAttachDevice(struct IDevmgrService *inst, const struct HdfDeviceInfo *deviceInfo, struct IHdfDeviceToken *token)
+</pre>
+
+
+<p>
+The device driver also will be loaded when user will subscribe the driver service from user space:
+</p>
+
+<pre class="example">
+From user space:
+struct HdfIoService *HdfIoServiceBind(const char *serviceName, mode_t permission)
+|-&gt; hdf_syscall_adapter.c
+    struct HdfIoService *HdfIoServiceAdapterObtain(const char *serviceName, mode_t mode)
+    |-&gt; int32_t HdfLoadDriverByServiceName(const char *serviceName)  // if the driver is not loaded
+        |-&gt; ioService-&gt;dispatcher-&gt;Dispatch(&amp;ioService-&gt;object, 0, data, NULL);
+            |-&gt; hdf_syscal_adapter.c
+                int HdfSyscallAdapterDispatch(struct HdfObject *object, int code, struct HdfSBuf *data, struct HdfSBuf *reply)
+                |-&gt; int ret = ioctl(ioService-&gt;fd,  HDF_WRITE_READ, &amp;wrBuf);
+                    |-&gt; hdf_vnode_adapter.c  // enter into kernel space
+                        int HdfVNodeAdapterIoctl(struct file *filep, int cmd, unsigned long arg)
+                        |-&gt; int HdfVNodeAdapterServCall(const struct HdfVNodeAdapterClient *client, unsigned long arg)
+                            |-&gt; int ret = client-&gt;adapter-&gt;ioService.dispatcher-&gt;Dispatch(client-&gt;adapter-&gt;ioService.target,
+                                                                                  bwr.cmdCode, data, reply);
+                                |-&gt; devmgr_service_start.c
+                                    int DeviceManagerDispatch(struct HdfObject *stub, int code, struct HdfSBuf *data, struct HdfSBuf *reply)
+                                    |-&gt; int DevSvcManagerClntSubscribeService(const char *svcName, struct SubscriberCallback callback)
+                                        |-&gt; serviceManager-&gt;SubscribeService(serviceManager, svcName, callback);
+                                            |-&gt; devsrv_manager.c
+                                                int DevSvcManagerSubscribeService(struct IDevSvcManager *inst, const char *svcName, struct SubscriberCallback callBack)
+                                                |-&gt; devmgr_service.c
+                                                    int DevmgrServiceLoadDevice(const char *svcName)
+                                                    |-&gt; int DevmgrServiceFindAndActiveDevice(const char *svcName, bool isLoad)
+                                                        |-&gt; DevmgrServiceActiveDevice(hostClnt, deviceInfo, isLoad); //Iterate each hosts in devMgrSvc and compare deviceInfo-&gt;svcname wiht the parameter svcName, if eque, then call this function
+                                                            |-&gt; devHostSvcIf-&gt;AddDevice(devHostSvcIf, deviceInfo);
+
+    |-&gt; adapter-&gt;fd = open(realPath, O_RDWR);
+    |-&gt; ioService-&gt;dispatcher.Dispatch = HdfSyscallAdapterDispatch;
+
+</pre>
+
+<p>
+user will call ioService-&gt;dispatcher.Dispatch() interface to interactive with driver.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2020-12-13 Sun 00:00</p>
+<p class="author">Author: yannik</p>
+<p class="date">Created: 2020-12-13 Sun 21:31</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
