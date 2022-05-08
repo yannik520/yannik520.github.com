@@ -17,7 +17,8 @@
 #+LATEX_HEADER:
 
 * About Me
-  I'm a software engineer, with more than 10 years of experience in Android/Linux kernel development and RTOS porting. \\
+  I'm a embedded software engineer, with more than 10 years of experience in Android/Linux kernel development and RTOS porting. \\
+  Now i'm working on QNX Hypervisor and Xen. \\
 [[./yannik_li.jpg]]
 
 + My Resume :[[./liyanqing.doc]]
@@ -57,7 +58,7 @@
 ** [[./completion.html][Synchronization Mechanism: Completion]]
 ** [[./user_space_memory_access_from_kernel.html][User Space Memory Access From The Linux Kernel]]
 
-* Android 
+* Android
 ** [[./suspend_and_resume.html][Suspend&Resume]]
 ** [[./ashmem.html][Ashmem Analysis]]
 ** [[./emacs_android.html][Developing Android APP with Emacs]]
